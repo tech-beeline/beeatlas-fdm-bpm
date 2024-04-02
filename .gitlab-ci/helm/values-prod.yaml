@@ -1,0 +1,9 @@
+env:
+  SPRING_PROFILES_ACTIVE: prod
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "vault:eafdmmart/data/prod/bpm#driver"
+  SPRING_DATASOURCE_URL: "vault:eafdmmart/data/prod/bpm#url"
+  SPRING_DATASOURCE_USERNAME: "vault:eafdmmart/data/prod/bpm#username"
+  SPRING_DATASOURCE_PASSWORD: "vault:eafdmmart/data/prod/bpm#password"
+
+
+replicaCount: 3
