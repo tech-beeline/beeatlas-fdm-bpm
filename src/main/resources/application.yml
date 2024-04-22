@@ -1,11 +1,13 @@
-spring:
-  jpa:
-    hibernate:
-      ddl-auto: update
 
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: metrics,prometheus
+camunda.bpm.admin-user:
+  id: beeatlas
+  password: beeatlas
+spring.datasource.url: jdbc:postgresql://localhost/bpm
+spring.datasource.username: postgres
+spring.datasource.password: 1234
+camunda:
+  bpm:
+    auto-deployment-enabled: true
+integration:
+  capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
+  dashboard-server-url: https://dashboard-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru

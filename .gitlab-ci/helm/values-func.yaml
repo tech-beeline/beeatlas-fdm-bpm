@@ -12,3 +12,5 @@ env:
   SPRING_DATASOURCE_URL: "vault:eafdmmart/data/test/func/bpm#url"
   SPRING_DATASOURCE_USERNAME: "vault:eafdmmart/data/test/func/bpm#username"
   SPRING_DATASOURCE_PASSWORD: "vault:eafdmmart/data/test/func/bpm#password"
+  INTEGRATION_CAPABILITY_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#capabilityserver"
+  INTEGRATION_DASHBOARD_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#dashboardserver"
