@@ -1,0 +1,15 @@
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/cors-allow-headers: Content-Type, authorization
+    nginx.ingress.kubernetes.io/cors-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/enable-cors: 'true'
+
+env:
+  SPRING_PROFILES_ACTIVE: e2e
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "vault:eafdmmart/data/test/e2e/bpm#driver"
+  SPRING_DATASOURCE_URL: "vault:eafdmmart/data/test/e2e/bpm#url"
+  SPRING_DATASOURCE_USERNAME: "vault:eafdmmart/data/test/e2e/bpm#username"
+  SPRING_DATASOURCE_PASSWORD: "vault:eafdmmart/data/test/e2e/bpm#password"
+  INTEGRATION_CAPABILITY_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#capabilityserver"
+  INTEGRATION_DASHBOARD_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#dashboardserver"

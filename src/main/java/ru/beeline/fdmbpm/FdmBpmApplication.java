@@ -11,5 +11,4 @@ public class FdmBpmApplication {
     public static void main(String[] args) {
         SpringApplication.run(FdmBpmApplication.class, args);
     }
-
 }
