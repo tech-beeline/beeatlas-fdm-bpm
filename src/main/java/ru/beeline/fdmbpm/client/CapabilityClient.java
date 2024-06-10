@@ -35,7 +35,7 @@ public class CapabilityClient {
 
             HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(body, headers);
             return restTemplate.exchange(capabilityServerUrl + "/api/v1/package-tech-capabilities",
-                    HttpMethod.PUT, entity, PackageRegistrationResponseDTO.class).getBody();
+                    HttpMethod.POST, entity, PackageRegistrationResponseDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
