@@ -24,6 +24,6 @@ public class CapabilityService {
 
     public Integer sendTechCapability() {
         LOGGER.info("sendTechCapability");
-        return capabilityClient.postTechCapabilities(dashboardClient.getTecCapabilities()).getPackageId();
+        return capabilityClient.postTechCapabilities(dashboardClient.getTechCapabilities()).getPackageId();
     }
 }

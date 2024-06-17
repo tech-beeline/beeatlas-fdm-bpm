@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DashboardTechCapabilitiesDTO {
 
-    List<DashboardCapabilityDTO> list;
+    List<DashboardTechCapabilityDTO> list;
 }

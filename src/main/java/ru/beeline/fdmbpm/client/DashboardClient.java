@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 
 import java.util.List;
 
@@ -40,13 +41,13 @@ public class DashboardClient {
         return null;
     }
 
-    public List<DashboardCapabilityDTO> getTecCapabilities() {
+    public List<DashboardTechCapabilitiesDTO> getTechCapabilities() {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {
+            return restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardTechCapabilitiesDTO>>() {
             }).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());

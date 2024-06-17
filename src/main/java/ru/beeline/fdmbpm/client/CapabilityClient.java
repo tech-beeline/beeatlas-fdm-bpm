@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 
 import java.util.List;
@@ -27,13 +28,13 @@ public class CapabilityClient {
         this.restTemplate = restTemplate;
     }
 
-    public PackageRegistrationResponseDTO postTechCapabilities(List<DashboardCapabilityDTO> body) {
+    public PackageRegistrationResponseDTO postTechCapabilities(List<DashboardTechCapabilitiesDTO> body) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("SOURCE", "Sparx");
 
-            HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(body, headers);
+            HttpEntity<List<DashboardTechCapabilitiesDTO>> entity = new HttpEntity<>(body, headers);
             return restTemplate.exchange(capabilityServerUrl + "/api/v1/package-tech-capabilities",
                     HttpMethod.POST, entity, PackageRegistrationResponseDTO.class).getBody();
         } catch (Exception e) {
