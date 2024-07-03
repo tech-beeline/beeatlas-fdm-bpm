@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class CapabilityService {
 
@@ -32,6 +34,7 @@ public class CapabilityService {
     public Integer sendTechCapability() {
         LOGGER.info("sendTechCapability");
         List<DashboardTechCapabilitiesDTO> dashboardTechCapabilitiesDTOList = dashboardClient.getTechCapabilities();
+        log.info("Receive Tech Capability:" + dashboardTechCapabilitiesDTOList.toString());
         return capabilityClient.postTechCapabilities(dashboardTechCapabilitiesDTOList).getPackageId();
     }
 
