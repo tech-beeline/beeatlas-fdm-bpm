@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
+import ru.beeline.fdmbpm.dto.DashboardTechCapabilityDTO;
 
 import java.util.List;
 
@@ -41,13 +42,13 @@ public class DashboardClient {
         return null;
     }
 
-    public DashboardTechCapabilitiesDTO getTechCapabilities() {
+    public List<DashboardTechCapabilityDTO> getTechCapabilities() {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<DashboardTechCapabilitiesDTO>() {
+            return restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {
             }).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());

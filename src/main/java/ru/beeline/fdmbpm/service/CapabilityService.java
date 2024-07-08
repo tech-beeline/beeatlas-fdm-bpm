@@ -33,8 +33,8 @@ public class CapabilityService {
 
     public Integer sendTechCapability() {
         LOGGER.info("sendTechCapability");
-        DashboardTechCapabilitiesDTO dashboardTechCapabilitiesDTOList = dashboardClient.getTechCapabilities();
-        log.info("Receive Tech Capability:" + dashboardTechCapabilitiesDTOList.toString());
+        DashboardTechCapabilitiesDTO dashboardTechCapabilitiesDTOList = new DashboardTechCapabilitiesDTO(dashboardClient.getTechCapabilities());
+        log.info("Receive Tech Capability:" + dashboardTechCapabilitiesDTOList);
         return capabilityClient.postTechCapabilities(dashboardTechCapabilitiesDTOList).getPackageId();
     }
 
