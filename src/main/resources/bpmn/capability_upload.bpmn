@@ -11,6 +11,7 @@
     <bpmn:sequenceFlow id="Flow_09es047" sourceRef="StartEvent_1" targetRef="Activity_0n2bx88" />
     <bpmn:serviceTask id="Activity_0n2bx88" name="Отправка данных о BC" camunda:delegateExpression="${CapabilityUploadSendBusinessCapability}">
       <bpmn:incoming>Flow_09es047</bpmn:incoming>
+      <bpmn:incoming>Flow_0k0ek1m</bpmn:incoming>
       <bpmn:outgoing>Flow_0v93703</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0v93703" sourceRef="Activity_0n2bx88" targetRef="Event_0khj7tc" />
@@ -26,11 +27,14 @@
       <bpmn:incoming>Flow_11to9te</bpmn:incoming>
       <bpmn:outgoing>Flow_0lgufda</bpmn:outgoing>
     </bpmn:serviceTask>
-
     <bpmn:endEvent id="Event_1xk4x3a">
       <bpmn:incoming>Flow_0lgufda</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0lgufda" sourceRef="Activity_089hfym" targetRef="Event_1xk4x3a" />
+    <bpmn:startEvent id="Event_0t6xdd7">
+      <bpmn:outgoing>Flow_0k0ek1m</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0k0ek1m" sourceRef="Event_0t6xdd7" targetRef="Activity_0n2bx88" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1akt99u">
@@ -51,6 +55,9 @@
       <bpmndi:BPMNShape id="Event_1xk4x3a_di" bpmnElement="Event_1xk4x3a">
         <dc:Bounds x="632" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0t6xdd7_di" bpmnElement="Event_0t6xdd7">
+        <dc:Bounds x="152" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_09es047_di" bpmnElement="Flow_09es047">
         <di:waypoint x="188" y="120" />
         <di:waypoint x="240" y="120" />
@@ -66,6 +73,12 @@
       <bpmndi:BPMNEdge id="Flow_0lgufda_di" bpmnElement="Flow_0lgufda">
         <di:waypoint x="580" y="120" />
         <di:waypoint x="632" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k0ek1m_di" bpmnElement="Flow_0k0ek1m">
+        <di:waypoint x="188" y="210" />
+        <di:waypoint x="214" y="210" />
+        <di:waypoint x="214" y="120" />
+        <di:waypoint x="240" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

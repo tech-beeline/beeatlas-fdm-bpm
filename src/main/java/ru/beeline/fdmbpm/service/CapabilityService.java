@@ -28,6 +28,7 @@ public class CapabilityService {
     public Integer sendBusinessCapability() {
         LOGGER.info("sendBusinessCapability");
         List<DashboardCapabilityDTO> dashboardCapabilityDTOS = sort(dashboardClient.getCapabilities());
+        log.info("Receive Business Capability:" + dashboardCapabilityDTOS);
         return capabilityClient.postBusinessCapabilities(dashboardCapabilityDTOS).getPackageId();
     }
 
