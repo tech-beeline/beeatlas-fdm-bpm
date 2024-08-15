@@ -1,10 +1,15 @@
-
+  spring.jpa.properties.hibernate.default_schema=capability
+    spring.flyway.default-schema=capability
+spring:
+  jpa:
+    properties:
+      hibernate:
+        default_schema: bpmn
+  flyway:
+    default-schema: bpmn
 camunda.bpm.admin-user:
   id: beeatlas
   password: beeatlas
-spring.datasource.url: jdbc:postgresql://localhost/bpm
-spring.datasource.username: postgres
-spring.datasource.password: 1234
 camunda:
   bpm:
     auto-deployment-enabled: true
