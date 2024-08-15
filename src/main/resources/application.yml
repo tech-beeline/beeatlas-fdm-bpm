@@ -11,6 +11,8 @@ camunda.bpm.admin-user:
 camunda:
   bpm:
     auto-deployment-enabled: true
+    database:
+      schema-name: bpmn
 integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
   dashboard-server-url: https://dashboard-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
