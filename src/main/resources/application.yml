@@ -1,5 +1,8 @@
 camunda:
   bpm:
+    admin-user:
+      id: beeatlas
+      password: beeatlas
     database:
       schema-update: true
 integration:
