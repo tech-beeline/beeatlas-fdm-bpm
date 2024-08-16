@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
-import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilityDTO;
 
 import java.util.List;
@@ -34,8 +33,12 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(capabilityServerUrl + "/api/capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {
+            List<DashboardCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {
             }).getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("dashboard's Capabilities aren't received");
+            }
+            return result;
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -48,8 +51,12 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {
+            List<DashboardTechCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {
             }).getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("dashboard's TechCapabilities aren't received");
+            }
+            return result;
         } catch (Exception e) {
             log.error(e.getMessage());
         }
