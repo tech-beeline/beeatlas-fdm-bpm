@@ -1,5 +1,6 @@
 camunda:
   bpm:
+    authorization: true
     admin-user:
       id: beeatlas
       password: beeatlas
