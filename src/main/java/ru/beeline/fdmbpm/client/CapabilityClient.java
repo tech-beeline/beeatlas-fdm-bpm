@@ -58,4 +58,32 @@ public class CapabilityClient {
         }
         return null;
     }
+
+    public void сalculatePrivateTechCapabiltiesCount(int entityId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(null, headers);
+            restTemplate.exchange(capabilityServerUrl + "/api/v1/сalculate-private-tech-capabilties/" + entityId,
+                    HttpMethod.POST, entity, Object.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public void сalculateTotalTechCapabiltiesCount() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(null, headers);
+            restTemplate.exchange(capabilityServerUrl + "/api/v1/сalculate-total-tech-capabilties",
+                    HttpMethod.POST, entity, Object.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
 }
