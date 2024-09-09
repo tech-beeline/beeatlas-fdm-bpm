@@ -66,7 +66,7 @@ public class CapabilityClient {
             headers.add("SOURCE", "Sparx");
 
             HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(null, headers);
-            restTemplate.exchange(capabilityServerUrl + "/api/v1/сalculate-private-tech-capabilties/" + entityId,
+            restTemplate.exchange(capabilityServerUrl + "/api/v1/calculate-private-tech-capabilities/" + entityId,
                     HttpMethod.POST, entity, Object.class);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -80,7 +80,7 @@ public class CapabilityClient {
             headers.add("SOURCE", "Sparx");
 
             HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(null, headers);
-            restTemplate.exchange(capabilityServerUrl + "/api/v1/сalculate-total-tech-capabilties",
+            restTemplate.exchange(capabilityServerUrl + "/api/v1/calculate-total-tech-capabilities",
                     HttpMethod.POST, entity, Object.class);
         } catch (Exception e) {
             log.error(e.getMessage());
