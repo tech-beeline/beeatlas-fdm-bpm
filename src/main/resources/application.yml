@@ -8,3 +8,6 @@ camunda:
 integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
   dashboard-server-url: https://dashboard-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
+queue:
+  package-queue:
+    name: package_queue
