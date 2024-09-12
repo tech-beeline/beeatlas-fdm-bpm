@@ -22,7 +22,7 @@ public class RabbitConfig {
     @Value("${spring.rabbitmq.virtual-host}")
     private String virtualHost;
 
-    @Value("${queue.tech-capability.name}")
+    @Value("${queue.package-queue.name}")
     private String queueName;
 
     @Value("${spring.rabbitmq.template.exchange}")
