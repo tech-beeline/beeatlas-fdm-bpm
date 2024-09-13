@@ -16,8 +16,9 @@ public class CalculatePrivateTechCapabilitiesCountDelegate implements JavaDelega
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("running process СalculatePrivateTechCapabiltiesCount");
         int entityId = (int) delegateExecution.getVariable("entity_id");
+
+        log.info("running process СalculatePrivateTechCapabiltiesCount entityId=" + entityId);
         capabilityClient.сalculatePrivateTechCapabiltiesCount(entityId);
     }
 }
