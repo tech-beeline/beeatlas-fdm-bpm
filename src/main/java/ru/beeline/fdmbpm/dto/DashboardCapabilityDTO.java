@@ -21,6 +21,6 @@ public class DashboardCapabilityDTO {
     private Date createdDate;
     private Date modifiedDate;
     private String status;
-    private String parent;
+    private DashboardCapabilityParentDTO parent;
     private String owner;
 }
