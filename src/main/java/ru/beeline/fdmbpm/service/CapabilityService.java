@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class CapabilityService {
         try {
             LOGGER.info("sendProduct");
             List<BwProductDTO> products = bwEmployeeClient.getProducts();
-            LOGGER.info("Receive products:" + products);
+            log.info("Receive products:" + products);
             if (products.size() > 0) {
                 LOGGER.info("Register package");
                 PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage("UPDATE_PRODUCTS", products.size());
@@ -78,14 +79,14 @@ public class CapabilityService {
     public Integer sendBusinessCapability() {
         LOGGER.info("sendBusinessCapability");
         List<DashboardCapabilityDTO> dashboardCapabilityDTOS = sort(dashboardClient.getCapabilities());
-        LOGGER.info("Receive Business Capability:" + dashboardCapabilityDTOS);
+        log.info("Receive Business Capability:" + dashboardCapabilityDTOS);
         return capabilityClient.postBusinessCapabilities(dashboardCapabilityDTOS).getPackageId();
     }
 
     public Integer sendTechCapability() {
         LOGGER.info("sendTechCapability");
         DashboardTechCapabilitiesDTO dashboardTechCapabilitiesDTOList = new DashboardTechCapabilitiesDTO(dashboardClient.getTechCapabilities());
-        LOGGER.info("Receive Tech Capability:" + dashboardTechCapabilitiesDTOList);
+        log.info("Receive Tech Capability:" + dashboardTechCapabilitiesDTOList);
         return capabilityClient.postTechCapabilities(dashboardTechCapabilitiesDTOList).getPackageId();
     }
 
@@ -103,7 +104,7 @@ public class CapabilityService {
             previousSize = remaining.size();
             for (DashboardCapabilityDTO capability : new ArrayList<>(remaining)) {
                 if (capability.getParent() != null
-                        && sorted.stream().anyMatch(c -> capability.getParent().getCode().equals(c.getCode()))) {
+                        && sorted.stream().anyMatch(c -> capability.getParent().equals(c.getCode()))) {
                     sorted.add(capability);
                     remaining.remove(capability);
                 }
