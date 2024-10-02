@@ -13,7 +13,7 @@
     <bpmn:sequenceFlow id="Flow_1f9lwin" name="Да" sourceRef="Gateway_0png7sb" targetRef="Activity_1cjnsn0" />
     <bpmn:sequenceFlow id="Flow_1tx5c0z" name="Нет" sourceRef="Gateway_0png7sb" targetRef="Activity_1dnm65o">
       <bpmn:extensionElements />
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${entity_id != null}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${entity_id != 0}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="Gateway_0sb7jdd">
       <bpmn:incoming>Flow_1n3ngy3</bpmn:incoming>
