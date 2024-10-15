@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.beeline</groupId>
     <artifactId>fdm-bpm</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <name>fdm-bpm</name>
     <description>fdm-bpm</description>
     <properties>
@@ -44,6 +44,11 @@
         <dependency>
             <groupId>org.camunda.bpm.springboot</groupId>
             <artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.beeline</groupId>
+            <artifactId>fdm-lib</artifactId>
+            <version>0.0.14</version>
         </dependency>
 
         <dependency>

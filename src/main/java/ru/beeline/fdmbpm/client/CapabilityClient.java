@@ -2,6 +2,7 @@ package ru.beeline.fdmbpm.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,6 +13,8 @@ import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilityDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 
 import java.util.List;
 
@@ -59,6 +62,40 @@ public class CapabilityClient {
         return null;
     }
 
+    public PackageRegistrationResponseDTO deleteBusinessCapabilities(List<BusinessCapabilityDTO> list) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            for (BusinessCapabilityDTO dto : list) {
+                HttpEntity<String> entity = new HttpEntity<>(headers);
+                String url = capabilityServerUrl + "/api/v1/business-capability/" + dto.getCode();
+                restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public PackageRegistrationResponseDTO deleteTechCapabilities(List<TechCapabilityShortDTO> list) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            for (TechCapabilityShortDTO dto : list) {
+                HttpEntity<String> entity = new HttpEntity<>(headers);
+                String url = capabilityServerUrl + "/api/v1/tech-capabilities/" + dto.getCode();
+                restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
     public void сalculatePrivateTechCapabiltiesCount(int entityId) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -85,5 +122,45 @@ public class CapabilityClient {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    public List<BusinessCapabilityDTO> getBusinessCapabilities() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<BusinessCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/v1/business-capability",
+                    HttpMethod.GET, entity, new ParameterizedTypeReference<List<BusinessCapabilityDTO>>() {
+                    }).getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("Business-capability aren't received");
+            }
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public List<TechCapabilityShortDTO> getTechCapabilities() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<TechCapabilityShortDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/v1/tech-capabilities",
+                    HttpMethod.GET, entity, new ParameterizedTypeReference<List<TechCapabilityShortDTO>>() {
+                    }).getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("Tech-capabilities aren't received");
+            }
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }
