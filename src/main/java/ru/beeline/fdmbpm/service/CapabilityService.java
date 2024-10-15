@@ -1,6 +1,5 @@
 package ru.beeline.fdmbpm.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,8 @@ import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmbpm.dto.bw.BwProductDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,16 +78,30 @@ public class CapabilityService {
     }
 
     public Integer sendBusinessCapability() {
-        LOGGER.info("sendBusinessCapability");
+        log.info("sendBusinessCapability");
         List<DashboardCapabilityDTO> dashboardCapabilityDTOS = sort(dashboardClient.getCapabilities());
         log.info("Receive Business Capability:" + dashboardCapabilityDTOS);
+        List<BusinessCapabilityDTO> businessCapabilityDTOS = capabilityClient.getBusinessCapabilities();
+        List<BusinessCapabilityDTO> uniqueBusinessCapability = businessCapabilityDTOS.stream()
+                .filter(businessCapability -> dashboardCapabilityDTOS.stream().noneMatch(dashboardCapability ->
+                        dashboardCapability.getCode().equals(businessCapability.getCode())))
+                .toList();
+        log.info("Unique Business Capability:" + uniqueBusinessCapability);
+        capabilityClient.deleteBusinessCapabilities(uniqueBusinessCapability);
         return capabilityClient.postBusinessCapabilities(dashboardCapabilityDTOS).getPackageId();
     }
 
     public Integer sendTechCapability() {
-        LOGGER.info("sendTechCapability");
+        log.info("sendTechCapability");
         DashboardTechCapabilitiesDTO dashboardTechCapabilitiesDTOList = new DashboardTechCapabilitiesDTO(dashboardClient.getTechCapabilities());
         log.info("Receive Tech Capability:" + dashboardTechCapabilitiesDTOList);
+        List<TechCapabilityShortDTO> techCapabilityDTOS = capabilityClient.getTechCapabilities();
+        List<TechCapabilityShortDTO> uniqueTechCapability =
+                techCapabilityDTOS.stream().filter(techCapability -> dashboardTechCapabilitiesDTOList.getList().stream().
+                                noneMatch(dashboardTechCapability -> dashboardTechCapability.getCode().equals(techCapability.getCode())))
+                        .toList();
+        log.info("Unique Tech Capability:" + uniqueTechCapability);
+        capabilityClient.deleteTechCapabilities(uniqueTechCapability);
         return capabilityClient.postTechCapabilities(dashboardTechCapabilitiesDTOList).getPackageId();
     }
 
