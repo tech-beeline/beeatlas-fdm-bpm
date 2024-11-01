@@ -8,7 +8,7 @@
     <bpmn:endEvent id="Event_0wkth3t">
       <bpmn:incoming>Flow_1n3ngy3</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="Activity_1cjnsn0" name="Общий пересчет кол-ва ТС" camunda:delegateExpression="${CapabilityUploadSendTechCapability}">
+    <bpmn:serviceTask id="Activity_1cjnsn0" name="Общий пересчет кол-ва ТС" camunda:delegateExpression="${СalculateTotalTechCapabiltiesCount}">
       <bpmn:incoming>Flow_1jrw1kc</bpmn:incoming>
       <bpmn:outgoing>Flow_1n3ngy3</bpmn:outgoing>
     </bpmn:serviceTask>
