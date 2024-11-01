@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_090gb9c" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_090gb9c" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.28.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
   <bpmn:process id="Process_19qkwkh" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_179qo5n</bpmn:outgoing>
@@ -8,7 +8,7 @@
     <bpmn:endEvent id="Event_0wkth3t">
       <bpmn:incoming>Flow_1n3ngy3</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="Activity_1cjnsn0" name="Общий пересчет кол-ва ТС" camunda:delegateExpression="">
+    <bpmn:serviceTask id="Activity_1cjnsn0" name="Общий пересчет кол-ва ТС" camunda:delegateExpression="${CapabilityUploadSendTechCapability}">
       <bpmn:incoming>Flow_1jrw1kc</bpmn:incoming>
       <bpmn:outgoing>Flow_1n3ngy3</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -27,12 +27,12 @@
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="172" y="99" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0wkth3t_di" bpmnElement="Event_0wkth3t">
+        <dc:Bounds x="542" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_03ea0t8_di" bpmnElement="Activity_1cjnsn0">
         <dc:Bounds x="380" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0wkth3t_di" bpmnElement="Event_0wkth3t">
-        <dc:Bounds x="542" y="99" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1q1a5jd_di" bpmnElement="Event_1qq0lvj">
         <dc:Bounds x="259" y="99" width="36" height="36" />
