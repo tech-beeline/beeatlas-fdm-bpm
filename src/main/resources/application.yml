@@ -1,8 +1,12 @@
+app:
+  scheduler:
+    create-relations-cron: "0 0 0 8 * ?"
 camunda:
   bpm:
     admin-user:
       id: beeatlas
       password: beeatlas
+    data-source: camundaDataSource
     database:
       schema-update: true
 integration:

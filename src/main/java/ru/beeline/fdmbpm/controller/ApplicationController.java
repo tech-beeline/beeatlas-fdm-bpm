@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.fdmbpm.gitrepository.RingRepository;
 import ru.beeline.fdmbpm.service.CapabilityService;
 
 @Slf4j
@@ -12,6 +13,9 @@ public class ApplicationController {
 
     @Autowired
     CapabilityService capabilityService;
+
+    @Autowired
+    RingRepository ringRepository;
 
     @GetMapping("/send-business")
     public String sendBusinessCapability() {
@@ -22,5 +26,10 @@ public class ApplicationController {
     public String sendTechCapability() {
         log.info("running process CapabilityUpload, step: send tech capability");
         return capabilityService.sendTechCapability().toString();
+    }
+    @GetMapping("/test-run")
+    public String testRun() {
+        log.info("running process CapabilityUpload, step: send tech capability");
+        return ringRepository.findUniqueCmdbCodeAndProjLang().toString();
     }
 }
