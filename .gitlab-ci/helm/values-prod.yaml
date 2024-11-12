@@ -20,6 +20,7 @@ env:
   SPRING_RABBITMQ_VIRTUAL_HOST: "vault:eafdmmart/data/prod/fdm#rabbitmqvirtualhost"
   INTEGRATION_CAPABILITY_SERVER_URL: "vault:eafdmmart/data/prod/fdm#capabilityserver"
   INTEGRATION_DASHBOARD_SERVER_URL: "vault:eafdmmart/data/prod/fdm#dashboardserver"
+  INTEGRATION_PACK_LOADER_SERVER_URL: "vault:eafdmmart/data/prod/fdm#packloaderserver"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/prod/fdm#notificationserver"
   GWURL: "vault:eafdmmart/data/prod/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/prod/fdm#mapicauth"
