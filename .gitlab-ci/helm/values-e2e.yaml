@@ -7,10 +7,14 @@ ingress:
 
 env:
   SPRING_PROFILES_ACTIVE: e2e
-  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "vault:eafdmmart/data/test/e2e/bpm#driver"
-  SPRING_DATASOURCE_URL: "vault:eafdmmart/data/test/e2e/bpm#url"
-  SPRING_DATASOURCE_USERNAME: "vault:eafdmmart/data/test/e2e/bpm#username"
-  SPRING_DATASOURCE_PASSWORD: "vault:eafdmmart/data/test/e2e/bpm#password"
+  SPRING_DATASOURCE_CAMUNDA_DRIVER_CLASS_NAME: "vault:eafdmmart/data/test/e2e/bpm#driver"
+  SPRING_DATASOURCE_CAMUNDA_URL: "vault:eafdmmart/data/test/e2e/bpm#url"
+  SPRING_DATASOURCE_CAMUNDA_USERNAME: "vault:eafdmmart/data/test/e2e/bpm#username"
+  SPRING_DATASOURCE_CAMUNDA_PASSWORD: "vault:eafdmmart/data/test/e2e/bpm#password"
+  SPRING_DATASOURCE_GIT_DRIVER_CLASS_NAME: "vault:eafdmmart/data/test/e2e/git#driver"
+  SPRING_DATASOURCE_GIT_URL: "vault:eafdmmart/data/test/e2e/git#url"
+  SPRING_DATASOURCE_GIT_USERNAME: "vault:eafdmmart/data/test/e2e/git#username"
+  SPRING_DATASOURCE_GIT_PASSWORD: "vault:eafdmmart/data/test/e2e/git#password"
   SPRING_RABBITMQ_TEMPLATE_EXCHANGE: "vault:eafdmmart/data/test/e2e/fdm#rabbitmqtemplateexchange"
   SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: "vault:eafdmmart/data/test/e2e/fdm#rabbitmqtemplateroutingkey"
   SPRING_RABBITMQ_HOST: "vault:eafdmmart/data/test/e2e/fdm#rabbitmqhost"
