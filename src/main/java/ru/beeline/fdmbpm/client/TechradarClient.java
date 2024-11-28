@@ -33,7 +33,7 @@ public class TechradarClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            return restTemplate.exchange(techradarServerUrl + "/api/v1/product-tech",
+            return restTemplate.exchange(techradarServerUrl + "/api/v1/tech/product-tech",
                     HttpMethod.GET, entity, new ParameterizedTypeReference<List<ProductDTO>>() {
                     }).getBody();
         } catch (Exception e) {
