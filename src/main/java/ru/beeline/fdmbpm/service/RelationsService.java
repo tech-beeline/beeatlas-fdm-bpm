@@ -10,7 +10,6 @@ import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.client.ProductClient;
@@ -36,9 +35,6 @@ public class RelationsService {
     @Value("${queue.package-queue.name}")
     private String packageQueueName;
 
-    @Value("${app.scheduler.create-relations-cron}")
-    String createRelationsCron;
-
     @Autowired
     RingRepository ringRepository;
 
@@ -56,11 +52,6 @@ public class RelationsService {
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationsService.class);
-
-    @Scheduled(cron = "${app.scheduler.create-relations-cron}")
-    public void createRelationsScheduler() {
-        createRelations();
-    }
 
     public void createRelations() {
         List<FdmGitlabLanguages> fdmGitlabLanguages = ringRepository.findUniqueCmdbCodeAndProjLang();

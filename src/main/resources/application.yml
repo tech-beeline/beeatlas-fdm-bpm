@@ -1,6 +1,3 @@
-app:
-  scheduler:
-    create-relations-cron: "0 0 0 8 * ?"
 camunda:
   bpm:
     admin-user:

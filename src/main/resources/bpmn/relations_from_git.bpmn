@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1u94ysh" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.19.0">
+  <bpmn:process id="Process_11bkvbv" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:endEvent id="Event_07iosub">
+      <bpmn:incoming>Flow_016v1q3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1qwcfuo" sourceRef="StartEvent_1" targetRef="Activity_0pei70b" />
+    <bpmn:sequenceFlow id="Flow_016v1q3" sourceRef="Activity_0pei70b" targetRef="Event_07iosub" />
+    <bpmn:serviceTask id="Activity_0pei70b" name="Выгрузка связей технологии и продукта из Git" camunda:delegateExpression="${RelationsFromGitCreateRelations}">
+      <bpmn:incoming>Flow_1qwcfuo</bpmn:incoming>
+      <bpmn:outgoing>Flow_016v1q3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1qwcfuo</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1afrq1f">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/2024-01-08T00:00:00+03:00/P1M</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_11bkvbv">
+      <bpmndi:BPMNShape id="Activity_1ftfrfa_di" bpmnElement="Activity_0pei70b">
+        <dc:Bounds x="250" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0f5b16z_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="172" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_07iosub_di" bpmnElement="Event_07iosub">
+        <dc:Bounds x="392" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1qwcfuo_di" bpmnElement="Flow_1qwcfuo">
+        <di:waypoint x="208" y="117" />
+        <di:waypoint x="250" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_016v1q3_di" bpmnElement="Flow_016v1q3">
+        <di:waypoint x="350" y="117" />
+        <di:waypoint x="392" y="117" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
