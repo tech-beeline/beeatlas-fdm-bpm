@@ -14,17 +14,15 @@ import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.TechradarClient;
+import ru.beeline.fdmbpm.dto.AliasLabelDTO;
 import ru.beeline.fdmbpm.dto.FdmGitlabLanguagesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
-import ru.beeline.fdmbpm.dto.techradar.ProductTechDTO;
 import ru.beeline.fdmbpm.gitdomain.FdmGitlabLanguages;
 import ru.beeline.fdmbpm.gitrepository.RingRepository;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,25 +53,18 @@ public class RelationsService {
 
     public void createRelations() {
         List<FdmGitlabLanguages> fdmGitlabLanguages = ringRepository.findUniqueCmdbCodeAndProjLang();
-        Map<String, Pair<List<String>, ProductDTO>> productPairMap = new HashMap<>();
         List<ProductDTO> productDTOS = techradarClient.getTech();
-        productDTOS.forEach(productDTO -> productPairMap.put(productDTO.getAlias(), new Pair<>(productDTO.getTech().stream().map(ProductTechDTO::getLabel).collect(Collectors.toList()), productDTO)));
-        Iterator<FdmGitlabLanguages> iterator = fdmGitlabLanguages.iterator();
-        while (iterator.hasNext()) {
-            FdmGitlabLanguages pair = iterator.next();
-            if (productPairMap.containsKey(pair.getCmdb_code()) &&
-                    productPairMap.get(pair.getCmdb_code()).a.contains(pair.getProj_lang())) {
-                iterator.remove();
-            } else {
-                Integer techId = productPairMap.get(pair.getCmdb_code())
-                        .b.getTech().stream()
-                        .filter(tech -> tech.getLabel().equals(pair.getProj_lang()))
-                        .findFirst()
-                        .get().getId();
-                Integer productId = productPairMap.get(pair.getCmdb_code()).b.getProductId();
-                productClient.deleteRelation(techId, productId);
-            }
-        }
+        List<AliasLabelDTO> aliasLabelDTOS = productDTOS.stream()
+                .flatMap(productDTO -> productDTO.getTech().stream()
+                        .map(productTechDTO -> new AliasLabelDTO(
+                                productDTO.getProductId(),
+                                productDTO.getAlias(),
+                                productTechDTO.getId(),
+                                productTechDTO.getLabel())))
+                .collect(Collectors.toList());
+        removeMatchingObjects(aliasLabelDTOS, fdmGitlabLanguages);
+        aliasLabelDTOS.forEach(aliasLabelDTO ->
+                productClient.deleteRelation(aliasLabelDTO.getTechId(), aliasLabelDTO.getProductId()));
         try {
             LOGGER.info("Register package");
             PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(
@@ -81,7 +72,8 @@ public class RelationsService {
             ObjectNode messagePayload = objectMapper.createObjectNode();
             messagePayload.put("packageId", responseDTO.getPackageId());
             messagePayload.put("payload", fdmGitlabLanguages.stream().map(obj ->
-                            FdmGitlabLanguagesDTO.builder().proj_lang(obj.getProj_lang()).cmdb_code(obj.getCmdb_code()).build())
+                            FdmGitlabLanguagesDTO.builder().proj_lang(obj.getProj_lang())
+                                    .cmdb_code(obj.getCmdb_code()).build())
                     .collect(Collectors.toList()
                     ).toString());
             LOGGER.info("Send to package-queue");
@@ -97,5 +89,21 @@ public class RelationsService {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return messagePostProcessor;
         });
+    }
+
+    private static void removeMatchingObjects(List<AliasLabelDTO> aliasLabelDTOS, List<FdmGitlabLanguages> fdmGitlabLanguages) {
+        Set<Pair<String, String>> fdmGitlabSet = fdmGitlabLanguages.stream()
+                .map(fdmGitlabLanguage -> new Pair<>(fdmGitlabLanguage.getProj_lang(), fdmGitlabLanguage.getCmdb_code()))
+                .collect(Collectors.toSet());
+
+        aliasLabelDTOS.removeIf(aliasLabelDTO ->
+                fdmGitlabSet.contains(new Pair<>(aliasLabelDTO.getLabel(), aliasLabelDTO.getAlias())));
+
+        Set<Pair<String, String>> aliasLabelSet = aliasLabelDTOS.stream()
+                .map(aliasLabelDTO -> new Pair<>(aliasLabelDTO.getLabel(), aliasLabelDTO.getAlias()))
+                .collect(Collectors.toSet());
+
+        fdmGitlabLanguages.removeIf(fdmGitlabLanguage ->
+                aliasLabelSet.contains(new Pair<>(fdmGitlabLanguage.getProj_lang(), fdmGitlabLanguage.getCmdb_code())));
     }
 }
