@@ -57,9 +57,10 @@ public class CapabilityService {
             List<BwProductDTO> products = bwEmployeeClient.getProducts();
             log.info("Receive products:" + products);
             if (products.size() > 0) {
-                LOGGER.info("Register package");
+                LOGGER.info("Register package, products size: {}", products.size());
                 PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage("UPDATE_PRODUCTS", products.size());
                 ObjectNode messagePayload = objectMapper.createObjectNode();
+                LOGGER.info("packageId: {}", responseDTO.getPackageId());
                 messagePayload.put("packageId", responseDTO.getPackageId());
                 messagePayload.put("payload", products.toString());
                 LOGGER.info("Send to package-queue");
