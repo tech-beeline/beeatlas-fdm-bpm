@@ -66,9 +66,10 @@ public class RelationsService {
         aliasLabelDTOS.forEach(aliasLabelDTO ->
                 productClient.deleteRelation(aliasLabelDTO.getTechId(), aliasLabelDTO.getProductId()));
         try {
-            LOGGER.info("Register package");
+            LOGGER.info("Register package,operation: {} , fdmGitlabLanguages size: {}", OPERATION, fdmGitlabLanguages.size());
             PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(
                     OPERATION, fdmGitlabLanguages.size());
+            LOGGER.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = objectMapper.createObjectNode();
             messagePayload.put("packageId", responseDTO.getPackageId());
             messagePayload.put("payload", fdmGitlabLanguages.stream().map(obj ->
