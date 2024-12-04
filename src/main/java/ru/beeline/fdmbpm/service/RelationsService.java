@@ -69,6 +69,7 @@ public class RelationsService {
             LOGGER.info("Register package");
             PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(
                     OPERATION, fdmGitlabLanguages.size());
+            LOGGER.info("the package has been registered, package id: " + responseDTO.getPackageId());
             ObjectNode messagePayload = objectMapper.createObjectNode();
             messagePayload.put("packageId", responseDTO.getPackageId());
             messagePayload.put("payload", fdmGitlabLanguages.stream().map(obj ->
@@ -78,6 +79,7 @@ public class RelationsService {
                     ).toString());
             LOGGER.info("Send to package-queue");
             sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+            LOGGER.info("createRelations method completed");
         } catch (
                 Exception e) {
             throw new RuntimeException(e);
