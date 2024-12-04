@@ -27,7 +27,7 @@
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="Flow_11to9tk" sourceRef="Event_0khj7td" targetRef="Event_1xk4x3a" />
+    <bpmn:sequenceFlow id="Flow_11to9tk" sourceRef="Event_0khj7td" targetRef="Activity_089hfyk" />
     <bpmn:serviceTask id="Activity_089hfyk" name="Отправка данных о Продуктах" camunda:delegateExpression="${CapabilityUploadSendProduct}">
       <bpmn:incoming>Flow_11to9tk</bpmn:incoming>
       <bpmn:outgoing>Flow_0lgufda</bpmn:outgoing>
