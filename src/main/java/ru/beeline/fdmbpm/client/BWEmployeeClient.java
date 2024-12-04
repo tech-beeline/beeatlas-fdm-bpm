@@ -54,7 +54,7 @@ public class BWEmployeeClient {
 
 
             productsDTO = restTemplate.exchange(
-                    gwUrl + "/appgit/v2/v2/products",
+                    gwUrl + "/bw-products",
                     HttpMethod.GET, entity, new ParameterizedTypeReference<List<BwProductDTO>>() {
                     }).getBody();
         } catch (HttpClientErrorException.Unauthorized e) {
