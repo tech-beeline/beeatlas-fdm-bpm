@@ -1,6 +1,7 @@
 package ru.beeline.fdmbpm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.Pair;
@@ -15,7 +16,6 @@ import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.TechradarClient;
 import ru.beeline.fdmbpm.dto.AliasLabelDTO;
-import ru.beeline.fdmbpm.dto.FdmGitlabLanguagesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
 import ru.beeline.fdmbpm.gitdomain.FdmGitlabLanguages;
@@ -66,22 +66,24 @@ public class RelationsService {
         aliasLabelDTOS.forEach(aliasLabelDTO ->
                 productClient.deleteRelation(aliasLabelDTO.getTechId(), aliasLabelDTO.getProductId()));
         try {
-            LOGGER.info("Register package,operation: {} , fdmGitlabLanguages size: {}", OPERATION, fdmGitlabLanguages.size());
+            LOGGER.info("Register package, operation: {} , fdmGitlabLanguages size: {}", OPERATION, fdmGitlabLanguages.size());
             PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(
                     OPERATION, fdmGitlabLanguages.size());
             LOGGER.info("the package has been registered, package id: " + responseDTO.getPackageId());
             ObjectNode messagePayload = objectMapper.createObjectNode();
             messagePayload.put("packageId", responseDTO.getPackageId());
-            messagePayload.put("payload", fdmGitlabLanguages.stream().map(obj ->
-                            FdmGitlabLanguagesDTO.builder().proj_lang(obj.getProj_lang())
-                                    .cmdb_code(obj.getCmdb_code()).build())
-                    .collect(Collectors.toList()
-                    ).toString());
+
+            ArrayNode payloadArray = messagePayload.putArray("payload");
+            fdmGitlabLanguages.forEach(obj -> {
+                ObjectNode item = objectMapper.createObjectNode();
+                item.put("proj_lang", obj.getProj_lang());
+                item.put("cmdb_code", obj.getCmdb_code());
+                payloadArray.add(item);
+            });
             LOGGER.info("Send to package-queue");
             sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
             LOGGER.info("createRelations method completed");
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
