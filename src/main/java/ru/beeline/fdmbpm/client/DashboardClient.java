@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilityDTO;
 
 import java.util.List;
@@ -55,6 +56,28 @@ public class DashboardClient {
             }).getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's TechCapabilities aren't received");
+            }
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public List<DashboardProductsDTO> getProducts() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<DashboardProductsDTO> result = restTemplate.exchange(
+                    capabilityServerUrl + "api/v4/systems?level=systems",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<DashboardProductsDTO>>() {
+                    }).getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("dashboard's Products aren't received");
             }
             return result;
         } catch (Exception e) {

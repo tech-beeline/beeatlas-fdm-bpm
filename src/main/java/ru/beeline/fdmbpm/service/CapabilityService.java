@@ -15,9 +15,9 @@ import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.DashboardClient;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
-import ru.beeline.fdmbpm.dto.bw.BwProductDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 
@@ -54,7 +54,7 @@ public class CapabilityService {
     public void sendProduct() {
         try {
             LOGGER.info("sendProduct");
-            List<BwProductDTO> products = bwEmployeeClient.getProducts();
+            List<DashboardProductsDTO> products = dashboardClient.getProducts();
             log.info("Receive products:" + products);
             if (products.size() > 0) {
                 LOGGER.info("Register package, products size: {}", products.size());
@@ -66,6 +66,7 @@ public class CapabilityService {
                 messagePayload.put("payload", products.toString());
                 LOGGER.info("Send to package-queue");
                 sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+                LOGGER.info("sendProduct completed");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
