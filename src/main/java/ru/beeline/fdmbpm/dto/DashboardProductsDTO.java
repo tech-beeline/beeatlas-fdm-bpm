@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 public class DashboardProductsDTO {
+
     private String name;
     private String code;
     private String version;
@@ -22,5 +22,5 @@ public class DashboardProductsDTO {
     private String fqName;
     private String status;
     private Date modifiedDate;
-    private List<LinkDTO> links;
+    private LinkDTO links;
 }
