@@ -1,6 +1,7 @@
 package ru.beeline.fdmbpm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -63,7 +64,14 @@ public class CapabilityService {
                 LOGGER.info("packageId: {}", responseDTO.getPackageId());
                 ObjectNode messagePayload = objectMapper.createObjectNode();
                 messagePayload.put("packageId", responseDTO.getPackageId());
-                messagePayload.put("payload", products.toString());
+
+                ArrayNode payloadArray = messagePayload.putArray("payload");
+                products.forEach(obj -> {
+                    ObjectNode item = objectMapper.createObjectNode();
+                    item.put("name", obj.getName());
+                    item.put("cmdb_code", obj.getCode());
+                    payloadArray.add(item);
+                });
                 LOGGER.info("Send to package-queue");
                 sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
                 LOGGER.info("sendProduct completed");
