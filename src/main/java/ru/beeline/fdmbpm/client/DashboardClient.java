@@ -71,7 +71,7 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardProductsDTO> result = restTemplate.exchange(
-                    capabilityServerUrl + "api/v4/systems?level=systems",
+                    capabilityServerUrl + "/api/v4/systems?level=systems",
                     HttpMethod.GET,
                     entity,
                     new ParameterizedTypeReference<List<DashboardProductsDTO>>() {
