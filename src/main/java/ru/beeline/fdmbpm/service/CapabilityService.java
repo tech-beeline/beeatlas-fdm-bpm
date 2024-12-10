@@ -69,7 +69,7 @@ public class CapabilityService {
                 products.forEach(obj -> {
                     ObjectNode item = objectMapper.createObjectNode();
                     item.put("name", obj.getName());
-                    item.put("cmdbCode", obj.getCode());
+                    item.put("cmdbCode", obj.getCode().toLowerCase());
                     payloadArray.add(item);
                 });
                 LOGGER.info("Send to package-queue");
