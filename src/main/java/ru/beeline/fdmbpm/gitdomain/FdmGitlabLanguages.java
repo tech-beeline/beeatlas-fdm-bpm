@@ -17,4 +17,5 @@ public class FdmGitlabLanguages {
     @Id
     private String cmdb_code;
     private String proj_lang;
+    private Date extraction_date;
 }
