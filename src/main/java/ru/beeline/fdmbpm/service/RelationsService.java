@@ -53,18 +53,18 @@ public class RelationsService {
 
     public void createRelations() {
         List<FdmGitlabLanguages> fdmGitlabLanguages = ringRepository.findUniqueCmdbCodeAndProjLangModify();
-        List<ProductDTO> productDTOS = techradarClient.getTech();
-        List<AliasLabelDTO> aliasLabelDTOS = productDTOS.stream()
-                .flatMap(productDTO -> productDTO.getTech().stream()
-                        .map(productTechDTO -> new AliasLabelDTO(
-                                productDTO.getProductId(),
-                                productDTO.getAlias(),
-                                productTechDTO.getId(),
-                                productTechDTO.getLabel())))
-                .collect(Collectors.toList());
-        removeMatchingObjects(aliasLabelDTOS, fdmGitlabLanguages);
-        aliasLabelDTOS.forEach(aliasLabelDTO ->
-                productClient.deleteRelation(aliasLabelDTO.getTechId(), aliasLabelDTO.getProductId()));
+//        List<ProductDTO> productDTOS = techradarClient.getTech();
+//        List<AliasLabelDTO> aliasLabelDTOS = productDTOS.stream()
+//                .flatMap(productDTO -> productDTO.getTech().stream()
+//                        .map(productTechDTO -> new AliasLabelDTO(
+//                                productDTO.getProductId(),
+//                                productDTO.getAlias(),
+//                                productTechDTO.getId(),
+//                                productTechDTO.getLabel())))
+//                .collect(Collectors.toList());
+//        removeMatchingObjects(aliasLabelDTOS, fdmGitlabLanguages);
+//        aliasLabelDTOS.forEach(aliasLabelDTO ->
+//                productClient.deleteRelation(aliasLabelDTO.getTechId(), aliasLabelDTO.getProductId()));
         try {
             LOGGER.info("Register package, operation: {} , fdmGitlabLanguages size: {}", OPERATION, fdmGitlabLanguages.size());
             PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(
