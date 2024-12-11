@@ -15,7 +15,7 @@ public interface RingRepository extends JpaRepository<FdmGitlabLanguages, Intege
             "       cmdb_code, " +
             "       proj_lang " +
             "FROM v_fdm_gitlab_languages " +
-            "ORDER BY cmdb_code, proj_lang, extraction_date DESC",
+            "ORDER BY cmdb_code, proj_lang DESC",
             nativeQuery = true)
     List<FdmGitlabLanguages> findUniqueCmdbCodeAndProjLang();
 }
