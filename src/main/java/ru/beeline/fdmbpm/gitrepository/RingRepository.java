@@ -13,11 +13,7 @@ public interface RingRepository extends JpaRepository<FdmGitlabLanguages, Intege
 
     @Query(value = "SELECT DISTINCT ON (cmdb_code, proj_lang) " +
             "       cmdb_code, " +
-            "       proj_namespace, " +
-            "       proj_name, " +
             "       proj_lang, " +
-            "       lang_share, " +
-            "       extraction_date " +
             "FROM v_fdm_gitlab_languages " +
             "ORDER BY cmdb_code, proj_lang, extraction_date DESC",
             nativeQuery = true)
