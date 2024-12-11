@@ -1,6 +1,7 @@
 package ru.beeline.fdmbpm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -15,9 +16,9 @@ import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.DashboardClient;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
-import ru.beeline.fdmbpm.dto.bw.BwProductDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 
@@ -54,7 +55,7 @@ public class CapabilityService {
     public void sendProduct() {
         try {
             LOGGER.info("sendProduct");
-            List<BwProductDTO> products = bwEmployeeClient.getProducts();
+            List<DashboardProductsDTO> products = dashboardClient.getProducts();
             log.info("Receive products:" + products);
             if (products.size() > 0) {
                 LOGGER.info("Register package, products size: {}", products.size());
@@ -63,9 +64,17 @@ public class CapabilityService {
                 LOGGER.info("packageId: {}", responseDTO.getPackageId());
                 ObjectNode messagePayload = objectMapper.createObjectNode();
                 messagePayload.put("packageId", responseDTO.getPackageId());
-                messagePayload.put("payload", products.toString());
+
+                ArrayNode payloadArray = messagePayload.putArray("payload");
+                products.forEach(obj -> {
+                    ObjectNode item = objectMapper.createObjectNode();
+                    item.put("name", obj.getName());
+                    item.put("cmdbCode", obj.getCode().toLowerCase());
+                    payloadArray.add(item);
+                });
                 LOGGER.info("Send to package-queue");
                 sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+                LOGGER.info("sendProduct completed");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

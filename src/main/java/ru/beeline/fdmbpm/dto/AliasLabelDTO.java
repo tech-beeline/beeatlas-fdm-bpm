@@ -8,6 +8,7 @@ import lombok.*;
 @ToString
 @Builder
 public class AliasLabelDTO {
+
     private Integer productId;
     private String alias;
     private Integer techId;
