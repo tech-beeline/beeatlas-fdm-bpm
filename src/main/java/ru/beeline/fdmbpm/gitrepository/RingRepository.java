@@ -1,4 +1,5 @@
 package ru.beeline.fdmbpm.gitrepository;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,9 +19,6 @@ public interface RingRepository extends JpaRepository<FdmGitlabLanguages, Intege
             "       lang_share, " +
             "       extraction_date " +
             "FROM v_fdm_gitlab_languages " +
-            "WHERE extraction_date = ( " +
-            "    SELECT MAX(extraction_date) " +
-            "    FROM v_fdm_gitlab_languages) " +
             "ORDER BY cmdb_code, proj_lang, extraction_date DESC",
             nativeQuery = true)
     List<FdmGitlabLanguages> findUniqueCmdbCodeAndProjLang();
