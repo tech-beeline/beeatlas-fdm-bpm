@@ -1,19 +1,18 @@
 package ru.beeline.fdmbpm.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class DashboardTechCapabilitiesDTO {
+public class LinkDTO {
 
-    List<DashboardTechCapabilityDTO> list;
+    private String self;
+    private String purpose;
+    private String e2e;
+    private String assessments;
 }

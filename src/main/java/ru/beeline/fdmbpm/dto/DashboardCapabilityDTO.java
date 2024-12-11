@@ -14,11 +14,13 @@ import java.util.Date;
 public class DashboardCapabilityDTO {
 
     private String code;
-    private boolean isDomain;
+    private Boolean isDomain;
     private String name;
     private String description;
     private String author;
+    private Date createdDate;
     private Date modifiedDate;
     private String status;
+    private String parent;
     private String owner;
 }
