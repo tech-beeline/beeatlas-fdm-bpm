@@ -12,3 +12,13 @@ integration:
 queue:
   package-queue:
     name: package_queue
+
+spring:
+  datasource:
+    git:
+      hikari:
+        maximum-pool-size: 3
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+

@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,9 +27,14 @@ public class GitDataSourceConfig {
         return new DataSourceProperties();
     }
 
+
     @Bean(name = "gitDataSource")
+    @ConfigurationProperties("spring.datasource.git.hikari")
     public DataSource gitDataSource() {
-        return gitDataSourceProperties().initializeDataSourceBuilder().build();
+        return gitDataSourceProperties()
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
     }
 
     @Bean(name = "gitEntityManagerFactory")
@@ -44,4 +50,5 @@ public class GitDataSourceConfig {
     public JpaTransactionManager gitTransactionManager() {
         return new JpaTransactionManager(gitEntityManagerFactory().getObject());
     }
+
 }
