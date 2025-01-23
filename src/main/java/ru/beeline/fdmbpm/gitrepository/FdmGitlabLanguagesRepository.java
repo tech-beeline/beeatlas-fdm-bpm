@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 
 @Repository
-public interface RingRepository extends JpaRepository<FdmGitlabLanguages, Integer> {
+public interface FdmGitlabLanguagesRepository extends JpaRepository<FdmGitlabLanguages, Integer> {
 
     @Query(value = "SELECT DISTINCT ON (cmdb_code, proj_lang) " +
             "       cmdb_code, " +
