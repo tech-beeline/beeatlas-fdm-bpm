@@ -27,6 +27,7 @@ env:
   INTEGRATION_PACK_LOADER_SERVER_URL: "vault:eafdmmart/data/dev/fdm#packloaderserver"
   INTEGRATION_TECHRADAR_SERVER_URL: "vault:eafdmmart/data/dev/fdm#techradarserverurl"
   INTEGRATION_PRODUCTS_SERVER_URL: "vault:eafdmmart/data/dev/fdm#productsserver"
+  INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/dev/fdm#documentserverurl"
   GWURL: "vault:eafdmmart/data/dev/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/dev/fdm#mapicauth"
   TECHUSER: "vault:eafdmmart/data/dev/fdm#techuser"
