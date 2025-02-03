@@ -11,6 +11,9 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.PackageRegistrationRequestDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 @Slf4j
 @Service
@@ -25,8 +28,15 @@ public class PackageClient {
     }
 
     public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize) {
-        try {
+        return registerPackage(operation, dataSize, "");
+    }
 
+    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String additionalParam1) {
+        return registerPackage(operation, dataSize, additionalParam1, "");
+    }
+
+    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source , String status ) {
+        try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -35,8 +45,14 @@ public class PackageClient {
                     .count(dataSize)
                     .build(),
                     headers);
-
-            return restTemplate.exchange(packLoaderServerUrl + "/api/v1/package",
+            String url = packLoaderServerUrl + "/api/v1/package";
+            if (source != null && !source.isEmpty()) {
+                url += "?source=" + URLEncoder.encode(source, StandardCharsets.UTF_8);
+            }
+            if (status != null && !status.isEmpty()) {
+                url += (url.contains("?") ? "&" : "?") + "status=" + URLEncoder.encode(status, StandardCharsets.UTF_8);
+            }
+            return restTemplate.exchange(url,
                     HttpMethod.POST, entity, PackageRegistrationResponseDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
