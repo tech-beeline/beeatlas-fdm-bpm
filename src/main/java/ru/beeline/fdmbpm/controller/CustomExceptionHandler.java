@@ -1,0 +1,43 @@
+package ru.beeline.fdmbpm.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.beeline.fdmbpm.exception.NotFoundException;
+import ru.beeline.fdmbpm.exception.S3Exception;
+import ru.beeline.fdmbpm.exception.ValidationException;
+
+@ControllerAdvice
+@Slf4j
+public class CustomExceptionHandler {
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> handleException(ValidationException e) {
+        log.error(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header("content-type", MediaType.APPLICATION_JSON_VALUE)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<Object> handleException(S3Exception e) {
+        log.error(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header("content-type", MediaType.APPLICATION_JSON_VALUE)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Object> handleException(NotFoundException e) {
+        log.error(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .header("content-type", MediaType.APPLICATION_JSON_VALUE)
+                .body(e.getMessage());
+    }
+}
