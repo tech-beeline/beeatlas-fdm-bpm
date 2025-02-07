@@ -109,7 +109,5 @@ public class RelationsService {
 
         fdmGitlabLanguages.removeIf(fdmGitlabLanguage ->
                 aliasLabelSet.contains(new Pair<>(fdmGitlabLanguage.getProj_lang(), fdmGitlabLanguage.getCmdb_code())));
-
-
     }
 }

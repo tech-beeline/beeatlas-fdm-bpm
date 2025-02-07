@@ -28,6 +28,8 @@ env:
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/prod/fdm#notificationserver"
   INTEGRATION_TECHRADAR_SERVER_URL: "vault:eafdmmart/data/prod/fdm#techradarserverurl"
   INTEGRATION_PRODUCTS_SERVER_URL: "vault:eafdmmart/data/prod/fdm#productsserver"
+  INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/prod/ambassador#authsso"
+
   GWURL: "vault:eafdmmart/data/prod/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/prod/fdm#mapicauth"
   TECHUSER: "vault:eafdmmart/data/prod/fdm#techuser"

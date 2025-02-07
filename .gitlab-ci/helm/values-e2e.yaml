@@ -27,6 +27,8 @@ env:
   INTEGRATION_PACK_LOADER_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#packloaderserver"
   INTEGRATION_TECHRADAR_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#techradarserverurl"
   INTEGRATION_PRODUCTS_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#productsserver"
+  INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/test/e2e/ambassador#authsso"
+
   GWURL: "vault:eafdmmart/data/test/e2e/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/test/e2e/fdm#mapicauth"
   TECHUSER: "vault:eafdmmart/data/test/e2e/fdm#techuser"
