@@ -81,7 +81,6 @@ public class ImportProcessService {
                     if (sync) {
                         purgingBusinessCapability(excelBcDTOS);
                     }
-                    registerAndSendBusinessCapabilityPackage(operation, excelBcDTOS);
                     return registerAndSendBusinessCapabilityPackage(operation, excelBcDTOS);
                 } else if (entityType.equals("tech_capability")) {
                     List<ExcelTcDTO> excelTcDTOS = excelTcMapper.convert(excelDTOS);
@@ -126,7 +125,7 @@ public class ImportProcessService {
     private Integer registerAndSendBusinessCapabilityPackage(String operation, List<ExcelBcDTO> excelBcDTOS) {
         try {
             log.info("Register package, operation: {} , excelBcDTOS size: {}", operation, excelBcDTOS.size());
-            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelBcDTOS.size());
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelBcDTOS.size(),"excel");
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForBc(responseDTO, excelBcDTOS);
             log.info("Send to package-queue");
@@ -141,7 +140,7 @@ public class ImportProcessService {
     private Integer registerAndSendTechCapabilityPackage(String operation, List<ExcelTcDTO> excelTcDTOS) {
         try {
             log.info("Register package, operation: {} , excelTcDTOS size: {}", operation, excelTcDTOS.size());
-            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelTcDTOS.size());
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelTcDTOS.size(),"excel");
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForTc(responseDTO, excelTcDTOS);
             log.info("Send to package-queue");
@@ -176,7 +175,7 @@ public class ImportProcessService {
             item.put("author", bcDTO.getAuthor());
             item.put("link", bcDTO.getLink());
             item.put("owner", bcDTO.getOwner());
-            item.putPOJO("parents", bcDTO.getParents());
+            item.putPOJO("parent", bcDTO.getParent());
             item.put("isDomain", bcDTO.getIsDomain());
             payloadArray.add(item);
         });
@@ -363,15 +362,15 @@ public class ImportProcessService {
         List<ExcelBcDTO> sorted = new ArrayList<>();
         List<ExcelBcDTO> remaining = new ArrayList<>(excelBcDTOS);
         sorted.addAll(remaining.stream()
-                .filter(e -> e.getParents() == null || e.getParents().isEmpty())
+                .filter(e -> e.getParent() == null || e.getParent().isEmpty())
                 .collect(Collectors.toList()));
         remaining.removeAll(sorted);
         int previousSize;
         do {
             previousSize = remaining.size();
             for (ExcelBcDTO excelBcDTO : new ArrayList<>(remaining)) {
-                if (excelBcDTO.getParents() != null && !excelBcDTO.getParents().isEmpty()
-                        && sorted.stream().anyMatch(e -> excelBcDTO.getParents().equals(e.getCode()))) {
+                if (excelBcDTO.getParent() != null && !excelBcDTO.getParent().isEmpty()
+                        && sorted.stream().anyMatch(e -> excelBcDTO.getParent().equals(e.getCode()))) {
                     sorted.add(excelBcDTO);
                     remaining.remove(excelBcDTO);
                 }
