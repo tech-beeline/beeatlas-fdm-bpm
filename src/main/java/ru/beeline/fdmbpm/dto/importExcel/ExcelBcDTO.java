@@ -16,7 +16,7 @@ public class ExcelBcDTO {
     private String author;
     private String link;
     private String owner;
-    private String parents;
+    private String parent;
     private Boolean isDomain;
 
 }

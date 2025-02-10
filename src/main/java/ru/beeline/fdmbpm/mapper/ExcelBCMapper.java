@@ -25,7 +25,7 @@ public class ExcelBCMapper {
                 .author(excelDTOS.getAuthor())
                 .link(excelDTOS.getLink())
                 .owner(excelDTOS.getOwner())
-                .parents(!excelDTOS.getParents().isEmpty() ? excelDTOS.getParents().get(0) : null)
+                .parent(!excelDTOS.getParents().isEmpty() ? excelDTOS.getParents().get(0) : null)
                 .isDomain(excelDTOS.getIsDomain())
                 .build();
     }

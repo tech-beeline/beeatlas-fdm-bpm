@@ -31,8 +31,8 @@ public class PackageClient {
         return registerPackage(operation, dataSize, "");
     }
 
-    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String additionalParam1) {
-        return registerPackage(operation, dataSize, additionalParam1, "");
+    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source) {
+        return registerPackage(operation, dataSize, source, "");
     }
 
     public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source , String status ) {
