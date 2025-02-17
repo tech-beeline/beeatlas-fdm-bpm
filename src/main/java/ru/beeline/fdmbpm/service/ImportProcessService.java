@@ -125,7 +125,7 @@ public class ImportProcessService {
     private Integer registerAndSendBusinessCapabilityPackage(String operation, List<ExcelBcDTO> excelBcDTOS) {
         try {
             log.info("Register package, operation: {} , excelBcDTOS size: {}", operation, excelBcDTOS.size());
-            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelBcDTOS.size(),"excel");
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelBcDTOS.size(), "excel");
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForBc(responseDTO, excelBcDTOS);
             log.info("Send to package-queue");
@@ -140,7 +140,7 @@ public class ImportProcessService {
     private Integer registerAndSendTechCapabilityPackage(String operation, List<ExcelTcDTO> excelTcDTOS) {
         try {
             log.info("Register package, operation: {} , excelTcDTOS size: {}", operation, excelTcDTOS.size());
-            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelTcDTOS.size(),"excel");
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelTcDTOS.size(), "excel");
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForTc(responseDTO, excelTcDTOS);
             log.info("Send to package-queue");
@@ -292,7 +292,7 @@ public class ImportProcessService {
                     String cellValue = getCellValueAsString(cell);
                     switch (columnName) {
                         case "code":
-                            excelDTO.setCode(cellValue);
+                            excelDTO.setCode(cellValue.trim());
                             break;
                         case "name":
                             excelDTO.setName(cellValue);
@@ -313,8 +313,12 @@ public class ImportProcessService {
                             excelDTO.setOwner(cellValue);
                             break;
                         case "parents":
-                            List<String> parents = Arrays.asList(cellValue.split(","));
-                            excelDTO.setParents(parents);
+                            if (cellValue != null) {
+                                List<String> parents = Arrays.asList(cellValue.split(","));
+                                excelDTO.setParents(parents.stream()
+                                        .map(String::trim)
+                                        .collect(Collectors.toList()));
+                            }
                             break;
                         case "isdomain":
                             excelDTO.setIsDomain(Boolean.parseBoolean(cellValue));
@@ -338,7 +342,7 @@ public class ImportProcessService {
 
     private String getCellValueAsString(Cell cell) {
         if (cell == null) {
-            return "";
+            return null;
         }
         switch (cell.getCellType()) {
             case STRING:
@@ -347,14 +351,15 @@ public class ImportProcessService {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue().toString();
                 } else {
-                    return String.valueOf(cell.getNumericCellValue());
+                    long numericValue = (long) cell.getNumericCellValue();
+                    return String.valueOf(numericValue);
                 }
             case BOOLEAN:
                 return String.valueOf(cell.getBooleanCellValue());
             case FORMULA:
                 return cell.getCellFormula();
             default:
-                return "";
+                return null;
         }
     }
 
