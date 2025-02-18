@@ -99,6 +99,7 @@ public class CapabilityService {
                 .toList();
         log.info("Unique Business Capability:" + uniqueBusinessCapability);
         capabilityClient.deleteBusinessCapabilities(uniqueBusinessCapability);
+        log.info("Unique business Capabilities have been removed");
         return capabilityClient.postBusinessCapabilities(dashboardCapabilityDTOS).getPackageId();
     }
 
