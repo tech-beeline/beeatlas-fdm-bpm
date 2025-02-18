@@ -71,6 +71,7 @@ public class CapabilityClient {
             for (BusinessCapabilityDTO dto : list) {
                 HttpEntity<String> entity = new HttpEntity<>(headers);
                 String url = capabilityServerUrl + "/api/v1/business-capability/" + dto.getCode();
+                log.info(url);
                 restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
             }
         } catch (Exception e) {
