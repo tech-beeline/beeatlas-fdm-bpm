@@ -68,10 +68,11 @@ public class CapabilityClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("SOURCE", "Sparx");
 
+            log.info("BusinessCapabilityDTO list size = " + list.size());
             for (BusinessCapabilityDTO dto : list) {
                 HttpEntity<String> entity = new HttpEntity<>(headers);
                 String url = capabilityServerUrl + "/api/v1/business-capability/" + dto.getCode();
-                log.info(url);
+                log.info("dto.getCode = " + dto.getCode() + ". " + url);
                 restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
             }
         } catch (Exception e) {
