@@ -29,6 +29,7 @@ env:
   INTEGRATION_TECHRADAR_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#techradarserverurl"
   INTEGRATION_PRODUCTS_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#productsserver"
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#documentserverurl"
+  INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/test/func/ambassador#authsso"
 
   GWURL: "vault:eafdmmart/data/test/func/fdm#mapicurl"
