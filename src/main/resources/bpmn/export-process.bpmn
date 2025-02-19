@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1n83sen" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
-  <bpmn:process id="Process_1uac9qb" name="export-process" isExecutable="true">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1n83sen" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler"
+exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
+  <bpmn:process id="Process_1uac9qb" name="export-process" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_1e0yb7r</bpmn:outgoing>
     </bpmn:startEvent>
@@ -10,11 +13,11 @@
       <bpmn:incoming>Flow_1fk9dv7</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1fk9dv7" sourceRef="Activity_0ya3zdd" targetRef="Event_0m0bomz" />
-    <bpmn:serviceTask id="Activity_1deif0i" name="Экспорт данных">
+    <bpmn:serviceTask id="Activity_1deif0i" name="Экспорт данных" camunda:delegateExpression="${ExportProcess}">
       <bpmn:incoming>Flow_1e0yb7r</bpmn:incoming>
       <bpmn:outgoing>Flow_1w6dgtl</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_0ya3zdd" name="Генерация события для нотификаций">
+    <bpmn:serviceTask id="Activity_0ya3zdd" name="Генерация события для нотификаций" camunda:delegateExpression="${GenerationNotificationProcess}">
       <bpmn:incoming>Flow_1w6dgtl</bpmn:incoming>
       <bpmn:outgoing>Flow_1fk9dv7</bpmn:outgoing>
     </bpmn:serviceTask>
