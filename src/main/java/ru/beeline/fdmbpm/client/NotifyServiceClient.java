@@ -29,7 +29,7 @@ public class NotifyServiceClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            return restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/subscribe/" + entityType + "/" + docId,
+            return restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/business-event/" + entityType + "/" + docId,
                     HttpMethod.POST, new HttpEntity<>(headers), DocIdDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
