@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilityDTO;
+import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
@@ -160,6 +161,19 @@ public class CapabilityClient {
                 throw new RuntimeException("Tech-capabilities aren't received");
             }
             return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public DocIdDTO postExportCapability(Integer docId, String capability) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            return restTemplate.exchange(capabilityServerUrl + "/api/v1/export/" + capability + "/" + docId,
+                    HttpMethod.POST, new HttpEntity<>(headers), DocIdDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
