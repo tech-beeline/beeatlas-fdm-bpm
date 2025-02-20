@@ -27,9 +27,7 @@ import ru.beeline.fdmbpm.mapper.ExcelTcMapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,32 +69,49 @@ public class ImportProcessService {
             byte[] fileData = response.getBody();
             String fileName = response.getHeaders().getContentDisposition().getFilename();
             Set<String> expectedColumns = new HashSet<>(Arrays.asList("code", "name", "description", "parents",
-                    "isdomain", "status", "author", "link", "owner"));
+                    "status", "author", "link", "owner"));
+            if (entityType.equals("business_capability")) {
+                expectedColumns.add("isdomain");
+            }
             String operation = getOperationType(entityType);
-            if (fileValidation(fileName) && columnValidation(fileData, expectedColumns)) {
-                log.info("File and columns are valid.");
-                List<ExcelDTO> excelDTOS = convertExcelToJson(fileData);
-                if (entityType.equals("business_capability")) {
-                    List<ExcelBcDTO> excelBcDTOS = sort(excelBCMapper.convert(excelDTOS));
-                    if (sync) {
-                        purgingBusinessCapability(excelBcDTOS);
-                    }
-                    return registerAndSendBusinessCapabilityPackage(operation, excelBcDTOS);
-                } else if (entityType.equals("tech_capability")) {
-                    List<ExcelTcDTO> excelTcDTOS = excelTcMapper.convert(excelDTOS);
-                    if (sync) {
-                        purgingTechCapability(excelTcDTOS);
-                    }
-                    return registerAndSendTechCapabilityPackage(operation, excelTcDTOS);
+            File tempFile = null;
+            try {
+                tempFile = File.createTempFile("document", ".tmp");
+                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                    fos.write(fileData);
                 }
-            } else {
-                log.error("Invalid file format: {}", fileName);
-                PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation,
-                        1, "excel", "VALIDATE ERROR");
-                if (responseDTO == null) {
-                    throw new ValidationException("Not valid file, not registered");
+                if (fileValidation(fileName) && columnValidation(tempFile, expectedColumns)) {
+                    log.info("File and columns are valid.");
+                    List<ExcelDTO> excelDTOS = convertExcelToJson(tempFile);
+                    if (entityType.equals("business_capability")) {
+                        List<ExcelBcDTO> excelBcDTOS = sort(excelBCMapper.convert(excelDTOS));
+                        if (sync) {
+                            purgingBusinessCapability(excelBcDTOS);
+                        }
+                        return registerAndSendBusinessCapabilityPackage(operation, excelBcDTOS);
+                    } else if (entityType.equals("tech_capability")) {
+                        List<ExcelTcDTO> excelTcDTOS = excelTcMapper.convert(excelDTOS);
+                        if (sync) {
+                            purgingTechCapability(excelTcDTOS);
+                        }
+                        return registerAndSendTechCapabilityPackage(operation, excelTcDTOS);
+                    }
+                } else {
+                    log.error("Invalid file format: {}", fileName);
+                    PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation,
+                            1, "excel", "VALIDATE ERROR");
+                    if (responseDTO == null) {
+                        throw new ValidationException("Not valid file, not registered");
+                    }
+                    return responseDTO.getPackageId();
                 }
-                return responseDTO.getPackageId();
+            } catch (IOException e) {
+                log.error("Error creating or processing the temporary file: ", e);
+                throw new RuntimeException("Error processing file", e);
+            } finally {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
             }
         } else {
             handleErrorResponse(response, docId);
@@ -223,20 +238,14 @@ public class ImportProcessService {
         capabilityClient.deleteTechCapabilities(uniqueTechCapability);
     }
 
-    private Boolean columnValidation(byte[] fileBytes, Set<String> expectedColumns) {
-        try (InputStream inputStream = new ByteArrayInputStream(fileBytes);
-             Workbook workbook = new XSSFWorkbook(inputStream)) {
-            Sheet sheet = workbook.getSheetAt(0);
+    private Boolean columnValidation(File tempFile, Set<String> expectedColumns) {
+        try (Workbook workbook = WorkbookFactory.create(tempFile)) {
             Set<String> actualColumns = new HashSet<>();
-            Row headerRow = sheet.getRow(0);
-            if (headerRow != null) {
-                for (int j = 0; j < headerRow.getLastCellNum(); j++) {
-                    Cell cell = headerRow.getCell(j);
-                    if (cell != null) {
-                        actualColumns.add(normalizeColumnName(cell.getStringCellValue()));
-                    }
+            workbook.getSheetAt(0).getRow(0).forEach(cell -> {
+                if (cell != null) {
+                    actualColumns.add(normalizeColumnName(cell.getStringCellValue()));
                 }
-            }
+            });
             return actualColumns.containsAll(expectedColumns);
         } catch (IOException e) {
             log.error("Error reading file: ", e);
@@ -262,23 +271,21 @@ public class ImportProcessService {
         return false;
     }
 
-    public List<ExcelDTO> convertExcelToJson(byte[] fileBytes) {
+    public List<ExcelDTO> convertExcelToJson(File tempFile) {
         List<ExcelDTO> excelDTOList = new ArrayList<>();
-        try (InputStream inputStream = new ByteArrayInputStream(fileBytes);
+        try (InputStream inputStream = new FileInputStream(tempFile);
              Workbook workbook = new XSSFWorkbook(inputStream)) {
-
             Sheet sheet = workbook.getSheetAt(0);
             Row headerRow = sheet.getRow(0);
             boolean hasIsDomain = false;
 
             for (int j = 0; j < headerRow.getLastCellNum(); j++) {
                 Cell headerCell = headerRow.getCell(j);
-                if (normalizeColumnName(headerCell.getStringCellValue()).equals("isdomain")) {
+                if (normalizeColumnName(headerCell.getStringCellValue()).equals("isDomain")) {
                     hasIsDomain = true;
                     break;
                 }
             }
-
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) {
@@ -328,9 +335,11 @@ public class ImportProcessService {
                 if (!hasIsDomain) {
                     excelDTO.setIsDomain(null);
                 }
+
                 excelDTOList.add(excelDTO);
             }
         } catch (IOException e) {
+            log.error("Error processing file: ", e);
             throw new RuntimeException(e);
         }
         return excelDTOList;
@@ -346,7 +355,8 @@ public class ImportProcessService {
         }
         switch (cell.getCellType()) {
             case STRING:
-                return cell.getStringCellValue();
+                String value = cell.getStringCellValue();
+            return (value == null || value.isEmpty()) ? null : value;
             case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue().toString();
