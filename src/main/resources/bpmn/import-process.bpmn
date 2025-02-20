@@ -5,7 +5,10 @@
       <bpmn:outgoing>Flow_02p9k7t</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_02p9k7t" sourceRef="StartEvent_1" targetRef="Activity_0mbhi4h" />
-    <bpmn:serviceTask id="Activity_0mbhi4h" name="Выгрузка данных из excel" camunda:delegateExpression="${ImportProcess}">
+   <bpmn:serviceTask id="Activity_0mbhi4h"
+                     name="Выгрузка данных из excel"
+                     camunda:delegateExpression="${ImportProcess}"
+                     camunda:asyncBefore="true">
       <bpmn:incoming>Flow_02p9k7t</bpmn:incoming>
       <bpmn:outgoing>Flow_0ytkr80</bpmn:outgoing>
     </bpmn:serviceTask>
