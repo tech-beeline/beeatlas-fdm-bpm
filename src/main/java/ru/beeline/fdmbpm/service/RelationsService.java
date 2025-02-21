@@ -12,6 +12,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.beeline.fdmbpm.client.AuthSSOClient;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.TechradarClient;
@@ -47,6 +48,9 @@ public class RelationsService {
 
     @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    AuthSSOClient authSSOClient;
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationsService.class);
@@ -91,6 +95,7 @@ public class RelationsService {
     public void sendMessageToCapabilityQueue(String queue, String message) {
         rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
             return messagePostProcessor;
         });
     }
