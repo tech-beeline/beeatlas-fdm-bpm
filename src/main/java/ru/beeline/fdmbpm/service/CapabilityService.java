@@ -37,16 +37,10 @@ public class CapabilityService {
     CapabilityClient capabilityClient;
 
     @Autowired
-    BWEmployeeClient bwEmployeeClient;
-
-    @Autowired
     PackageClient packageClient;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    AuthSSOClient authSSOClient;
+    RabbitService rabbitService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -73,20 +67,12 @@ public class CapabilityService {
                     payloadArray.add(item);
                 });
                 LOGGER.info("Send to package-queue");
-                sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+                rabbitService.sendMessage(packageQueueName, objectMapper.writeValueAsString(messagePayload));
                 LOGGER.info("sendProduct completed");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void sendMessageToCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
-            return messagePostProcessor;
-        });
     }
 
     public Integer sendBusinessCapability() {

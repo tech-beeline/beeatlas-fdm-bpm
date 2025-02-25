@@ -47,10 +47,7 @@ public class RelationsService {
     PackageClient packageClient;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    AuthSSOClient authSSOClient;
+    RabbitService rabbitService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationsService.class);
@@ -85,19 +82,11 @@ public class RelationsService {
                 payloadArray.add(item);
             });
             LOGGER.info("Send to package-queue");
-            sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+            rabbitService.sendMessage(packageQueueName, objectMapper.writeValueAsString(messagePayload));
             LOGGER.info("createRelations method completed");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void sendMessageToCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
-            return messagePostProcessor;
-        });
     }
 
     private static void removeMatchingObjects(List<AliasLabelDTO> aliasLabelDTOS, List<FdmGitlabLanguages> fdmGitlabLanguages) {

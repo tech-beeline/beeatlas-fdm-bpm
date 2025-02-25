@@ -1,5 +1,7 @@
 package ru.beeline.fdmbpm.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -16,9 +18,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.beeline.fdmbpm.client.AuthSSOClient;
+import ru.beeline.fdmbpm.service.RelationsService;
 
 @Configuration
 public class RabbitConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RabbitConfig.class);
 
     @Value("${spring.rabbitmq.username}")
     private String userName;
@@ -72,6 +76,7 @@ public class RabbitConfig {
         factory.addConnectionListener(new ConnectionListener() {
             @Override
             public void onCreate(Connection connection) {
+                LOGGER.info("create connection and update token");
                 factory.setPassword(authSSOClient.getToken());
             }
 
