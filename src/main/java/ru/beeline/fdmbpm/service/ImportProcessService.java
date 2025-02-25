@@ -48,10 +48,7 @@ public class ImportProcessService {
     CapabilityClient capabilityClient;
 
     @Autowired
-    DashboardClient dashboardClient;
-
-    @Autowired
-    CapabilityService capabilityService;
+    RabbitService rabbitService;
 
     @Autowired
     ExcelBCMapper excelBCMapper;
@@ -145,7 +142,7 @@ public class ImportProcessService {
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForBc(responseDTO, excelBcDTOS);
             log.info("Send to package-queue");
-            capabilityService.sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+            rabbitService.sendMessage(packageQueueName, objectMapper.writeValueAsString(messagePayload));
             log.info("method completed");
             return responseDTO.getPackageId();
         } catch (Exception e) {
@@ -160,7 +157,7 @@ public class ImportProcessService {
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForTc(responseDTO, excelTcDTOS);
             log.info("Send to package-queue");
-            capabilityService.sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+            rabbitService.sendMessage(packageQueueName, objectMapper.writeValueAsString(messagePayload));
             log.info("method completed");
             return responseDTO.getPackageId();
         } catch (Exception e) {
