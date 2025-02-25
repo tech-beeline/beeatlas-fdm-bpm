@@ -83,6 +83,7 @@ public class ImportProcessService {
                 if (fileValidation(fileName) && columnValidation(tempFile, expectedColumns)) {
                     log.info("File and columns are valid.");
                     List<ExcelDTO> excelDTOS = convertExcelToJson(tempFile);
+                    System.gc();
                     if (entityType.equals("business_capability")) {
                         List<ExcelBcDTO> excelBcDTOS = sort(excelBCMapper.convert(excelDTOS));
                         if (sync) {
@@ -257,18 +258,15 @@ public class ImportProcessService {
         if (fileName == null || fileName.isEmpty()) {
             return false;
         }
-        int dotIndex = fileName.indexOf('.');
-        if (dotIndex == -1) {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
             return false;
         }
-        String fileExtension = fileName.substring(dotIndex);
-        List<String> validFormats = Arrays.asList(".xlsx", ".xls", ".xlsm", ".xlsb");
-        for (String format : validFormats) {
-            if (format.equalsIgnoreCase(fileExtension)) {
-                return true;
-            }
-        }
-        return false;
+        String fileExtension = fileName.substring(dotIndex).toLowerCase();
+        return switch (fileExtension) {
+            case ".xlsx", ".xls", ".xlsm", ".xlsb" -> true;
+            default -> false;
+        };
     }
 
     public List<ExcelDTO> convertExcelToJson(File tempFile) {
@@ -335,7 +333,6 @@ public class ImportProcessService {
                 if (!hasIsDomain) {
                     excelDTO.setIsDomain(null);
                 }
-
                 excelDTOList.add(excelDTO);
             }
         } catch (IOException e) {
@@ -356,7 +353,7 @@ public class ImportProcessService {
         switch (cell.getCellType()) {
             case STRING:
                 String value = cell.getStringCellValue();
-            return (value == null || value.isEmpty()) ? null : value;
+                return (value == null || value.isEmpty()) ? null : value;
             case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue().toString();
@@ -378,7 +375,7 @@ public class ImportProcessService {
         List<ExcelBcDTO> remaining = new ArrayList<>(excelBcDTOS);
         sorted.addAll(remaining.stream()
                 .filter(e -> e.getParent() == null || e.getParent().isEmpty())
-                .collect(Collectors.toList()));
+                .toList());
         remaining.removeAll(sorted);
         int previousSize;
         do {
