@@ -80,6 +80,7 @@ public class ImportProcessService {
                 if (fileValidation(fileName) && columnValidation(tempFile, expectedColumns)) {
                     log.info("File and columns are valid.");
                     List<ExcelDTO> excelDTOS = convertExcelToJson(tempFile);
+                    fileData = null;
                     System.gc();
                     if (entityType.equals("business_capability")) {
                         List<ExcelBcDTO> excelBcDTOS = sort(excelBCMapper.convert(excelDTOS));
