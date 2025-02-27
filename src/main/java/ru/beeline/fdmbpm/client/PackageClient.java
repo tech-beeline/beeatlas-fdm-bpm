@@ -28,14 +28,15 @@ public class PackageClient {
     }
 
     public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize) {
-        return registerPackage(operation, dataSize, "");
+        return registerPackage(operation, dataSize, "", "", null);
     }
 
-    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source) {
-        return registerPackage(operation, dataSize, source, "");
+    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source, Integer sourceId) {
+        return registerPackage(operation, dataSize, source, "", sourceId);
     }
 
-    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source , String status ) {
+    public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize, String source,
+                                                          String status, Integer sourceId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -51,6 +52,9 @@ public class PackageClient {
             }
             if (status != null && !status.isEmpty()) {
                 url += (url.contains("?") ? "&" : "?") + "status=" + URLEncoder.encode(status, StandardCharsets.UTF_8);
+            }
+            if (sourceId != null) {
+                url += (url.contains("?") ? "&" : "?") + "source_id=" + sourceId;
             }
             return restTemplate.exchange(url,
                     HttpMethod.POST, entity, PackageRegistrationResponseDTO.class).getBody();

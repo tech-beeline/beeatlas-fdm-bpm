@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.CapabilityClient;
-import ru.beeline.fdmbpm.client.DashboardClient;
 import ru.beeline.fdmbpm.client.DocumentServiceClient;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
@@ -80,24 +79,25 @@ public class ImportProcessService {
                 if (fileValidation(fileName) && columnValidation(tempFile, expectedColumns)) {
                     log.info("File and columns are valid.");
                     List<ExcelDTO> excelDTOS = convertExcelToJson(tempFile);
+                    fileData = null;
                     System.gc();
                     if (entityType.equals("business_capability")) {
                         List<ExcelBcDTO> excelBcDTOS = sort(excelBCMapper.convert(excelDTOS));
                         if (sync) {
                             purgingBusinessCapability(excelBcDTOS);
                         }
-                        return registerAndSendBusinessCapabilityPackage(operation, excelBcDTOS);
+                        return registerAndSendBusinessCapabilityPackage(operation, excelBcDTOS, docId);
                     } else if (entityType.equals("tech_capability")) {
                         List<ExcelTcDTO> excelTcDTOS = excelTcMapper.convert(excelDTOS);
                         if (sync) {
                             purgingTechCapability(excelTcDTOS);
                         }
-                        return registerAndSendTechCapabilityPackage(operation, excelTcDTOS);
+                        return registerAndSendTechCapabilityPackage(operation, excelTcDTOS, docId);
                     }
                 } else {
                     log.error("Invalid file format: {}", fileName);
                     PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation,
-                            1, "excel", "VALIDATE ERROR");
+                            1, "excel", "VALIDATE ERROR", docId);
                     if (responseDTO == null) {
                         throw new ValidationException("Not valid file, not registered");
                     }
@@ -135,10 +135,12 @@ public class ImportProcessService {
         return response;
     }
 
-    private Integer registerAndSendBusinessCapabilityPackage(String operation, List<ExcelBcDTO> excelBcDTOS) {
+    private Integer registerAndSendBusinessCapabilityPackage(String operation, List<ExcelBcDTO> excelBcDTOS,
+                                                             Integer docId) {
         try {
             log.info("Register package, operation: {} , excelBcDTOS size: {}", operation, excelBcDTOS.size());
-            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelBcDTOS.size(), "excel");
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelBcDTOS.size(),
+                    "excel", docId);
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForBc(responseDTO, excelBcDTOS);
             log.info("Send to package-queue");
@@ -150,10 +152,12 @@ public class ImportProcessService {
         }
     }
 
-    private Integer registerAndSendTechCapabilityPackage(String operation, List<ExcelTcDTO> excelTcDTOS) {
+    private Integer registerAndSendTechCapabilityPackage(String operation, List<ExcelTcDTO> excelTcDTOS,
+                                                         Integer docId) {
         try {
             log.info("Register package, operation: {} , excelTcDTOS size: {}", operation, excelTcDTOS.size());
-            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelTcDTOS.size(), "excel");
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(operation, excelTcDTOS.size(),
+                    "excel", docId);
             log.info("packageId: {}", responseDTO.getPackageId());
             ObjectNode messagePayload = createMessagePayloadForTc(responseDTO, excelTcDTOS);
             log.info("Send to package-queue");
@@ -387,9 +391,7 @@ public class ImportProcessService {
         } while (previousSize != remaining.size() && !remaining.isEmpty());
 
         if (!remaining.isEmpty()) {
-            throw new IllegalArgumentException("Для объектов: " + remaining.stream()
-                    .map(ExcelBcDTO::getCode)
-                    .collect(Collectors.joining(", ")) + " - не существует указанных родителей");
+            log.error("Для объектов в документе не существует указанных родителей");
         }
         return sorted;
     }
