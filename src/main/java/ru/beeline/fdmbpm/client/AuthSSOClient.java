@@ -33,22 +33,16 @@ public class AuthSSOClient {
     private static ZonedDateTime expiresAt;
 
     public String getToken() {
-        log.info("token expiresAt {}", expiresAt);
-        log.info("ZonedDateTime.now is{}", ZonedDateTime.now(ZoneId.of("UTC")));
-        log.info("token^ {}", accessToken);
+
         if (accessToken == null || expiresAt.isBefore(ZonedDateTime.now(ZoneId.of("UTC")))) {
             accessToken = obtainAccessToken();
             expiresAt =  Instant.ofEpochSecond((Integer) JwtUtils.encodeJWT(accessToken).get("exp")).atZone(ZoneId.of("UTC"));
-            log.info("new token expiresAt {}", expiresAt);
-            log.info("ZonedDateTime.now is{}", ZonedDateTime.now(ZoneId.of("UTC")));
-            log.info("new token isExpired :{}", expiresAt.isBefore(ZonedDateTime.now(ZoneId.of("UTC"))));
-            log.info("new  token^ {}", accessToken);
+
         }
         return accessToken;
     }
 
     public String obtainAccessToken() {
-        log.info("obtain token");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
