@@ -280,7 +280,7 @@ public class ImportProcessService {
 
             for (int j = 0; j < headerRow.getLastCellNum(); j++) {
                 Cell headerCell = headerRow.getCell(j);
-                if (normalizeColumnName(headerCell.getStringCellValue()).equals("isDomain")) {
+                if (normalizeColumnName(headerCell.getStringCellValue()).equals("isdomain")) {
                     hasIsDomain = true;
                     break;
                 }
