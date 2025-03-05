@@ -48,7 +48,7 @@ public class TechradarClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            return restTemplate.exchange(techradarServerUrl + "/api/v1/export/tech/" + docId,
+            return restTemplate.exchange(techradarServerUrl + "/api/v1/tech/export/" + docId,
                     HttpMethod.POST, new HttpEntity<>(headers), DocIdDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
