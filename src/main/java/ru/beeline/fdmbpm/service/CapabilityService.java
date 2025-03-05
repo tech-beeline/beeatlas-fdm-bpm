@@ -11,10 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.beeline.fdmbpm.client.BWEmployeeClient;
-import ru.beeline.fdmbpm.client.CapabilityClient;
-import ru.beeline.fdmbpm.client.DashboardClient;
-import ru.beeline.fdmbpm.client.PackageClient;
+import ru.beeline.fdmbpm.client.*;
 import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.DashboardTechCapabilitiesDTO;
@@ -40,13 +37,10 @@ public class CapabilityService {
     CapabilityClient capabilityClient;
 
     @Autowired
-    BWEmployeeClient bwEmployeeClient;
-
-    @Autowired
     PackageClient packageClient;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    RabbitService rabbitService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -73,19 +67,12 @@ public class CapabilityService {
                     payloadArray.add(item);
                 });
                 LOGGER.info("Send to package-queue");
-                sendMessageToCapabilityQueue(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+                rabbitService.sendMessage(packageQueueName, objectMapper.writeValueAsString(messagePayload));
                 LOGGER.info("sendProduct completed");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void sendMessageToCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            return messagePostProcessor;
-        });
     }
 
     public Integer sendBusinessCapability() {

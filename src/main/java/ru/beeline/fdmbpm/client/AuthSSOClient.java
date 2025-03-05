@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.utils.JwtUtils;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -27,12 +30,14 @@ public class AuthSSOClient {
     }
 
     private static String accessToken;
-    private static Integer expiresAt = 0;
+    private static ZonedDateTime expiresAt;
 
     public String getToken() {
-        if (accessToken == null || System.currentTimeMillis() / 1000 >= expiresAt) {
+
+        if (accessToken == null || expiresAt.isBefore(ZonedDateTime.now(ZoneId.of("UTC")))) {
             accessToken = obtainAccessToken();
-            expiresAt = (Integer) JwtUtils.encodeJWT(accessToken).get("exp");
+            expiresAt =  Instant.ofEpochSecond((Integer) JwtUtils.encodeJWT(accessToken).get("exp")).atZone(ZoneId.of("UTC"));
+
         }
         return accessToken;
     }
