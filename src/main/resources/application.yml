@@ -25,3 +25,23 @@ spring:
         idle-timeout: 600000
         max-lifetime: 1800000
 
+    processes:
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    processes:
+      hibernate:
+        ddl-auto: none
+      properties:
+        hibernate:
+          format_sql: true
+          show_sql: true
+          default_schema: processes
+
+  flyway:
+    enabled: true
+    default-schema: processes
+    schemas: processes
+    baseline-on-migrate: true
+    clean-disabled: true
+    locations: classpath:db/migration
