@@ -20,14 +20,16 @@ spring:
   datasource:
     git:
       hikari:
-        dialect: org.hibernate.dialect.PostgreSQL95Dialect
-        url: ${SPRING_DATASOURCE_GIT_URL}
-        username: ${SPRING_DATASOURCE_GIT_USERNAME}
-        password: ${SPRING_DATASOURCE_GIT_PASSWORD}
         maximum-pool-size: 2
         connection-timeout: 30000
         idle-timeout: 600000
         max-lifetime: 1800000
+    jpa:
+      git:
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQL95Dialect
+
 
     processes:
       driver-class-name: org.postgresql.Driver
