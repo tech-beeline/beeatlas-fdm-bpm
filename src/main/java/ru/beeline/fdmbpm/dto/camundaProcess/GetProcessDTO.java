@@ -1,4 +1,4 @@
-package ru.beeline.fdmbpm.dto;
+package ru.beeline.fdmbpm.dto.camundaProcess;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,13 +11,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProcessDTO {
+public class GetProcessDTO {
 
     private Integer id;
     private String name;
-    private Integer processId;
     private Boolean isDone;
     private Boolean isError;
     private LocalDateTime createdDate;
-
 }

@@ -3,9 +3,12 @@ package ru.beeline.fdmbpm.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CamundaProcessStatusRepository extends JpaRepository<CamundaProcessStatus, Integer> {
 
     Optional<CamundaProcessStatus> findFirstByCamundaProcessIdOrderByCreatedDateDesc(Integer id);
+
+    List<CamundaProcessStatus> findByCamundaProcessId(Integer id);
 }
