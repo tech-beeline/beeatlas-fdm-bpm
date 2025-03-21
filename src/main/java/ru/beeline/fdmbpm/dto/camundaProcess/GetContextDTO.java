@@ -14,9 +14,7 @@ import lombok.NoArgsConstructor;
 public class GetContextDTO {
 
     private Integer id;
-    @JsonProperty("proc_id")
     private String procId;
-    @JsonProperty("business_key")
     private String businessKey;
     private TypeDTO type;
     private StatusDTO status;
