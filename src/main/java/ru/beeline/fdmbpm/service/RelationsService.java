@@ -19,7 +19,7 @@ import ru.beeline.fdmbpm.dto.AliasLabelDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
 import ru.beeline.fdmbpm.gitdomain.FdmGitlabLanguages;
-import ru.beeline.fdmbpm.gitrepository.RingRepository;
+import ru.beeline.fdmbpm.gitrepository.FdmGitlabLanguagesRepository;
 
 import java.util.List;
 import java.util.Set;
@@ -34,7 +34,7 @@ public class RelationsService {
     private String packageQueueName;
 
     @Autowired
-    RingRepository ringRepository;
+    FdmGitlabLanguagesRepository fdmGitlabLanguagesRepository;
 
     @Autowired
     TechradarClient techradarClient;
@@ -52,7 +52,7 @@ public class RelationsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationsService.class);
 
     public void createRelations() {
-        List<FdmGitlabLanguages> fdmGitlabLanguages = ringRepository.findUniqueCmdbCodeAndProjLangModify();
+        List<FdmGitlabLanguages> fdmGitlabLanguages = fdmGitlabLanguagesRepository.findUniqueCmdbCodeAndProjLangModify();
         List<ProductDTO> productDTOS = techradarClient.getTech();
         List<AliasLabelDTO> aliasLabelDTOS = productDTOS.stream()
                 .flatMap(productDTO -> productDTO.getTech().stream()
