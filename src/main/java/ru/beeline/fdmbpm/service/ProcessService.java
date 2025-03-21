@@ -5,27 +5,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
+import ru.beeline.fdmbpm.domain.Context;
 import ru.beeline.fdmbpm.domain.StatusProcess;
+import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.ProcessDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
+import ru.beeline.fdmbpm.mapper.ContextDtoMapper;
 import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.CamundaProcessStatusRepository;
+import ru.beeline.fdmbpm.repository.ContextRepository;
 import ru.beeline.fdmbpm.repository.StatusProcessRepository;
+import ru.beeline.fdmbpm.repository.TypeProcessRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class ProcessService {
 
     @Autowired
-    CamundaProcessRepository camundaProcessRepository;
+    ContextDtoMapper contextDtoMapper;
+
+    @Autowired
+    ContextRepository contextRepository;
+
+    @Autowired
+    TypeProcessRepository typeProcessRepository;
 
     @Autowired
     StatusProcessRepository statusProcessRepository;
+
+    @Autowired
+    CamundaProcessRepository camundaProcessRepository;
 
     @Autowired
     CamundaProcessStatusRepository camundaProcessStatusRepository;
@@ -88,6 +104,30 @@ public class ProcessService {
                     .sorted(Comparator.comparing(GetProcessDTO::getCreatedDate))
                     .toList()
             );
+        }
+        return result;
+    }
+
+    public List<GetContextDTO> getAllProcessByContext(String name, String value) {
+        List<Context> contextList = contextRepository.findByNameAndValue(name, value);
+        List<GetContextDTO> result = new ArrayList<>();
+        if (!contextList.isEmpty()) {
+            for (Context context : contextList) {
+                Optional<CamundaProcess> optionalCamundaProcess = camundaProcessRepository.findById(context.getCamundaProcessId());
+                if (optionalCamundaProcess.isPresent()) {
+                    CamundaProcess camundaProcess = optionalCamundaProcess.get();
+                    TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId())
+                            .orElseThrow(() -> new NotFoundException(String.format("Type process для camunda process type process id: %s не найден",
+                                    camundaProcess.getTypeProcessId())));
+                    CamundaProcessStatus camundaProcessStatus =
+                            camundaProcessStatusRepository.findFirstByCamundaProcessIdOrderByCreatedDateDesc(camundaProcess.getId())
+                                    .orElseThrow(() -> new NotFoundException(String.format("Camunda process status для camunda process с id: %s не найден", camundaProcess.getId())));
+                    StatusProcess statusProcess =
+                            statusProcessRepository.findById(camundaProcessStatus.getStatusProcessId())
+                                    .orElseThrow(() -> new NotFoundException("Status Process не найден"));
+                    result.add(contextDtoMapper.convert(camundaProcess, typeProcess, statusProcess, camundaProcessStatus));
+                }
+            }
         }
         return result;
     }
