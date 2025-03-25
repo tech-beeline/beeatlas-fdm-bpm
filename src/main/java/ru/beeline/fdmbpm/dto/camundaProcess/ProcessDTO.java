@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.dto.camundaProcess;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +19,6 @@ public class ProcessDTO {
     private Integer processId;
     private Boolean isDone;
     private Boolean isError;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime createdDate;
 }

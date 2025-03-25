@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessByIdDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.ProcessDTO;
 import ru.beeline.fdmbpm.service.ProcessService;
@@ -36,5 +37,10 @@ public class CamundaProcessController {
     public ResponseEntity<List<GetContextDTO>> getAllProcessByContext(@PathVariable String name,
                                                                       @PathVariable String value) {
         return ResponseEntity.status(HttpStatus.OK).body(processService.getAllProcessByContext(name, value));
+    }
+
+    @GetMapping("/processes/{id}")
+    public ResponseEntity <GetProcessByIdDTO> getProcessById(@PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(processService.getProcessById(id));
     }
 }
