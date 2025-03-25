@@ -3,9 +3,11 @@ package ru.beeline.fdmbpm.mapper;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
+import ru.beeline.fdmbpm.domain.Context;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.ShortContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.StatusDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.TypeDTO;
 
@@ -29,6 +31,13 @@ public class ContextDtoMapper {
                         .name(statusProcess.getName())
                         .createdDate(camundaProcessStatus.getCreatedDate())
                         .build())
+                .build();
+    }
+
+    public ShortContextDTO shortContextConvert(Context context) {
+        return ShortContextDTO.builder().
+                name(context.getName())
+                .value(context.getValue())
                 .build();
     }
 }

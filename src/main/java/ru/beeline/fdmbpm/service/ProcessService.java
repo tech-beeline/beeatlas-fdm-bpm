@@ -9,8 +9,12 @@ import ru.beeline.fdmbpm.domain.Context;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessByIdDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.ProcessDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.ShortContextDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.StatusDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.TypeDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.mapper.ContextDtoMapper;
 import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
@@ -117,11 +121,12 @@ public class ProcessService {
                 if (optionalCamundaProcess.isPresent()) {
                     CamundaProcess camundaProcess = optionalCamundaProcess.get();
                     TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId())
-                            .orElseThrow(() -> new NotFoundException(String.format("Type process для camunda process type process id: %s не найден",
+                            .orElseThrow(() -> new NotFoundException(String.format("Type process, для camunda process, с type process id: %s не найден",
                                     camundaProcess.getTypeProcessId())));
                     CamundaProcessStatus camundaProcessStatus =
                             camundaProcessStatusRepository.findFirstByCamundaProcessIdOrderByCreatedDateDesc(camundaProcess.getId())
-                                    .orElseThrow(() -> new NotFoundException(String.format("Camunda process status для camunda process с id: %s не найден", camundaProcess.getId())));
+                                    .orElseThrow(() -> new NotFoundException(String.format("Camunda process status для camunda process с id: %s не найден",
+                                            camundaProcess.getId())));
                     StatusProcess statusProcess =
                             statusProcessRepository.findById(camundaProcessStatus.getStatusProcessId())
                                     .orElseThrow(() -> new NotFoundException("Status Process не найден"));
@@ -130,5 +135,48 @@ public class ProcessService {
             }
         }
         return result;
+    }
+
+    public GetProcessByIdDTO getProcessById(Integer id) {
+        CamundaProcess camundaProcess = camundaProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Запись camunda process, с данным id не найдена"));
+        TypeProcess typeProcess = findTypeProcessById(camundaProcess.getTypeProcessId());
+        List<CamundaProcessStatus> camundaProcessStatusList = findAllCamundaProcessStatus(camundaProcess.getId());
+        List<StatusDTO> statusDTOList = camundaProcessStatusList.stream()
+                .map(camundaProcessStatus -> {
+                    StatusProcess statusProcess = findStatusProcess(camundaProcessStatus.getStatusProcessId());
+                    return StatusDTO.builder()
+                            .id(camundaProcessStatus.getId())
+                            .name(statusProcess.getName())
+                            .alias(statusProcess.getAlias())
+                            .createdDate(camundaProcessStatus.getCreatedDate())
+                            .build();
+                }).toList();
+        List<ShortContextDTO> shortContextDTOList = contextRepository.findByCamundaProcessId(camundaProcess.getId())
+                .stream()
+                .map(context -> contextDtoMapper.shortContextConvert(context))
+                .toList();
+        return processByIdConvert(camundaProcess, typeProcess, statusDTOList, shortContextDTOList);
+    }
+
+    private TypeProcess findTypeProcessById(Integer id) {
+        return typeProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Type process с id: %s не найден", id)));
+    }
+
+    private GetProcessByIdDTO processByIdConvert(CamundaProcess camundaProcess, TypeProcess typeProcess,
+                                                 List<StatusDTO> statusDTOList, List<ShortContextDTO> shortContextDTOList) {
+        return GetProcessByIdDTO.builder()
+                .id(camundaProcess.getId())
+                .procId(camundaProcess.getProcId())
+                .businessKey(camundaProcess.getBusinessKey())
+                .type(TypeDTO.builder()
+                        .id(typeProcess.getId())
+                        .name(typeProcess.getName())
+                        .description(typeProcess.getDescription())
+                        .build())
+                .statuses(statusDTOList)
+                .context(shortContextDTOList)
+                .build();
     }
 }

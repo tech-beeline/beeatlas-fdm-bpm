@@ -8,4 +8,6 @@ import java.util.List;
 public interface ContextRepository extends JpaRepository<Context, Integer> {
 
     List<Context> findByNameAndValue (String name, String Value);
+
+    List<Context> findByCamundaProcessId(Integer camundaProcessId);
 }
