@@ -24,9 +24,10 @@ public class NotifyServiceClient {
         this.restTemplate = restTemplate;
     }
 
-    public DocIdDTO postExportNotify(Integer docId, String entityType) {
+    public DocIdDTO postExportNotify(Integer docId, String entityType, Integer userId) {
         try {
             HttpHeaders headers = new HttpHeaders();
+            headers.set("user-id", String.valueOf(userId));
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             return restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/business-event/" + entityType + "/" + docId,
