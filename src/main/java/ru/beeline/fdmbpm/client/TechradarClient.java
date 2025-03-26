@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
+import ru.beeline.fdmlib.dto.techradar.ProcessDTO;
 
 import java.util.List;
 
@@ -36,6 +37,22 @@ public class TechradarClient {
 
             return restTemplate.exchange(techradarServerUrl + "/api/v1/tech/product-tech",
                     HttpMethod.GET, entity, new ParameterizedTypeReference<List<ProductDTO>>() {
+                    }).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public List<ProcessDTO> getProcesses() {
+        try {
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            return restTemplate.exchange(techradarServerUrl + "/api/v1/processes",
+                    HttpMethod.GET, entity, new ParameterizedTypeReference<List<ProcessDTO>>() {
                     }).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());

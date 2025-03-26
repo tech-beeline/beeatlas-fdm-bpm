@@ -41,6 +41,8 @@ env:
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/dev/fdm#documentserverurl"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/dev/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#authsso"
+  INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/dev/grafana#url"
+  INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/dev/grafana#token"
 
   GWURL: "vault:eafdmmart/data/dev/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/dev/fdm#mapicauth"
