@@ -45,7 +45,7 @@ public class ExportProcessService {
         }
     }
 
-    public void generationNotification(String entityType, Integer docId) {
-        notifyServiceClient.postExportNotify(docId, entityType);
+    public void generationNotification(String entityType, Integer docId, Integer userId) {
+        notifyServiceClient.postExportNotify(docId, entityType, userId);
     }
 }

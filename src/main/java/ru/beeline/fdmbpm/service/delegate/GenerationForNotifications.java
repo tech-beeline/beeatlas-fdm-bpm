@@ -17,6 +17,7 @@ public class GenerationForNotifications implements JavaDelegate {
     public void execute(DelegateExecution delegateExecution) throws Exception {
         String entityType = (String) delegateExecution.getVariable("entityType");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-        exportProcessService.generationNotification(entityType, docId);
+        Integer userId = (Integer) delegateExecution.getVariable("userId");
+        exportProcessService.generationNotification(entityType, docId, userId);
     }
 }
