@@ -42,6 +42,7 @@ env:
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/prod/ambassador#authsso"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/prod/grafana#url"
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/prod/grafana#token"
+  INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/prod/fdm#documentserverurl"
 
   GWURL: "vault:eafdmmart/data/prod/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/prod/fdm#mapicauth"
