@@ -6,7 +6,9 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1qwcfuo" sourceRef="StartEvent_1" targetRef="Activity_0pei70b" />
     <bpmn:sequenceFlow id="Flow_016v1q3" sourceRef="Activity_0pei70b" targetRef="Event_07iosub" />
-    <bpmn:serviceTask id="Activity_0pei70b" name="Выгрузка связей технологии и продукта из Git" camunda:delegateExpression="${RelationsFromGitCreateRelations}">
+    <bpmn:serviceTask id="Activity_0pei70b"
+                      name="Выгрузка связей технологии и продукта из Git"
+                      camunda:delegateExpression="${RelationsFromGitCreateRelations}">
       <bpmn:incoming>Flow_1qwcfuo</bpmn:incoming>
       <bpmn:outgoing>Flow_016v1q3</bpmn:outgoing>
     </bpmn:serviceTask>

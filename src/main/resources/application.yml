@@ -6,9 +6,13 @@ camunda:
     data-source: camundaDataSource
     database:
       schema-update: true
+    job-execution:
+        enabled: true
+
 integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
   dashboard-server-url: https://dashboard-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
+  grafana-server-url: https://inside.beeline.ru
 queue:
   package-queue:
     name: package_queue
@@ -21,4 +25,31 @@ spring:
         connection-timeout: 30000
         idle-timeout: 600000
         max-lifetime: 1800000
+        driver-class-name: org.postgresql.Driver
+      jpa:
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQL95Dialect
 
+
+    processes:
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    processes:
+      hibernate:
+        ddl-auto: none
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQL95Dialect
+          format_sql: true
+          show_sql: true
+          default_schema: processes
+
+  flyway:
+    enabled: true
+    default-schema: processes
+    schemas: processes
+    baseline-on-migrate: true
+    clean-disabled: true
+    locations: classpath:db/migration
