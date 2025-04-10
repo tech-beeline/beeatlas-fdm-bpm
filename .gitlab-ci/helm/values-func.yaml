@@ -43,7 +43,9 @@ env:
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/test/func/ambassador#authsso"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/test/func/grafana#url"
+  INTEGRATION_CMDB_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#cmdbserver"
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/test/func/grafana#token"
+  INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/test/func/fdm#cmdbtoken"
 
   GWURL: "vault:eafdmmart/data/test/func/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/test/func/fdm#mapicauth"
