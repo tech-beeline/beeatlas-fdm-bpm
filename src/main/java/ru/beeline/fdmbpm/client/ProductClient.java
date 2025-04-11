@@ -2,6 +2,7 @@ package ru.beeline.fdmbpm.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -10,8 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
+
+import java.util.List;
 
 
 @Slf4j
@@ -26,7 +28,7 @@ public class ProductClient {
         this.restTemplate = restTemplate;
     }
 
-    public void deleteRelation(Integer techId, Integer productId){
+    public void deleteRelation(Integer techId, Integer productId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,5 +61,24 @@ public class ProductClient {
             log.error("Error while posting product to CMDB: " + e.getMessage(), e);
             throw new RuntimeException("Error during post request", e);
         }
+    }
+
+    public List<String> getProductMnemonics() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<String> result = restTemplate.exchange(productServerUrl + "/api/v1/products/mnemonic",
+                    HttpMethod.GET, entity, new ParameterizedTypeReference<List<String>>() {
+                    }).getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("Mnemonics aren't received");
+            }
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }

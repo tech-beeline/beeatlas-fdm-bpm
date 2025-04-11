@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.beeline</groupId>
     <artifactId>fdm-bpm</artifactId>
-    <version>0.0.15</version>
+    <version>0.0.16</version>
     <name>fdm-bpm</name>
     <description>fdm-bpm</description>
     <properties>
