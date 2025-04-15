@@ -1,9 +1,11 @@
 package ru.beeline.fdmbpm.controller;
 
+import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.beeline.fdmbpm.exception.NotFoundException;
@@ -39,5 +41,20 @@ public class CustomExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
                 .body(e.getMessage());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<String> handleMissingParams(MissingServletRequestParameterException e) {
+        String paramName = e.getParameterName();
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Параметр '" + paramName + "' обязателен");
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<String> headerException(ForbiddenException e) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Отсутсвуют необходимые хэдеры.");
     }
 }

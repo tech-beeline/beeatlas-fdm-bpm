@@ -1,4 +1,7 @@
+DROP SEQUENCE  IF EXISTS  processes.seq_application_id  CASCADE;
 CREATE SEQUENCE processes.seq_application_id START WITH 1 INCREMENT BY 1;
+
+DROP SEQUENCE  IF EXISTS  processes.seq_comments_id  CASCADE;
 CREATE SEQUENCE processes.seq_comments_id START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE processes.application_type_enum
@@ -32,7 +35,7 @@ CREATE TABLE processes.application
     author_id      INTEGER NOT NULL,
     process_id     TEXT    NOT NULL,
     business_key   TEXT    NOT NULL,
-    executer_id    INTEGER,
+    executor_id    INTEGER,
     name           TEXT,
     responsible_id INTEGER,
     create_date    TIMESTAMP WITHOUT TIME ZONE,
