@@ -1,13 +1,17 @@
 package ru.beeline.fdmbpm.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.beeline.fdmbpm.domain.Application;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
 import ru.beeline.fdmbpm.domain.Context;
+import ru.beeline.fdmbpm.domain.ExecutorRoles;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessByIdDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessDTO;
@@ -16,10 +20,13 @@ import ru.beeline.fdmbpm.dto.camundaProcess.ShortContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.StatusDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.TypeDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
+import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.mapper.ContextDtoMapper;
+import ru.beeline.fdmbpm.repository.ApplicationRepository;
 import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.CamundaProcessStatusRepository;
 import ru.beeline.fdmbpm.repository.ContextRepository;
+import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
 import ru.beeline.fdmbpm.repository.StatusProcessRepository;
 import ru.beeline.fdmbpm.repository.TypeProcessRepository;
 
@@ -27,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
 
 @Slf4j
 @Service
@@ -40,6 +49,12 @@ public class ProcessService {
 
     @Autowired
     TypeProcessRepository typeProcessRepository;
+
+    @Autowired
+    ApplicationRepository applicationRepository;
+
+    @Autowired
+    ExecutorRolesRepository executorRolesRepository;
 
     @Autowired
     StatusProcessRepository statusProcessRepository;
@@ -178,5 +193,28 @@ public class ProcessService {
                 .statuses(statusDTOList)
                 .context(shortContextDTOList)
                 .build();
+    }
+
+    public void patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
+
+        Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
+                new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+        List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
+        if (executorRoles.isEmpty()) {
+            throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
+        } else {
+            if (application.getExecutorId() != null) {
+                throw new ValidationException("Исполнитель уже назначен");
+            } else {
+                application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
+                applicationRepository.save(application);
+                patchChangeStatus(businessKey,nextStatus,request,null);
+            }
+        }
+    }
+
+    public void patchChangeStatus(String businessKey, String nextStatus, HttpServletRequest request, CommentDTO commentDTO) {
+
+
     }
 }
