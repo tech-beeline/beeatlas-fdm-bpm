@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
+import ru.beeline.fdmbpm.dto.product.ProductDTO;
 
 import java.util.List;
 
@@ -80,5 +81,21 @@ public class ProductClient {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    public ProductDTO getProductInfoByCmdb(String cmdb) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ProductDTO result = restTemplate.exchange(productServerUrl + "/api/v1/product/" + cmdb,
+                    HttpMethod.GET, entity,
+                    ProductDTO.class).getBody();
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

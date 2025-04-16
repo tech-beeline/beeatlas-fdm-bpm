@@ -43,6 +43,9 @@ env:
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/test/e2e/ambassador#authsso"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/test/e2e/grafana#url"
   INTEGRATION_CMDB_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#cmdbserver"
+  INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#archserverurl"
+  INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#graphserverurl"
+
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/test/e2e/grafana#token"
   INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/test/e2e/fdm#cmdbtoken"
 
