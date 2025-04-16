@@ -10,17 +10,30 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @EqualsAndHashCode
-@Table(name = "executor_roles", schema = "processes")
-public class ExecutorRoles {
+@Table(name = "application_type_status", schema = "processes")
+public class ApplicationTypeStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private String alias;
+
+    private String name;
+
     @Column(name = "type_id")
     private Integer typeId;
 
-    private String role;
+    @Column(name = "serial_number")
+    private Integer serialNumber;
+
+    private String message;
+
+    @Column(name = "is_end_status")
+    private Boolean isEndStatus;
+
+    @Column(name = "is_author_responsible")
+    private Boolean isAuthorResponsible;
 
     @ManyToOne
     @JoinColumn(name = "type_id", referencedColumnName = "id", insertable = false, updatable = false)

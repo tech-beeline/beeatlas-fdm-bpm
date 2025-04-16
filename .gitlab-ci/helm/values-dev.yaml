@@ -41,13 +41,13 @@ env:
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/dev/fdm#documentserverurl"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/dev/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#authsso"
+  INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#authserverurl"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/dev/grafana#url"
+  INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/dev/grafana#token"
   INTEGRATION_CMDB_SERVER_URL: "vault:eafdmmart/data/dev/fdm#cmdbserver"
+  INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/dev/fdm#cmdbtoken"
   INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#archserverurl"
   INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#graphserverurl"
-
-  INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/dev/grafana#token"
-  INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/dev/fdm#cmdbtoken"
 
   GWURL: "vault:eafdmmart/data/dev/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/dev/fdm#mapicauth"
