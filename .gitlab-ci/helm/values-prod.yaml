@@ -40,6 +40,8 @@ env:
   INTEGRATION_TECHRADAR_SERVER_URL: "vault:eafdmmart/data/prod/fdm#techradarserverurl"
   INTEGRATION_PRODUCTS_SERVER_URL: "vault:eafdmmart/data/prod/fdm#productsserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/prod/ambassador#authsso"
+  INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/prod/fdm#archserverurl"
+  INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/prod/fdm#graphserverurl"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/prod/grafana#url"
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/prod/grafana#token"
 

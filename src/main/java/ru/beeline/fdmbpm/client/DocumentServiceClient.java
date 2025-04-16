@@ -3,11 +3,17 @@ package ru.beeline.fdmbpm.client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import ru.beeline.fdmbpm.dto.DocIdDTO;
+import ru.beeline.fdmbpm.exception.NotFoundException;
 
 @Slf4j
 @Service
@@ -35,15 +41,47 @@ public class DocumentServiceClient {
                     new ParameterizedTypeReference<byte[]>() {
                     }
             );
-        }catch (HttpServerErrorException.ServiceUnavailable e) {
+        } catch (HttpServerErrorException.ServiceUnavailable e) {
             log.error("Ошибка при загрузке документа: ", e);
             return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
-        }catch (HttpClientErrorException.NotFound e){
+        } catch (HttpClientErrorException.NotFound e) {
             log.error("Запись с данным id не найдена: ", e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error("Exception occurred: ", e);
             throw e;
+        }
+    }
+
+    public DocIdDTO postDocument(String excelFile) {
+        try {
+            String url = documentServiceUrl + "/api/v1/documents/workspace/json?isPublic=true";
+            FileSystemResource resource = new FileSystemResource(excelFile);
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", resource);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "data from structurizr");
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<DocIdDTO> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, DocIdDTO.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                log.info("File uploaded successfully");
+            } else {
+                log.error("Failed to upload file: {}", response.getStatusCode());
+            }
+            return response.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (RestClientException e) {
+            log.error("Error while uploading file: {}", e.getMessage(), e);
+            throw new RuntimeException("Error while uploading file");
         }
     }
 }
