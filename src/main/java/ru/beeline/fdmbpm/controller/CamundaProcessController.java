@@ -1,6 +1,7 @@
 package ru.beeline.fdmbpm.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,15 @@ public class CamundaProcessController {
     }
 
     @GetMapping("/processes/{id}")
-    public ResponseEntity <GetProcessByIdDTO> getProcessById(@PathVariable Integer id) {
+    public ResponseEntity<GetProcessByIdDTO> getProcessById(@PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(processService.getProcessById(id));
+    }
+
+    @PatchMapping("/application/{businessKey}/executor")
+    public ResponseEntity patchExecutorProcess(@PathVariable String businessKey,
+                                               @RequestParam(value = "nextStatus") String nextStatus,
+                                               HttpServletRequest request) {
+        processService.patchExecutorProcess(businessKey, nextStatus, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
