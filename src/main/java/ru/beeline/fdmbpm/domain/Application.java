@@ -36,7 +36,6 @@ public class Application {
     @Column(name = "executor_id")
     private Integer executorId;
 
-    @Column(name = "name")
     private String name;
 
     @Column(name = "responsible_id")
@@ -50,6 +49,4 @@ public class Application {
 
     @Column(name = "entity_id")
     private Integer entityId;
-
-
 }

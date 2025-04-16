@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessByIdDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessDTO;
@@ -46,10 +47,19 @@ public class CamundaProcessController {
     }
 
     @PatchMapping("/application/{businessKey}/executor")
-    public ResponseEntity patchExecutorProcess(@PathVariable String businessKey,
-                                               @RequestParam(value = "nextStatus") String nextStatus,
-                                               HttpServletRequest request) {
+    public ResponseEntity<Void> patchExecutorProcess(@PathVariable String businessKey,
+                                                     @RequestParam(value = "nextStatus") String nextStatus,
+                                                     HttpServletRequest request) {
         processService.patchExecutorProcess(businessKey, nextStatus, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/application/{businessKey}/change-status/{statusAlias}")
+    public ResponseEntity<Void> patchChangeStatus(@PathVariable String businessKey,
+                                                  @PathVariable String statusAlias,
+                                                  @RequestBody(required = false) CommentDTO commentDTO,
+                                                  HttpServletRequest request) {
+        processService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

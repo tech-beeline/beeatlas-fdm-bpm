@@ -1,12 +1,17 @@
 package ru.beeline.fdmbpm.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
+import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.beeline.fdmbpm.client.UserClient;
 import ru.beeline.fdmbpm.domain.Application;
+import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
+import ru.beeline.fdmbpm.domain.Comment;
 import ru.beeline.fdmbpm.domain.Context;
 import ru.beeline.fdmbpm.domain.ExecutorRoles;
 import ru.beeline.fdmbpm.domain.StatusProcess;
@@ -19,20 +24,25 @@ import ru.beeline.fdmbpm.dto.camundaProcess.ProcessDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.ShortContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.StatusDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.TypeDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.mapper.ContextDtoMapper;
 import ru.beeline.fdmbpm.repository.ApplicationRepository;
+import ru.beeline.fdmbpm.repository.ApplicationTypeStatusRepository;
 import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.CamundaProcessStatusRepository;
+import ru.beeline.fdmbpm.repository.CommentRepository;
 import ru.beeline.fdmbpm.repository.ContextRepository;
 import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
 import ru.beeline.fdmbpm.repository.StatusProcessRepository;
 import ru.beeline.fdmbpm.repository.TypeProcessRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
@@ -42,7 +52,16 @@ import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
 public class ProcessService {
 
     @Autowired
+    UserClient userClient;
+
+    @Autowired
+    RuntimeService runtimeService;
+
+    @Autowired
     ContextDtoMapper contextDtoMapper;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     @Autowired
     ContextRepository contextRepository;
@@ -64,6 +83,9 @@ public class ProcessService {
 
     @Autowired
     CamundaProcessStatusRepository camundaProcessStatusRepository;
+
+    @Autowired
+    ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
     public ProcessDTO getProcess(String idEnum, String id) {
         CamundaProcess camundaProcess = findCamundaProcess(idEnum, id);
@@ -208,13 +230,78 @@ public class ProcessService {
             } else {
                 application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
                 applicationRepository.save(application);
-                patchChangeStatus(businessKey,nextStatus,request,null);
+                patchChangeStatus(businessKey, nextStatus, request, null);
             }
         }
     }
 
-    public void patchChangeStatus(String businessKey, String nextStatus, HttpServletRequest request, CommentDTO commentDTO) {
+    public void patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request, CommentDTO commentDTO) {
+        Application application = getAuthorizedApplication(businessKey, request);
+        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
+        ApplicationTypeStatus targetStatus = applicationTypeStatusRepository
+                .findByTypeIdAndAlias(application.getTypeId(), statusAlias);
+        if (targetStatus == null) {
+            throw new ValidationException("Данного статуса не существует");
+        }
+        ApplicationTypeStatus currentStatus = applicationTypeStatusRepository.findById(application.getStatusId())
+                .orElseThrow(() -> new NotFoundException("Статус с данным id не найден"));
+        if (currentStatus.getAlias().equals(targetStatus.getAlias())) {
+            return;
+        }
+        if (currentStatus.getIsEndStatus()) {
+            throw new ValidationException("Заявка завершена");
+        }
+        Integer currentSerial = currentStatus.getSerialNumber();
+        Integer targetSerial = targetStatus.getSerialNumber();
+        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial - 1);
+        if (!canChangeStatus) {
+            throw new ValidationException("Переход к этому статусу невозможен");
+        }
+        application.setStatusId(targetStatus.getId());
+        if (targetStatus.getIsAuthorResponsible()) {
+            application.setResponsibleId(application.getAuthorId());
+        } else {
+            application.setResponsibleId(application.getExecutorId());
+        }
+        application.setUpdateDate(LocalDateTime.now());
+        applicationRepository.save(application);
+        saveComment(application, commentDTO, userId);
+        sendStatusChangeMessageToProcess(application, targetStatus.getMessage());
+    }
 
+    private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
+        Application application = applicationRepository.findByBusinessKey(businessKey)
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
+        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(), userId)) {
+            throw new ForbiddenException("Нет прав доступа");
+        }
+        return application;
+    }
 
+    private void saveComment(Application application, CommentDTO commentDTO, Integer userId) {
+        if (commentDTO != null && commentDTO.getComment() != null) {
+            UserProfileDTO userProfileDTO = userClient.getUserProfile(userId);
+            if (userProfileDTO == null) {
+                throw new NotFoundException("Пользователь с данным id не найден");
+            }
+            commentRepository.save(Comment.builder()
+                    .applicationId(application.getId())
+                    .comment(commentDTO.getComment())
+                    .createdDate(LocalDateTime.now())
+                    .fullName(userProfileDTO.getFullName())
+                    .build());
+        }
+    }
+
+    private void sendStatusChangeMessageToProcess(Application application, String message) {
+//        Процесса еще не реализован
+//        Map<String, Object> variables = new HashMap<>();
+//        variables.put("message", message);
+//        runtimeService.createMessageCorrelation("change_of_status")
+//                .processInstanceId(application.getProcessId())
+//                .setVariables(variables)
+//                .correlate();
+        log.info("переданы данные в процесс камунды");
     }
 }

@@ -12,7 +12,7 @@
                   exporterVersion="5.31.0"
                   modeler:executionPlatform="Camunda Platform"
                   modeler:executionPlatformVersion="7.22.0">
-  <bpmn:process id="Process_0hln3fg" isExecutable="true" camunda:historyTimeToLive="180">
+  <bpmn:process id="Process_0hln3fg" name="CMDB-process-2" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0spxqgs</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1x00lot">

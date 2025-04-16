@@ -41,7 +41,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
             logger.info("Set headers complete");
             return true;
         } catch (Exception e) {
-            throw new ForbiddenException("Отсутсвуют необходимые хэдеры. " + e.getMessage());
+            throw new ForbiddenException("Отсутсвуют необходимые хэдеры.");
         }
     }
 
