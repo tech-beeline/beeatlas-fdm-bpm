@@ -22,7 +22,7 @@ public class StatusLogic {
     CamundaProcessStatusRepository camundaProcessStatusRepository;
 
     protected void saveAlias(Integer processId, String alias, TypeProcess typeProcess) {
-        StatusProcess statusProcess = statusProcessRepository.findByAliasAnAndTypeProcessId(alias, typeProcess.getId());
+        StatusProcess statusProcess = statusProcessRepository.findByAliasAndTypeProcessId(alias, typeProcess.getId());
         camundaProcessStatusRepository.save(CamundaProcessStatus.builder()
                 .statusProcessId(statusProcess.getId())
                 .camundaProcessId(processId)
