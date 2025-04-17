@@ -64,7 +64,7 @@ public class RelationsService {
                     grafanaService.getMnemonics(processDTO, products).stream()
                             .map(element -> FdmGitlabLanguages.builder()
                                     .cmdb_code(element.get("cmdb_code"))
-                                    .proj_lang("proj_lang")
+                                    .proj_lang(element.get("proj_lang"))
                                     .build())
                             .collect(Collectors.toUnmodifiableList())
             );
