@@ -43,6 +43,7 @@ env:
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#authsso"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/dev/grafana#url"
   INTEGRATION_CMDB_SERVER_URL: "vault:eafdmmart/data/dev/fdm#cmdbserver"
+  INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#authserverurl"
   INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#archserverurl"
   INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#graphserverurl"
 

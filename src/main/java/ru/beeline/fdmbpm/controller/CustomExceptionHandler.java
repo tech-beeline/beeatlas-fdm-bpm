@@ -55,6 +55,6 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> headerException(ForbiddenException e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body("Отсутсвуют необходимые хэдеры.");
+                .body(e.getMessage());
     }
 }
