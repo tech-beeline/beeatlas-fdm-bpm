@@ -5,5 +5,5 @@ import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 
 public interface StatusProcessRepository extends JpaRepository<StatusProcess, Integer> {
-    StatusProcess findByAliasAnAndTypeProcessId(String alias, Integer typeProcessId);
+    StatusProcess findByAliasAndTypeProcessId(String alias, Integer typeProcessId);
 }

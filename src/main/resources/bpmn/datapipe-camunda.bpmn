@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1885e4x" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1885e4x" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.28.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
   <bpmn:process id="Process_08wprkp" name="datapipeline-process" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0075dwi</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_0075dwi" sourceRef="StartEvent_1" targetRef="Activity_09flps1" />
-    <bpmn:serviceTask id="Activity_0u8o6m7" name="Выгрузка json workspace" camunda:delegateExpression="">
+    <bpmn:serviceTask id="Activity_0u8o6m7" name="Выгрузка json workspace" camunda:delegateExpression="${ExportJsonWorkspaceDelegate}">
       <bpmn:incoming>Flow_11kgjqd</bpmn:incoming>
       <bpmn:outgoing>Flow_0g8nq48</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0g8nq48" sourceRef="Activity_0u8o6m7" targetRef="Gateway_1sdbakt" />
-    <bpmn:serviceTask id="Activity_05xz8qx" name="Обогащение локального графа" camunda:delegateExpression="">
+    <bpmn:serviceTask id="Activity_05xz8qx" name="Обогащение локального графа" camunda:delegateExpression="${LocalGraphEnrichmentDelegate}">
       <bpmn:incoming>Flow_0zzndqa</bpmn:incoming>
       <bpmn:outgoing>Flow_1dz72wb</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1dz72wb" sourceRef="Activity_05xz8qx" targetRef="Activity_0boo1ka" />
-    <bpmn:serviceTask id="Activity_0boo1ka" name="Расчет FF">
+    <bpmn:serviceTask id="Activity_0boo1ka" name="Расчет FF" camunda:delegateExpression="${CalculateLocalFFDelegate}">
       <bpmn:incoming>Flow_1dz72wb</bpmn:incoming>
       <bpmn:outgoing>Flow_09aeu24</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -23,7 +23,7 @@
       <bpmn:incoming>Flow_0grs3i1</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_09aeu24" sourceRef="Activity_0boo1ka" targetRef="Gateway_03vxns6" />
-    <bpmn:serviceTask id="Activity_0bt8s50" name="Публикация в Structurizr">
+    <bpmn:serviceTask id="Activity_0bt8s50" name="Публикация в Structurizr" camunda:delegateExpression="${PublicToStructurizrDelegate}">
       <bpmn:incoming>Flow_00k58ha</bpmn:incoming>
       <bpmn:outgoing>Flow_1dgegbt</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -32,12 +32,12 @@
       <bpmn:outgoing>Flow_0jy6kkl</bpmn:outgoing>
       <bpmn:outgoing>Flow_1pfdn2v</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_0hghy0h" name="Публикация в ФДМ">
+    <bpmn:serviceTask id="Activity_0hghy0h" name="Публикация в ФДМ" camunda:delegateExpression="${PublicToFdmDelegate}">
       <bpmn:incoming>Flow_109w18z</bpmn:incoming>
       <bpmn:outgoing>Flow_00k58ha</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0kxqse5" sourceRef="Activity_1de4p94" targetRef="Activity_0mgpzvr" />
-    <bpmn:serviceTask id="Activity_1de4p94" name="Обогащение глобального графа">
+    <bpmn:serviceTask id="Activity_1de4p94" name="Обогащение глобального графа" camunda:delegateExpression="${GlobalGraphEnrichmentDelegate}">
       <bpmn:incoming>Flow_1pfdn2v</bpmn:incoming>
       <bpmn:outgoing>Flow_0kxqse5</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -56,7 +56,7 @@
       <bpmn:outgoing>Flow_0zzndqa</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0zzndqa" sourceRef="Gateway_1sdbakt" targetRef="Activity_05xz8qx" />
-    <bpmn:serviceTask id="Activity_0mgpzvr" name="Расчет глобальных FF">
+    <bpmn:serviceTask id="Activity_0mgpzvr" name="Расчет глобальных FF" camunda:delegateExpression="${CalculateGlobalFFDelegate}">
       <bpmn:incoming>Flow_0kxqse5</bpmn:incoming>
       <bpmn:outgoing>Flow_0480bdn</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -74,7 +74,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.hasVariable('error')}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1mz259t" sourceRef="Activity_09flps1" targetRef="Gateway_0gln622" />
-    <bpmn:serviceTask id="Activity_09flps1" name="Получение информации и регистрации процесса">
+    <bpmn:serviceTask id="Activity_09flps1" name="Получение информации и регистрации процесса" camunda:delegateExpression="${RegisterProcessDelegate}">
       <bpmn:incoming>Flow_0075dwi</bpmn:incoming>
       <bpmn:outgoing>Flow_1mz259t</bpmn:outgoing>
     </bpmn:serviceTask>
