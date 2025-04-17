@@ -57,7 +57,7 @@ public class RelationsService {
         List<ProcessDTO> processTechDTOs = techradarClient.getProcesses().stream()
                 .filter(processDTO -> processList.contains(processDTO.getProcess()))
                 .collect(Collectors.toUnmodifiableList());
-        List<Map<String, String>> products = grafanaService.getProducts();
+        Map<String, Map<String, String>> products = grafanaService.getProducts();
         List<FdmGitlabLanguages> dashboardList = new ArrayList<>();
         processTechDTOs.forEach(processDTO -> {
             dashboardList.addAll(
