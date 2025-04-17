@@ -101,6 +101,8 @@ public class GrafanaClient {
 
     public String getMnemonics(ProcessDTO processDTO) {
         try {
+            long nowGMT = Instant.now().toEpochMilli();
+            long nowGMTMinus1Hour = nowGMT - 3600000;
             String mnemonicsRequestRow = "{\n" +
                     "    \"queries\": [\n" +
                     "        {\n" +
@@ -116,14 +118,14 @@ public class GrafanaClient {
                     "            \"instant\": true\n" +
                     "        }\n" +
                     "    ],\n" +
-                    "    \"from\": \"s\",\n" +
-                    "    \"to\": \"s\"\n" +
+                    "    \"from\": \"%s\",\n" +
+                    "    \"to\": \"%s\"\n" +
                     "}";
             String body = String.format(
                     mnemonicsRequestRow,
                     processDTO.getProcess(),
-                    "1739518075430",
-                    "1739521675430"
+                    nowGMTMinus1Hour,
+                    nowGMT
             );
 
             HttpHeaders headers = new HttpHeaders();
