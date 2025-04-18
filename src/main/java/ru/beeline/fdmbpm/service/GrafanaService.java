@@ -3,18 +3,12 @@ package ru.beeline.fdmbpm.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.GrafanaClient;
 import ru.beeline.fdmlib.dto.techradar.ProcessDTO;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -49,27 +43,28 @@ public class GrafanaService {
         return processValues;
     }
 
-    public List<Map<String, String>> getProducts() {
-        List<Map<String, String>> result = new ArrayList<>();
+    public Map<String, Map<String, String>> getProducts() {
+        Map<String, Map<String, String>> result = new HashMap<>();
         try {
             String response = grafanaClient.getProducts();
-            JSONObject jsonResponse = (JSONObject) JSONValue.parse(response);
-            JSONObject results = (JSONObject) jsonResponse.get("results");
-            JSONObject resultObj = (JSONObject) results.get("A");
-            JSONArray frames = (JSONArray) resultObj.get("frames");
-            JSONObject firstFrame = (JSONObject) frames.get(0);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
 
-            JSONObject schema = (JSONObject) firstFrame.get("schema");
-            JSONArray schemafields = (JSONArray) schema.get("fields");
-            JSONObject data = (JSONObject) firstFrame.get("data");
-            JSONArray values = (JSONArray) data.get("values");
+            JsonNode results = root.path("results");
+            JsonNode resultObj = results.path("A");
+            JsonNode frames = resultObj.path("frames");
+            JsonNode firstFrame = frames.get(0);
 
-            // Определение индексов столбцов
+            JsonNode schema = firstFrame.path("schema");
+            JsonNode schemafields = schema.path("fields");
+            JsonNode data = firstFrame.path("data");
+            JsonNode values = data.path("values");
+
             int appIndex = -1, epIndex = -1, mnemonicIndex = -1, hostIndex = -1;
 
             for (int i = 0; i < schemafields.size(); i++) {
-                JSONObject field = (JSONObject) schemafields.get(i);
-                String fieldName = (String) field.get("name");
+                JsonNode field = schemafields.get(i);
+                String fieldName = field.path("name").asText();
                 switch (fieldName) {
                     case "Приложение":
                         appIndex = i;
@@ -86,20 +81,18 @@ public class GrafanaService {
                 }
             }
 
-            // Проверка наличия всех необходимых столбцов
             if (appIndex == -1 || epIndex == -1 || mnemonicIndex == -1 || hostIndex == -1) {
                 throw new IllegalArgumentException("Не все необходимые столбцы найдены в ответе.");
             }
 
-            // Формирование итогового массива
-            int recordCount = ((JSONArray)values.get(0)).size(); // Количество записей
+            int recordCount = values.get(0).size();
             for (int i = 0; i < recordCount; i++) {
                 Map<String, String> record = new HashMap<>();
-                record.put("app", ((JSONArray)values.get(appIndex)).get(i).toString());
-                record.put("ep", ((JSONArray)values.get(epIndex)).get(i).toString());
-                record.put("mnemonic",((JSONArray)values.get(mnemonicIndex)).get(i).toString());
-                record.put("host", ((JSONArray)values.get(hostIndex)).get(i).toString());
-                result.add(record);
+                record.put("app", values.get(appIndex).get(i).asText());
+                record.put("ep", values.get(epIndex).get(i).asText());
+                record.put("mnemonic", values.get(mnemonicIndex).get(i).asText());
+                record.put("host", values.get(hostIndex).get(i).asText());
+                result.put(values.get(hostIndex).get(i).asText(), record);
             }
 
         } catch (Exception e) {
@@ -109,58 +102,52 @@ public class GrafanaService {
         return result;
     }
 
-    public List<Map<String, String>> getMnemonics(ProcessDTO processDTO, List<Map<String, String>> applications) {
-        List<Map<String, String>> result = new ArrayList<>();
-
+    public Set<Map<String, String>> getMnemonics(ProcessDTO processDTO, Map<String, Map<String, String>> applications) {
+        Set<Map<String, String>> result = new HashSet<>();
         try {
-            JSONObject jsonResponse = (JSONObject) JSONValue.parse(grafanaClient.getMnemonics(processDTO));
-            JSONObject results = (JSONObject) jsonResponse.get("results");
-            JSONObject  resultObj = (JSONObject) results.get("A-Instant");
-            JSONArray frames = (JSONArray) resultObj.get("frames");
-            for (int i = 0; i < frames.size(); i++) {
-                JSONObject frame = (JSONObject) frames.get(i);
+            String jsonString = grafanaClient.getMnemonics(processDTO).trim();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jsonString);
 
-                JSONObject schema = (JSONObject) frame.get("schema");
-                JSONArray fields = (JSONArray) schema.get("fields");
+            JsonNode results = root.path("results");
+            JsonNode resultObj = results.path("A-Instant");
+            JsonNode frames = resultObj.path("frames");
 
-                // Поиск элемента с name = "Value"
-                JSONObject valueField = null;
-                int valueIndex = -1;
-                for (int j = 0; j < fields.size(); j++) {
-                    JSONObject field = (JSONObject) fields.get(j);
-                    if ("Value".equals(field.get("name"))) {
-                        valueField = field;
-                        valueIndex = j;
-                        break;
-                    }
-                }
+            if (frames.isArray()) {
+                for (JsonNode frame : frames) {
+                    JsonNode schema = frame.path("schema");
+                    JsonNode fields = schema.path("fields");
 
-                if (valueField != null) {
-                    JSONObject labels = (JSONObject) valueField.get("labels");
-                    String host = (String) labels.get("HOST");
-                    for (int k = 0; k < applications.size(); k++) {
-                        Map<String, String> app = applications.get(k);
-                        if (host.equals(app.get("host"))) {
-                            // Формирование мнемоники
-                            String mnemonic = app.get("mnemonic");
-                            String processedMnemonic = mnemonic.substring(mnemonic.indexOf('.') + 1, mnemonic.lastIndexOf('.'));
-
-                            // Формирование объекта результата
-                            Map<String, String> record = new HashMap<>();
-                            record.put("cmdb_code", "af-messendgers");
-                            record.put("proj_lang", "Zabbix");
-                            record.put("processed_mnemonic", processedMnemonic);
-                            result.add(record);
+                    JsonNode valueField = null;
+                    for (int j = 0; j < fields.size(); j++) {
+                        JsonNode field = fields.get(j);
+                        if ("Value".equals(field.path("name").asText())) {
+                            valueField = field;
                             break;
+                        }
+                    }
+
+                    if (valueField != null) {
+                        JsonNode labels = valueField.path("labels");
+                        String host = labels.path("HOST").asText();
+                        if (applications.containsKey(host) && applications.get(host).containsKey("mnemonic")) {
+                            String mnemonic = applications.get(host).get("mnemonic");
+                            String processedMnemonic = mnemonic.substring(
+                                    mnemonic.indexOf('.') + 1,
+                                    mnemonic.lastIndexOf('.')
+                            );
+                            Map<String, String> record = new HashMap<>();
+                            record.put("cmdb_code", processedMnemonic);
+                            record.put("proj_lang", labels.get("groupname").asText());
+                            result.add(record);
                         }
                     }
                 }
             }
-
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             e.printStackTrace();
         }
-
         return result;
     }
 }
