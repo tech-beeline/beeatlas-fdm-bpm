@@ -47,7 +47,6 @@ env:
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#authserverurl"
   INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#archserverurl"
   INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#graphserverurl"
-
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/test/func/grafana#token"
   INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/test/func/fdm#cmdbtoken"
 
