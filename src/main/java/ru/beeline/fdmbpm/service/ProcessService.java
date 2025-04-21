@@ -7,6 +7,7 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.fdmbpm.client.UserClient;
+import ru.beeline.fdmbpm.controller.RequestContext;
 import ru.beeline.fdmbpm.domain.Application;
 import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
@@ -16,6 +17,10 @@ import ru.beeline.fdmbpm.domain.Context;
 import ru.beeline.fdmbpm.domain.ExecutorRoles;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationCommentDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationStatusDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationTypeDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessByIdDTO;
@@ -44,6 +49,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
 
@@ -303,5 +309,56 @@ public class ProcessService {
 //                .setVariables(variables)
 //                .correlate();
         log.info("переданы данные в процесс камунды");
+    }
+
+    public List<ApplicationDTO> getAssignedApplications() {
+        List<String> roles = RequestContext.getRoles();
+        List<ExecutorRoles> executorRoles;
+        if (roles != null && !roles.isEmpty()) {
+            executorRoles = executorRolesRepository.findByRoleIn(roles);
+        } else {
+            throw new ValidationException("Отсутствует роль в заголовках");
+        }
+        List<Application> applicationList = applicationRepository.findAllByTypeIdIn(executorRoles.stream().
+                map(ExecutorRoles::getTypeId).collect(Collectors.toList()));
+        return buildApplicationDTO(applicationList);
+    }
+
+    private List<ApplicationDTO> buildApplicationDTO(List<Application> applicationList) {
+        return applicationList.stream().
+                map(application -> ApplicationDTO.builder()
+                        .id(application.getId())
+                        .type(ApplicationTypeDTO.builder()
+                                .id(application.getApplicationType().getId())
+                                .name(application.getApplicationType().getName())
+                                .description(application.getApplicationType().getDescription())
+                                .entityType(application.getApplicationType().getEntityType())
+                                .build())
+                        .status(ApplicationStatusDTO.builder()
+                                .id(application.getStatus().getId())
+                                .name(application.getStatus().getName())
+                                .isEndStatus(application.getStatus().getIsEndStatus())
+                                .build())
+                        .authorId(application.getAuthorId())
+                        .executorId(application.getExecutorId())
+                        .name(application.getName())
+                        .responsibleId(application.getResponsibleId())
+                        .createDate(application.getCreateDate())
+                        .updateDate(application.getUpdateDate())
+                        .comments(buildComments(application.getId()))
+                        .build()).toList();
+    }
+
+    private List<ApplicationCommentDTO> buildComments(Integer applicationId) {
+        List<Comment> commentList = commentRepository.findAllByApplicationId(applicationId);
+        if (!commentList.isEmpty()) {
+            return commentList.stream().map(comment -> ApplicationCommentDTO.builder()
+                    .id(comment.getId())
+                    .comment(comment.getComment())
+                    .createdDate(comment.getCreatedDate())
+                    .fullName(comment.getFullName())
+                    .build()).toList();
+        }
+        return new ArrayList<>();
     }
 }
