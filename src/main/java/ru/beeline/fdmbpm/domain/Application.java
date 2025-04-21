@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @Data
@@ -49,4 +50,15 @@ public class Application {
 
     @Column(name = "entity_id")
     private Integer entityId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private ApplicationTypeEnum applicationType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private ApplicationTypeStatus status;
+
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Comment> comments;
 }

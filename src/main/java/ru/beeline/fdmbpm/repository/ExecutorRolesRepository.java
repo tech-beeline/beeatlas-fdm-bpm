@@ -8,4 +8,6 @@ import java.util.List;
 public interface ExecutorRolesRepository extends JpaRepository<ExecutorRoles,Integer> {
 
     List<ExecutorRoles> findByTypeId(Integer typeId);
+
+    List<ExecutorRoles> findByRoleIn(List<String> roles);
 }
