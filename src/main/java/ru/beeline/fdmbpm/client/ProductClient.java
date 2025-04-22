@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
@@ -45,21 +48,29 @@ public class ProductClient {
 
     public void postProductCMDB(String product, PostProductRequest postProductRequest) {
         try {
+            String json = new ObjectMapper().writeValueAsString(postProductRequest);
+            log.info("Sending JSON to CMDB. Size: {} bytes", json.length());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(postProductRequest, headers);
             ResponseEntity<Void> response = restTemplate.exchange(
-                    productServerUrl + "/api/v1/infra/" + product,
+                    productServerUrl + "/api/v1/infra?product=" + product,
                     HttpMethod.POST,
                     requestEntity,
                     Void.class
             );
             if (response.getStatusCode() != HttpStatus.CREATED) {
+                log.error("Unexpected status code from CMDB: {}", response.getStatusCode());
                 throw new RuntimeException("Failed to post product. HTTP Status: " + response.getStatusCode());
             }
             log.info("Product posted successfully with status 201.");
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("HTTP error while posting product '{}'. Status: {}, Body: {}",
+                    product, e.getStatusCode(), e.getResponseBodyAsString(), e);
+            throw new RuntimeException("Error during post request", e);
         } catch (Exception e) {
-            log.error("Error while posting product to CMDB: " + e.getMessage(), e);
+            log.error("General error while posting product '{}', Message: {}",
+                    product, e.getMessage(), e);
             throw new RuntimeException("Error during post request", e);
         }
     }

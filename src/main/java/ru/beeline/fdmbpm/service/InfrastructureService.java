@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.CmdbClient;
 import ru.beeline.fdmbpm.client.ProductClient;
+import ru.beeline.fdmbpm.dto.PropertyDTO;
 import ru.beeline.fdmbpm.dto.cmdb.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,23 +25,24 @@ public class InfrastructureService {
 
     public void gettingApplicationData(String product) {
         CmdbResponseDTO cmdbResponse = cmdbClient.getCmdbInfrastructure(product);
+        log.info("Successfully received the CMDB infrastructure report for product '{}'.", product);
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
         List<InfraDTO> infraDTOList = new ArrayList<>();
         assetDTOMap.forEach((key, value) -> {
-            Map<String, String> properties = new HashMap<>();
+            List<PropertyDTO> properties = new ArrayList<>();
             switch (value.getClassTitle()) {
-                case "База данных" -> properties.put("item", value.getItem());
+                case "База данных" -> properties.add(new PropertyDTO("item", value.getItem()));
                 case "Серверный домен (виртуальный)" -> {
-                    properties.put("item", value.getItem());
-                    properties.put("vimServerDomainCpuCores", value.getAssetAdditionalData().getVimServerDomainCpuCores());
-                    properties.put("vimServerDomainCpuType", value.getAssetAdditionalData().getVimServerDomainCpuType());
-                    properties.put("totalPhysicalMemory", value.getAssetAdditionalData().getTotalPhysicalMemory());
-                    properties.put("vimServerDomainLogicalDrives", value.getAssetAdditionalData().getVimServerDomainLogicalDrives());
-                    properties.put("vimIp", value.getAssetAdditionalData().getVimIp());
-                    properties.put("vimServerDomainOs", value.getAssetAdditionalData().getVimServerDomainOs());
+                    properties.add(new PropertyDTO("item", value.getItem()));
+                    properties.add(new PropertyDTO("vimServerDomainCpuCores", value.getAssetAdditionalData().getVimServerDomainCpuCores()));
+                    properties.add(new PropertyDTO("vimServerDomainCpuType", value.getAssetAdditionalData().getVimServerDomainCpuType()));
+                    properties.add(new PropertyDTO("totalPhysicalMemory", value.getAssetAdditionalData().getTotalPhysicalMemory()));
+                    properties.add(new PropertyDTO("vimServerDomainLogicalDrives", value.getAssetAdditionalData().getVimServerDomainLogicalDrives()));
+                    properties.add(new PropertyDTO("vimIp", value.getAssetAdditionalData().getVimIp()));
+                    properties.add(new PropertyDTO("vimServerDomainOs", value.getAssetAdditionalData().getVimServerDomainOs()));
                 }
                 case "Экземпляр приложения" ->
-                        properties.put("appEnvType", value.getAssetAdditionalData().getAppEnvType());
+                        properties.add(new PropertyDTO("appEnvType", value.getAssetAdditionalData().getAppEnvType()));
             }
             infraDTOList.add(InfraDTO.builder()
                     .name(value.getName())
@@ -63,5 +64,6 @@ public class InfrastructureService {
                 .relations(relationsDTOList)
                 .build();
         productClient.postProductCMDB(product, postProductRequest);
+        log.info("Successfully Product infrastructure synchronization");
     }
 }

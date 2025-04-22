@@ -1,6 +1,7 @@
 package ru.beeline.fdmbpm.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,8 @@ public class Comment {
     private Integer applicationId;
 
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     @JoinColumn(name = "application_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Application application;
 }

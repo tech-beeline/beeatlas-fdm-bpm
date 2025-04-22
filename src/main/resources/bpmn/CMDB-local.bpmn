@@ -25,7 +25,7 @@
       <bpmn:incoming>Flow_0hva6ck</bpmn:incoming>
       <bpmn:outgoing>Flow_0jdmn1t</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0zisyo4">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2M</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:endEvent id="Event_19z2g6g">
