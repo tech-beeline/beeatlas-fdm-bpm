@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.service.ApplicationService;
-import ru.beeline.fdmbpm.service.ProcessService;
 
 import java.util.List;
 
@@ -32,6 +31,12 @@ public class CamundaApplicationController {
     public ResponseEntity<List<ApplicationDTO>> getApplicationsByAuthor(HttpServletRequest request) {
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByAuthor(userId));
+    }
+
+    @GetMapping("/application/executor")
+    public ResponseEntity<List<ApplicationDTO>> getApplicationsByExecutor(HttpServletRequest request) {
+        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
+        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByExecutor(userId));
     }
 
     @PatchMapping("/application/{businessKey}/executor")

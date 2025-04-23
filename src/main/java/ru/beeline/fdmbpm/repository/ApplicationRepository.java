@@ -12,4 +12,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
     List<Application> findAllByTypeIdIn(List<Integer> typeId);
 
     Optional<List<Application>> findAllByAuthorId(Integer authorId);
+
+    Optional<List<Application>> findAllByExecutorId(Integer ExecutorId);
 }

@@ -110,7 +110,13 @@ public class ApplicationService {
     public List<ApplicationDTO> getApplicationsByAuthor(Integer userId) {
         List<Application> application = applicationRepository.findAllByAuthorId(userId).orElseThrow(() ->
                 new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены", userId)));
-        return buildApplicationDTO(application );
+        return buildApplicationDTO(application);
+    }
+
+    public List<ApplicationDTO> getApplicationsByExecutor(Integer userId) {
+        List<Application> application = applicationRepository.findAllByExecutorId(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены", userId)));
+        return buildApplicationDTO(application);
     }
 
     private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
