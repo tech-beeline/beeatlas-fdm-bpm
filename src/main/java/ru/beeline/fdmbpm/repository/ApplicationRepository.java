@@ -10,4 +10,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
     Optional<Application> findByBusinessKey(String businessKey);
 
     List<Application> findAllByTypeIdIn(List<Integer> typeId);
+
+    Optional<List<Application>> findAllByAuthorId(Integer authorId);
 }

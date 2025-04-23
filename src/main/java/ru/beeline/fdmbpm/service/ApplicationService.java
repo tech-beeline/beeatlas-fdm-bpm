@@ -107,6 +107,12 @@ public class ApplicationService {
         sendStatusChangeMessageToProcess(application, targetStatus.getMessage());
     }
 
+    public List<ApplicationDTO> getApplicationsByAuthor(Integer userId) {
+        List<Application> application = applicationRepository.findAllByAuthorId(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены", userId)));
+        return buildApplicationDTO(application );
+    }
+
     private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
                 .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
