@@ -47,7 +47,7 @@ public class ApplicationController {
         return capabilityService.sendTechCapability().toString();
     }
 
-    @PostMapping("/importProcess")
+    @PostMapping("/import-process")
     public String startImportService(@RequestBody PostImportServiceDTO postImportServiceDTO) {
         log.info("running process start Import Service");
         Integer id = importProcessService.uploadingDataFromExcel(postImportServiceDTO.getEntityType(),
@@ -56,7 +56,7 @@ public class ApplicationController {
         return String.format("the process has been completed, packageId: %s ", id.toString());
     }
 
-    @PostMapping("/exportProcess")
+    @PostMapping("/export-process")
     public String startExportProcess(@RequestBody PostImportServiceDTO postImportServiceDTO) {
         log.info("running process start Export process");
         exportProcessService.processExportingToExcel(postImportServiceDTO.getEntityType(),
@@ -64,7 +64,7 @@ public class ApplicationController {
         return "the process has been completed";
     }
 
-    @PostMapping("/InfrastructureProcess/{product}")
+    @PostMapping("/infrastructure-process/{product}")
     public String startInfrastructureProcess(@PathVariable String product) {
         log.info("running process start cmdb process");
         infrastructureService.gettingApplicationData(product);

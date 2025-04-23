@@ -46,26 +46,4 @@ public class CamundaProcessController {
     public ResponseEntity<GetProcessByIdDTO> getProcessById(@PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(processService.getProcessById(id));
     }
-
-    @GetMapping("/application/nobody")
-    public ResponseEntity<List<ApplicationDTO>> getAssignedApplications() {
-        return ResponseEntity.status(HttpStatus.OK).body(processService.getAssignedApplications());
-    }
-
-    @PatchMapping("/application/{businessKey}/executor")
-    public ResponseEntity<Void> patchExecutorProcess(@PathVariable String businessKey,
-                                                     @RequestParam(value = "nextStatus") String nextStatus,
-                                                     HttpServletRequest request) {
-        processService.patchExecutorProcess(businessKey, nextStatus, request);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    @PatchMapping("/application/{businessKey}/change-status/{statusAlias}")
-    public ResponseEntity<Void> patchChangeStatus(@PathVariable String businessKey,
-                                                  @PathVariable String statusAlias,
-                                                  @RequestBody(required = false) CommentDTO commentDTO,
-                                                  HttpServletRequest request) {
-        processService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }
