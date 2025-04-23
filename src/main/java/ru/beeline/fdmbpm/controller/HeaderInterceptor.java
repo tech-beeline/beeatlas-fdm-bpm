@@ -29,7 +29,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
         if (isBlank(request.getHeader(USER_PRODUCTS_IDS_HEADER))) missingHeaders.add(USER_PRODUCTS_IDS_HEADER);
         if (isBlank(request.getHeader(USER_ROLES_HEADER))) missingHeaders.add(USER_ROLES_HEADER);
         if (!missingHeaders.isEmpty()) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType("text/plain;charset=UTF-8");
             response.getWriter().write("Отсутствуют необходимые заголовки.");
             return false;

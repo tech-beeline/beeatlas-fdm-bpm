@@ -60,7 +60,6 @@ public class ApplicationService {
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
     public void patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
-
         Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
                 new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
