@@ -3,6 +3,7 @@ package ru.beeline.fdmbpm.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
+import org.camunda.bpm.engine.MismatchingMessageCorrelationException;
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationStatusDTO;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationTypeDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
+import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.ApplicationRepository;
@@ -27,7 +29,9 @@ import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -84,6 +88,7 @@ public class ApplicationService {
         ApplicationTypeStatus currentStatus = applicationTypeStatusRepository.findById(application.getStatusId())
                 .orElseThrow(() -> new NotFoundException("Статус с данным id не найден"));
         if (currentStatus.getAlias().equals(targetStatus.getAlias())) {
+            log.info("id текущего статуса и статуса из пути запроса совпадают");
             return;
         }
         if (currentStatus.getIsEndStatus()) {
@@ -91,7 +96,7 @@ public class ApplicationService {
         }
         Integer currentSerial = currentStatus.getSerialNumber();
         Integer targetSerial = targetStatus.getSerialNumber();
-        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial - 1);
+        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial + 1);
         if (!canChangeStatus) {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
@@ -126,7 +131,7 @@ public class ApplicationService {
             throw new ForbiddenException("Нет прав доступа");
         }
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        if (!Objects.equals(application.getAuthorId(), userId) || !Objects.equals(application.getExecutorId(), userId)) {
+        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(), userId)) {
             throw new ForbiddenException("Нет прав доступа");
         }
         return application;
@@ -148,16 +153,20 @@ public class ApplicationService {
     }
 
     private void sendStatusChangeMessageToProcess(Application application, String message) {
-//                Процесса еще не реализован
-//        Map<String, Object> variables = new HashMap<>();
-//        variables.put("message", message);
-//        runtimeService.createMessageCorrelation("change_of_status")
-//                .processInstanceId(application.getProcessId())
-//                .setVariables(variables)
-//                .correlate();
-        log.info("переданы данные в процесс камунды: {message, " + message + "}");
-        log.info("самого процесса еще нет");
+        try {
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("message", message);
+            runtimeService.createMessageCorrelation("change_of_status")
+                    .processInstanceId(application.getProcessId())
+                    .setVariables(variables)
+                    .correlate();
+            log.info("Переданы данные в процесс Camunda: {message, " + message + "}");
+        } catch (MismatchingMessageCorrelationException e) {
+            throw new CustomCamundaException("Процесс с ID "
+                    + application.getProcessId() + " не найден или уже завершён");
+        }
     }
+
 
     public List<ApplicationDTO> getAssignedApplications() {
         List<String> roles = RequestContext.getRoles();

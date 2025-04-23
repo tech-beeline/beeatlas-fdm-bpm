@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.S3Exception;
 import ru.beeline.fdmbpm.exception.ValidationException;
@@ -55,6 +56,13 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> headerException(ForbiddenException e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(CustomCamundaException.class)
+    public ResponseEntity<String> headerException(CustomCamundaException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(e.getMessage());
     }
 }
