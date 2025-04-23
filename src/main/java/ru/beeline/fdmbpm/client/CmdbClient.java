@@ -31,7 +31,6 @@ public class CmdbClient {
             headers.set("AuthenticationToken", "Bearer " + authenticationToken);
             HttpEntity<String> entity = new HttpEntity<>(headers);
             log.info("Request URL: " + cmdbUrl + "/api/cmdb/reports/infrastructure_on_asset_report/" + product + "/simple");
-            log.info("Authorization Header: Bearer " + authenticationToken);
             CmdbResponseDTO cmdbResponseDTO = restTemplate.exchange(cmdbUrl + "/api/cmdb/reports/infrastructure_on_asset_report/" +
                             product + "/simple", HttpMethod.GET, entity,
                     new ParameterizedTypeReference<CmdbResponseDTO>() {

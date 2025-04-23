@@ -301,14 +301,15 @@ public class ProcessService {
     }
 
     private void sendStatusChangeMessageToProcess(Application application, String message) {
-//        Процесса еще не реализован
+//                Процесса еще не реализован
 //        Map<String, Object> variables = new HashMap<>();
 //        variables.put("message", message);
 //        runtimeService.createMessageCorrelation("change_of_status")
 //                .processInstanceId(application.getProcessId())
 //                .setVariables(variables)
 //                .correlate();
-        log.info("переданы данные в процесс камунды");
+        log.info("переданы данные в процесс камунды: {message, " + message + "}");
+        log.info("самого процесса еще нет");
     }
 
     public List<ApplicationDTO> getAssignedApplications() {
