@@ -8,6 +8,7 @@ import ru.beeline.fdmbpm.client.CmdbClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.dto.PropertyDTO;
 import ru.beeline.fdmbpm.dto.cmdb.*;
+import ru.beeline.fdmbpm.exception.ValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,10 @@ public class InfrastructureService {
 
     public void gettingApplicationData(String product) {
         CmdbResponseDTO cmdbResponse = cmdbClient.getCmdbInfrastructure(product);
+        if (cmdbResponse == null) {
+            throw new ValidationException("Запрос к CMDB /api/cmdb/reports/infrastructure_on_asset_report/ c product: " +
+                    product + " = null");
+        }
         log.info("Successfully received the CMDB infrastructure report for product '{}'.", product);
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
         List<InfraDTO> infraDTOList = new ArrayList<>();
