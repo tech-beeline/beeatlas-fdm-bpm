@@ -7,4 +7,6 @@ import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 public interface ApplicationTypeStatusRepository extends JpaRepository<ApplicationTypeStatus, Integer> {
 
     ApplicationTypeStatus findByTypeIdAndAlias(Integer typeId, String alias);
+
+    ApplicationTypeStatus findByTypeIdAndSerialNumber(Integer typeId, Integer serialNumber);
 }
