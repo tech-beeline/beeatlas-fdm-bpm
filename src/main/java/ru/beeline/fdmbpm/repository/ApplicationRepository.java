@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Integer> {
     Optional<Application> findByBusinessKey(String businessKey);
 
-    List<Application> findAllByTypeIdIn(List<Integer> typeId);
+    List<Application> findAllByTypeIdInAndExecutorIdNull(List<Integer> typeId);
 
     Optional<List<Application>> findAllByAuthorId(Integer authorId);
 
