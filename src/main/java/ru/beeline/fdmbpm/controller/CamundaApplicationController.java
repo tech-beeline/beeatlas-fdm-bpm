@@ -41,7 +41,7 @@ public class CamundaApplicationController {
 
     @PatchMapping("/application/{businessKey}/executor")
     public ResponseEntity<Void> patchExecutorProcess(@PathVariable String businessKey,
-                                                     @RequestParam(value = "nextStatus") String nextStatus,
+                                                     @RequestParam(value = "next_status") String nextStatus,
                                                      HttpServletRequest request) {
         applicationService.patchExecutorProcess(businessKey, nextStatus, request);
         return ResponseEntity.status(HttpStatus.OK).build();
