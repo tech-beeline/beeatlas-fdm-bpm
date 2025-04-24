@@ -7,14 +7,11 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.ProductClient;
-import ru.beeline.fdmbpm.service.InfrastructureService;
 
 @Slf4j
 @Component("GettingAllApplications")
 public class GettingAllApplicationsDelegate implements JavaDelegate {
 
-    @Autowired
-    InfrastructureService infrastructureService;
     @Autowired
     ProductClient productClient;
 

@@ -27,8 +27,9 @@ public class InfrastructureService {
     public void gettingApplicationData(String product) {
         CmdbResponseDTO cmdbResponse = cmdbClient.getCmdbInfrastructure(product);
         if (cmdbResponse == null) {
-            throw new ValidationException("Запрос к CMDB /api/cmdb/reports/infrastructure_on_asset_report/ c product: " +
+            log.info("Запрос к CMDB /api/cmdb/reports/infrastructure_on_asset_report/ c product вернул:  " +
                     product + " = null");
+            return;
         }
         log.info("Successfully received the CMDB infrastructure report for product '{}'.", product);
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
