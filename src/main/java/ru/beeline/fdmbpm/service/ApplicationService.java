@@ -175,7 +175,7 @@ public class ApplicationService {
         } else {
             throw new ValidationException("Отсутствует роль в заголовках");
         }
-        List<Application> applicationList = applicationRepository.findAllByTypeIdIn(executorRoles.stream().
+        List<Application> applicationList = applicationRepository.findAllByTypeIdInAndExecutorIdNull(executorRoles.stream().
                 map(ExecutorRoles::getTypeId).collect(Collectors.toList()));
         return buildApplicationDTO(applicationList);
     }
