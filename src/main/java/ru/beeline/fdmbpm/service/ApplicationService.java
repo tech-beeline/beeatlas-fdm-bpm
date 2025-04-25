@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.MismatchingMessageCorrelationException;
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.beeline.fdmbpm.client.UserClient;
 import ru.beeline.fdmbpm.controller.RequestContext;
@@ -19,7 +21,6 @@ import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationStatusDTO;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationTypeDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
-import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.ApplicationRepository;
@@ -59,9 +60,9 @@ public class ApplicationService {
     @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
-    public void patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
+    public ResponseEntity<Boolean>  patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
-                new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+                new NotFoundException(String.format("Запись с данным business_key: %s не найдена", businessKey)));
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
         if (executorRoles.isEmpty()) {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
@@ -71,12 +72,17 @@ public class ApplicationService {
             } else {
                 application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
                 applicationRepository.save(application);
-                patchChangeStatus(businessKey, nextStatus, request, null);
+                if (Boolean.TRUE.equals(patchChangeStatus(businessKey, nextStatus, request, null).getBody())) {
+                    application.setExecutorId(null);
+                    applicationRepository.save(application);
+                    return ResponseEntity.status(HttpStatus.CONFLICT).build();
+                }
             }
         }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    public void patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request, CommentDTO commentDTO) {
+    public ResponseEntity<Boolean>  patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request, CommentDTO commentDTO) {
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         ApplicationTypeStatus targetStatus = applicationTypeStatusRepository
@@ -88,7 +94,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new NotFoundException("Статус с данным id не найден"));
         if (currentStatus.getAlias().equals(targetStatus.getAlias())) {
             log.info("id текущего статуса и статуса из пути запроса совпадают");
-            return;
+            return ResponseEntity.status(HttpStatus.OK).build();
         }
         if (currentStatus.getIsEndStatus()) {
             throw new ValidationException("Заявка завершена");
@@ -108,7 +114,10 @@ public class ApplicationService {
         application.setUpdateDate(LocalDateTime.now());
         applicationRepository.save(application);
         saveComment(application, commentDTO, userId);
-        sendStatusChangeMessageToProcess(application, targetStatus.getMessage());
+        if(sendStatusChangeMessageToProcess(application, targetStatus.getMessage())){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(true);
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     public List<ApplicationDTO> getApplicationsByAuthor(Integer userId) {
@@ -151,7 +160,7 @@ public class ApplicationService {
         }
     }
 
-    private void sendStatusChangeMessageToProcess(Application application, String message) {
+    private boolean sendStatusChangeMessageToProcess(Application application, String message) {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("message", message);
@@ -160,12 +169,15 @@ public class ApplicationService {
                     .setVariables(variables)
                     .correlate();
             log.info("Переданы данные в процесс Camunda: {message, " + message + "}");
+            return false;
         } catch (MismatchingMessageCorrelationException e) {
-            throw new CustomCamundaException("Процесс с ID "
-                    + application.getProcessId() + " не найден или уже завершён");
+            log.error("Процесс с ID " + application.getProcessId() + " не найден или уже завершён");
+            return true;
+        } catch (Exception e) {
+            log.error("Ошибка при отправке сообщения в Camunda", e);
+            return true;
         }
     }
-
 
     public List<ApplicationDTO> getAssignedApplications() {
         List<String> roles = RequestContext.getRoles();

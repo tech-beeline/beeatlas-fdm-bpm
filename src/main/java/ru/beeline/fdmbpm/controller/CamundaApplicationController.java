@@ -39,20 +39,18 @@ public class CamundaApplicationController {
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByExecutor(userId));
     }
 
-    @PatchMapping("/application/{businessKey}/executor")
-    public ResponseEntity<Void> patchExecutorProcess(@PathVariable String businessKey,
-                                                     @RequestParam(value = "nextStatus") String nextStatus,
+    @PatchMapping("/application/{business_key}/executor")
+    public ResponseEntity<Boolean> patchExecutorProcess(@PathVariable("business_key") String businessKey,
+                                                     @RequestParam(value = "next_status") String nextStatus,
                                                      HttpServletRequest request) {
-        applicationService.patchExecutorProcess(businessKey, nextStatus, request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return  applicationService.patchExecutorProcess(businessKey, nextStatus, request);
     }
 
-    @PatchMapping("/application/{businessKey}/change-status/{statusAlias}")
-    public ResponseEntity<Void> patchChangeStatus(@PathVariable String businessKey,
-                                                  @PathVariable String statusAlias,
+    @PatchMapping("/application/{business_key}/change-status/{status_alias}")
+    public ResponseEntity<Boolean> patchChangeStatus(@PathVariable("business_key") String businessKey,
+                                                  @PathVariable("status_alias") String statusAlias,
                                                   @RequestBody(required = false) CommentDTO commentDTO,
                                                   HttpServletRequest request) {
-        applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return  applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
     }
 }
