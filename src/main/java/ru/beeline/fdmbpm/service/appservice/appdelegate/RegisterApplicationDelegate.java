@@ -1,22 +1,22 @@
-package ru.beeline.fdmbpm.service.delegate;
+package ru.beeline.fdmbpm.service.appservice.appdelegate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.beeline.fdmbpm.service.ApplicationProcessService;
+import ru.beeline.fdmbpm.service.appservice.ApplicationProcessService;
 
 @Slf4j
-@Component("ApplicationProcessService")
-public class ApplicationProcessDelegate implements JavaDelegate {
+@Component("registerApplicationDelegate")
+public class RegisterApplicationDelegate implements JavaDelegate {
 
     @Autowired
     ApplicationProcessService applicationProcessService;
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("running process ApplicationProcessService");
+        log.info("старт процесса: Регистрация заявки");
         String processInstanceId = (String) delegateExecution.getVariable("processInstanceId");
         String businessKey = (String) delegateExecution.getVariable("businessKey");
         Integer authorId = (Integer) delegateExecution.getVariable("authorId");

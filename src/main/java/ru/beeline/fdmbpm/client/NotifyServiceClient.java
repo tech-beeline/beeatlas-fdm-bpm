@@ -6,6 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
@@ -36,5 +37,18 @@ public class NotifyServiceClient {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    public void postBusinessEvent(String role, String entityType, Integer entityId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/api/v1//notify/business-event/group/role/" + role +
+                            "/" + entityType + "/" + entityId,
+                    HttpMethod.POST, new HttpEntity<>(headers), ResponseEntity.class).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 }

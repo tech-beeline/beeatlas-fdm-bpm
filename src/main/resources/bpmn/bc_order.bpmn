@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0isqmf5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
-  <bpmn:process id="Process_11grtql" isExecutable="true">
+  <bpmn:process id="Process_11grtql" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0zb7ptd</bpmn:outgoing>
     </bpmn:startEvent>
@@ -24,7 +24,9 @@
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_1eae2ql" sourceRef="Gateway_004frrc" targetRef="Event_138pax1" />
-    <bpmn:serviceTask id="Activity_08m6at2" name="Разослать уведомления ответсвенным">
+    <bpmn:serviceTask id="Activity_08m6at2"
+                      name="Разослать уведомления ответсвенным"
+                      camunda:delegateExpression="${sendNotificationsDelegate}">
       <bpmn:incoming>Flow_1gb2183</bpmn:incoming>
       <bpmn:incoming>Flow_1okoajp</bpmn:incoming>
       <bpmn:outgoing>Flow_0wg3qsp</bpmn:outgoing>
@@ -37,11 +39,16 @@
     <bpmn:sequenceFlow id="Flow_1gb2183" sourceRef="Gateway_1x1hmab" targetRef="Activity_08m6at2" />
     <bpmn:sequenceFlow id="Flow_0zb7ptd" sourceRef="StartEvent_1" targetRef="Activity_1ygdvzl" />
     <bpmn:sequenceFlow id="Flow_1okoajp" sourceRef="Activity_1ygdvzl" targetRef="Activity_08m6at2" />
-    <bpmn:serviceTask id="Activity_1ygdvzl" name="Регистрация заявки" camunda:asyncBefore="true">
+    <bpmn:serviceTask id="Activity_1ygdvzl"
+                      name="Регистрация заявки"
+                      camunda:delegateExpression="${registerApplicationDelegate}"
+                      camunda:asyncBefore="true">
       <bpmn:incoming>Flow_0zb7ptd</bpmn:incoming>
       <bpmn:outgoing>Flow_1okoajp</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_0089vm9" name="Нотификация">
+    <bpmn:serviceTask id="Activity_0089vm9"
+                      name="Нотификация"
+                      camunda:delegateExpression="${notifyResponsibleDelegate}">
       <bpmn:incoming>Flow_1o7dcga</bpmn:incoming>
       <bpmn:incoming>Flow_1sdgzle</bpmn:incoming>
       <bpmn:incoming>Flow_128j3st</bpmn:incoming>
@@ -83,19 +90,25 @@
     <bpmn:sequenceFlow id="Flow_15ro3vl" name="Отказ по заявке" sourceRef="Gateway_0605357" targetRef="Activity_1718bek">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${message == "cancel"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Activity_1718bek" name="Нотификация">
+    <bpmn:serviceTask id="Activity_1718bek"
+                      name="Нотификация"
+                      camunda:delegateExpression="${notifyResponsibleDelegate}">
       <bpmn:incoming>Flow_15ro3vl</bpmn:incoming>
       <bpmn:outgoing>Flow_02zh8ec</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1iz1lof" name="Успешное завершение заявки" sourceRef="Gateway_0605357" targetRef="Activity_0a6jugw">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${message == "done"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Activity_0a6jugw" name="Целевое действие по заявке">
+    <bpmn:serviceTask id="Activity_0a6jugw"
+                      name="Целевое действие по заявке"
+                      camunda:delegateExpression="${performTargetActionDelegate}">
       <bpmn:incoming>Flow_1iz1lof</bpmn:incoming>
       <bpmn:outgoing>Flow_0jbeg92</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0jbeg92" sourceRef="Activity_0a6jugw" targetRef="Activity_1kihvdu" />
-    <bpmn:serviceTask id="Activity_1kihvdu" name="Нотификация">
+    <bpmn:serviceTask id="Activity_1kihvdu"
+                      name="Нотификация"
+                      camunda:delegateExpression="${notifyResponsibleDelegate}">
       <bpmn:incoming>Flow_0jbeg92</bpmn:incoming>
       <bpmn:outgoing>Flow_0fxvlfd</bpmn:outgoing>
     </bpmn:serviceTask>
