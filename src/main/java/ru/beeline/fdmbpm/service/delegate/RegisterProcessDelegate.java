@@ -28,8 +28,8 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
     @Override
     public void execute(DelegateExecution delegateExecution) {
         String cmdb = (String) delegateExecution.getVariable("cmdb");
-        String processId = (String) delegateExecution.getVariable("process_id");
-        String businessKey = (String) delegateExecution.getVariable("business_key");
+        String processId = delegateExecution.getProcessInstanceId();
+        String businessKey = delegateExecution.getBusinessKey();
         String docId = (String) delegateExecution.getVariable("docId");
         TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
         CamundaProcess camundaProcess = camundaProcessRepository.save(CamundaProcess.builder()
