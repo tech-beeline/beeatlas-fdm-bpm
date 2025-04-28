@@ -55,7 +55,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<String> headerException(ForbiddenException e) {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.FORBIDDEN)
                 .body(e.getMessage());
     }
 

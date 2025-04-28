@@ -60,29 +60,35 @@ public class ApplicationService {
     @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
-    public ResponseEntity<Boolean>  patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
+    public ResponseEntity<Boolean> patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
                 new NotFoundException(String.format("Запись с данным business_key: %s не найдена", businessKey)));
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
         if (executorRoles.isEmpty()) {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
+        }
+        if (!hasAccessRole(executorRoles.stream().map(ExecutorRoles::getRole).toList(), RequestContext.getRoles())) {
+            throw new ForbiddenException("Forbidden");
+        }
+        if (application.getExecutorId() != null) {
+            throw new ValidationException("Исполнитель уже назначен");
+        }
+        application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
+        if (Boolean.TRUE.equals(patchChangeStatus(businessKey, nextStatus, request, null).getBody())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } else {
-            if (application.getExecutorId() != null) {
-                throw new ValidationException("Исполнитель уже назначен");
-            } else {
-                application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
-                applicationRepository.save(application);
-                if (Boolean.TRUE.equals(patchChangeStatus(businessKey, nextStatus, request, null).getBody())) {
-                    application.setExecutorId(null);
-                    applicationRepository.save(application);
-                    return ResponseEntity.status(HttpStatus.CONFLICT).build();
-                }
-            }
+            applicationRepository.save(application);
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    public ResponseEntity<Boolean>  patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request, CommentDTO commentDTO) {
+    private boolean hasAccessRole(List<String> executorRoles, List<String> roles) {
+        return roles.stream()
+                .anyMatch(executorRoles::contains);
+    }
+
+    public ResponseEntity<Boolean> patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request,
+                                                     CommentDTO commentDTO) {
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         ApplicationTypeStatus targetStatus = applicationTypeStatusRepository
@@ -112,11 +118,11 @@ public class ApplicationService {
             application.setResponsibleId(application.getExecutorId());
         }
         application.setUpdateDate(LocalDateTime.now());
-        applicationRepository.save(application);
-        saveComment(application, commentDTO, userId);
-        if(sendStatusChangeMessageToProcess(application, targetStatus.getMessage())){
+        if (sendStatusChangeMessageToProcess(application, targetStatus.getMessage())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(true);
         }
+        applicationRepository.save(application);
+        saveComment(application, commentDTO, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
