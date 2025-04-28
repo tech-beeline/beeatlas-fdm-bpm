@@ -52,18 +52,13 @@ public class ApplicationProcessService {
                                    String comment, Integer entityId, String name) {
 
         log.info("Запуск процесса обработки заявки. processInstanceId: {}, businessKey: {}", processInstanceId, businessKey);
-        ApplicationTypeEnum applicationTypeEnum = applicationTypeEnumRepository.findByAlias(type);
+        ApplicationTypeEnum applicationTypeEnum = applicationTypeEnumRepository.findByAlias(type).
+                orElseThrow(() -> new CustomCamundaException(String.format("Запись в таблице application_type_enum с alias: %s не найдена.", type)));
         Integer typeId = applicationTypeEnum.getId();
-        if (applicationTypeEnum == null) {
-            throw new CustomCamundaException(String.format("Запись в таблице application_type_enum с alias: %s не найдена.", type));
-        }
         log.info("Тип заявки найден. typeId: {}", typeId);
-        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository
-                .findByTypeIdAndSerialNumber(typeId, 1);
-        if (applicationTypeStatus == null) {
-            throw new CustomCamundaException(String.format("Запись в таблице application_type_status с typeId: %s , и SerialNumber 1 не найдена."
-                    , typeId));
-        }
+        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository.findByTypeIdAndSerialNumber(typeId, 1).
+                orElseThrow(() -> new CustomCamundaException(String.format("Запись в таблице application_type_status с typeId: %s , и SerialNumber 1 не найдена."
+                        , typeId)));
         log.info("Статус для типа заявки найден. statusId: {}", applicationTypeStatus.getId());
         Application saveApplication = applicationRepository.save(Application.builder()
                 .typeId(applicationTypeEnum.getId())
@@ -115,8 +110,10 @@ public class ApplicationProcessService {
         ApplicationTypeEnum applicationTypeEnum = applicationTypeEnumRepository.findById(typeId)
                 .orElseThrow(() -> new NotFoundException("Запись в таблице application_type_enum c id: " + typeId + " не найдена"));
         String targetCall = applicationTypeEnum.getTargetCall();
-        if (targetCall != null && !targetCall.isEmpty()) {
+        log.info("targetCall: {}", targetCall);
+        if (targetCall != null && !targetCall.isEmpty() && entityId != null) {
             String url = targetCall.replace("{id}", entityId.toString());
+            log.info("url: {}", url);
             sendPostRequest(url);
         }
     }
