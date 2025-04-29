@@ -44,7 +44,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                 .build());
         log.info("RegisterProcessDelegate: camundaProcess=", camundaProcess.getId());
         delegateExecution.setVariable("process_id", camundaProcess.getId());
-        saveAlias(camundaProcess.getId(), "Datapipe", typeProcess);
+        saveAlias(camundaProcess.getId(), "crt", typeProcess);
         log.info("saveAlias: has been saved");
 
         contextRepository.save(Context.builder()
