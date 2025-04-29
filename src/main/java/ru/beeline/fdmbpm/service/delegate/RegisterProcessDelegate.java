@@ -46,14 +46,12 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
         delegateExecution.setVariable("process_id", camundaProcess.getId());
         saveAlias(camundaProcess.getId(), "crt", typeProcess);
         log.info("saveAlias: has been saved");
-        if (cmdb != null && !cmdb.isEmpty()) {
             contextRepository.save(Context.builder()
                     .name("cmdb")
                     .value(cmdb)
                     .camundaProcessId(camundaProcess.getId())
                     .build());
             log.info("context: has been saved");
-        }
         if (docId != null) {
             contextRepository.save(Context.builder()
                     .name("doc_id")
