@@ -15,16 +15,21 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @Slf4j
 @Service
-public class DocumentServiceClient {
+public class DocumentClient {
 
     private final RestTemplate restTemplate;
 
     private final String documentServiceUrl;
 
-    public DocumentServiceClient(@Value("${integration.document-server-url}") String documentServiceUrl,
-                                 RestTemplate restTemplate) {
+    public DocumentClient(@Value("${integration.document-server-url}") String documentServiceUrl,
+                          RestTemplate restTemplate) {
         this.documentServiceUrl = documentServiceUrl;
         this.restTemplate = restTemplate;
     }
@@ -55,6 +60,8 @@ public class DocumentServiceClient {
 
     public DocIdDTO postDocument(String excelFile) {
         try {
+            Path tempFile = Files.createTempFile("upload-", ".xlsx");
+            Files.write(tempFile, excelFile.getBytes(StandardCharsets.UTF_8));
             String url = documentServiceUrl + "/api/v1/documents/workspace/json?isPublic=true";
             FileSystemResource resource = new FileSystemResource(excelFile);
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -82,6 +89,9 @@ public class DocumentServiceClient {
         } catch (RestClientException e) {
             log.error("Error while uploading file: {}", e.getMessage(), e);
             throw new RuntimeException("Error while uploading file");
+        } catch (IOException e) {
+            log.error("Error while uploading file: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 }

@@ -6,18 +6,13 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.beeline.fdmbpm.client.DocumentServiceClient;
+import ru.beeline.fdmbpm.client.DocumentClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.StructurizrClient;
-import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.Context;
-import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
-import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.ContextRepository;
-import ru.beeline.fdmbpm.repository.TypeProcessRepository;
-import ru.beeline.fdmbpm.service.ExportProcessService;
 
 @Slf4j
 @Component("ExportJsonWorkspaceDelegate")
@@ -28,7 +23,7 @@ public class ExportJsonWorkspaceDelegate implements JavaDelegate {
     @Autowired
     StructurizrClient structurizrClient;
     @Autowired
-    DocumentServiceClient documentServiceClient;
+    DocumentClient documentClient;
     @Autowired
     ContextRepository contextRepository;
 
@@ -38,7 +33,7 @@ public class ExportJsonWorkspaceDelegate implements JavaDelegate {
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         ProductDTO productDTO = productClient.getProductInfoByCmdb(cmdb);
         String json = structurizrClient.getDocs(productDTO.getStructurizrApiUrl());
-        DocIdDTO docIdDTO = documentServiceClient.postDocument(json);
+        DocIdDTO docIdDTO = documentClient.postDocument(json);
         contextRepository.save(Context.builder()
                 .name("docId")
                 .value(docIdDTO.getDocId().toString())

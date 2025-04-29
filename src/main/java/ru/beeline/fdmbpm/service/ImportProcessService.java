@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.CapabilityClient;
-import ru.beeline.fdmbpm.client.DocumentServiceClient;
+import ru.beeline.fdmbpm.client.DocumentClient;
 import ru.beeline.fdmbpm.client.PackageClient;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmbpm.dto.importExcel.ExcelBcDTO;
@@ -38,7 +38,7 @@ public class ImportProcessService {
     private String packageQueueName;
 
     @Autowired
-    DocumentServiceClient documentServiceClient;
+    DocumentClient documentClient;
 
     @Autowired
     PackageClient packageClient;
@@ -118,13 +118,13 @@ public class ImportProcessService {
     }
 
     private ResponseEntity<byte[]> getDocumentWithRetry(Integer docId) {
-        ResponseEntity<byte[]> response = documentServiceClient.getDocument(docId);
+        ResponseEntity<byte[]> response = documentClient.getDocument(docId);
         int count = 0;
         int time = 5000;
         while (response.getStatusCode().isSameCodeAs(HttpStatus.SERVICE_UNAVAILABLE) && count < 3) {
             try {
                 Thread.sleep(time);
-                response = documentServiceClient.getDocument(docId);
+                response = documentClient.getDocument(docId);
                 count++;
                 time *= 2;
             } catch (InterruptedException e) {
