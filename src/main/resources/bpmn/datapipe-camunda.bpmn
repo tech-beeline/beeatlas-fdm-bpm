@@ -74,7 +74,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.hasVariable('error')}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1mz259t" sourceRef="Activity_09flps1" targetRef="Gateway_0gln622" />
-    <bpmn:serviceTask id="Activity_09flps1" name="Получение информации и регистрации процесса" camunda:delegateExpression="${RegisterProcessDelegate}">
+    <bpmn:serviceTask id="Activity_09flps1" name="Получение информации и регистрации процесса" camunda:asyncBefore="true" camunda:delegateExpression="${RegisterProcessDelegate}">
       <bpmn:incoming>Flow_0075dwi</bpmn:incoming>
       <bpmn:outgoing>Flow_1mz259t</bpmn:outgoing>
     </bpmn:serviceTask>
