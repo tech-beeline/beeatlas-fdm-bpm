@@ -48,7 +48,7 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_11kgjqd" name="Нет" sourceRef="Gateway_0gln622" targetRef="Activity_0u8o6m7">
       <bpmn:extensionElements />
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.hasVariable('docId')}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!execution.hasVariable('docId')}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="Gateway_1sdbakt">
       <bpmn:incoming>Flow_0g8nq48</bpmn:incoming>
@@ -180,7 +180,7 @@
         <di:waypoint x="425" y="177" />
         <di:waypoint x="460" y="177" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="433" y="159" width="19" height="14" />
+          <dc:Bounds x="433" y="159" width="20" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0zzndqa_di" bpmnElement="Flow_0zzndqa">
