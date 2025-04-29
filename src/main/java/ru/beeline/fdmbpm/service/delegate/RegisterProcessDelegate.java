@@ -28,23 +28,32 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
     @Override
     public void execute(DelegateExecution delegateExecution) {
         String cmdb = (String) delegateExecution.getVariable("cmdb");
+        log.info("RegisterProcessDelegate: cmdb=", cmdb);
         String processId = delegateExecution.getProcessInstanceId();
+        log.info("RegisterProcessDelegate: processId=", processId);
         String businessKey = delegateExecution.getBusinessKey();
+        log.info("RegisterProcessDelegate: businessKey=", businessKey);
         String docId = (String) delegateExecution.getVariable("docId");
+        log.info("RegisterProcessDelegate: docId=", docId);
         TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
+        log.info("RegisterProcessDelegate: typeProcess=", typeProcess.toString());
         CamundaProcess camundaProcess = camundaProcessRepository.save(CamundaProcess.builder()
                 .typeProcessId(typeProcess.getId())
                 .procId(processId)
                 .businessKey(businessKey)
                 .build());
+        log.info("RegisterProcessDelegate: camundaProcess=", camundaProcess.getId());
         delegateExecution.setVariable("process_id", camundaProcess.getId());
-
         saveAlias(camundaProcess.getId(), "Datapipe", typeProcess);
+        log.info("saveAlias: has been saved");
+
         contextRepository.save(Context.builder()
                 .name("cmdb")
                 .value(cmdb)
                 .camundaProcessId(camundaProcess.getId())
                 .build());
+        log.info("context: has been saved");
+
         if (docId != null) {
             contextRepository.save(Context.builder()
                     .name("doc_id")
