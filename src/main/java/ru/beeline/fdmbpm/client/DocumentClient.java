@@ -62,8 +62,8 @@ public class DocumentClient {
         try {
             Path tempFile = Files.createTempFile("upload-", ".xlsx");
             Files.write(tempFile, excelFile.getBytes(StandardCharsets.UTF_8));
+            FileSystemResource resource = new FileSystemResource(tempFile.toFile());
             String url = documentServiceUrl + "/api/v1/documents/workspace/json?isPublic=true";
-            FileSystemResource resource = new FileSystemResource(excelFile);
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", resource);
 
