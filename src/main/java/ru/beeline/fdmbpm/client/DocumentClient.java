@@ -79,6 +79,7 @@ public class DocumentClient {
             } else {
                 log.error("Failed to upload file: {}", response.getStatusCode());
             }
+            Files.deleteIfExists(tempFile);
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
             throw new NotFoundException(e.getMessage());
