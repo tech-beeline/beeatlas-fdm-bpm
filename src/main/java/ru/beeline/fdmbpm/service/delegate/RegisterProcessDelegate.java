@@ -33,7 +33,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
         log.info("RegisterProcessDelegate: processId=", processId);
         String businessKey = delegateExecution.getBusinessKey();
         log.info("RegisterProcessDelegate: businessKey=", businessKey);
-        String docId = (String) delegateExecution.getVariable("docId");
+        String docId = delegateExecution.getVariable("docId").toString();
         log.info("RegisterProcessDelegate: docId=", docId);
         TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
         log.info("RegisterProcessDelegate: typeProcess=", typeProcess.toString());
