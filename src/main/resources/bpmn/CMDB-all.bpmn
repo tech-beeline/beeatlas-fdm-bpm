@@ -4,7 +4,7 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0spxqgs</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1x00lot">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10Y</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1Y</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:serviceTask id="Activity_17zjctx" name="Получения списка приложений" camunda:delegateExpression="${GettingAllApplications}">
