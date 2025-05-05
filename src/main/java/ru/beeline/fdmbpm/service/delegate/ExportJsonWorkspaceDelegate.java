@@ -34,6 +34,7 @@ public class ExportJsonWorkspaceDelegate implements JavaDelegate {
         ProductDTO productDTO = productClient.getProductInfoByCmdb(cmdb);
         String json = structurizrClient.getDocs(productDTO.getStructurizrApiUrl());
         DocIdDTO docIdDTO = documentClient.postDocument(json);
+        log.info("docIdDTO: {}", docIdDTO);
         contextRepository.save(Context.builder()
                 .name("docId")
                 .value(docIdDTO.getDocId().toString())

@@ -60,7 +60,7 @@ public class DocumentClient {
 
     public DocIdDTO postDocument(String excelFile) {
         try {
-            Path tempFile = Files.createTempFile("upload-", ".xlsx");
+            Path tempFile = Files.createTempFile("upload-", ".json");
             Files.write(tempFile, excelFile.getBytes(StandardCharsets.UTF_8));
             FileSystemResource resource = new FileSystemResource(tempFile.toFile());
             String url = documentServiceUrl + "/api/v1/documents/workspace/json?isPublic=true";
@@ -72,9 +72,9 @@ public class DocumentClient {
             headers.set(HttpHeaders.CONTENT_DISPOSITION, "data from structurizr");
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
+            log.info("url: {}", url);
             ResponseEntity<DocIdDTO> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, DocIdDTO.class);
-            if (response.getStatusCode() == HttpStatus.OK) {
+            if (response.getStatusCode() == HttpStatus.CREATED) {
                 log.info("File uploaded successfully");
             } else {
                 log.error("Failed to upload file: {}", response.getStatusCode());
