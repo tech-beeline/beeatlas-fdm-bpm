@@ -33,7 +33,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
         log.info("RegisterProcessDelegate: processId=", processId);
         String businessKey = delegateExecution.getBusinessKey();
         log.info("RegisterProcessDelegate: businessKey=", businessKey);
-        String docId = delegateExecution.getVariable("docId").toString();
+        Integer docId = (Integer) delegateExecution.getVariable("docId");
         log.info("RegisterProcessDelegate: docId=", docId);
         TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
         log.info("RegisterProcessDelegate: typeProcess=", typeProcess.toString());
@@ -55,7 +55,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
         if (docId != null) {
             contextRepository.save(Context.builder()
                     .name("doc_id")
-                    .value(docId)
+                    .value(docId.toString())
                     .camundaProcessId(camundaProcess.getId())
                     .build());
         }
