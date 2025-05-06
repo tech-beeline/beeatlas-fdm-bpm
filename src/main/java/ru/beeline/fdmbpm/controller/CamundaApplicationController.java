@@ -40,17 +40,17 @@ public class CamundaApplicationController {
     }
 
     @PatchMapping("/application/{business_key}/executor")
-    public ResponseEntity<Boolean> patchExecutorProcess(@PathVariable("business_key") String businessKey,
+    public ResponseEntity patchExecutorProcess(@PathVariable("business_key") String businessKey,
                                                         @RequestParam(value = "next_status") String nextStatus,
                                                         HttpServletRequest request) {
         return applicationService.patchExecutorProcess(businessKey, nextStatus, request);
     }
 
     @PatchMapping("/application/{business_key}/change-status/{status_alias}")
-    public ResponseEntity<Boolean> patchChangeStatus(@PathVariable("business_key") String businessKey,
-                                                     @PathVariable("status_alias") String statusAlias,
-                                                     @RequestBody(required = false) CommentDTO commentDTO,
-                                                     HttpServletRequest request) {
-        return applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
+    public ResponseEntity patchChangeStatus(@PathVariable("business_key") String businessKey,
+                                            @PathVariable("status_alias") String statusAlias,
+                                            @RequestBody(required = false) CommentDTO commentDTO,
+                                            HttpServletRequest request) {
+        return  applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
     }
 }
