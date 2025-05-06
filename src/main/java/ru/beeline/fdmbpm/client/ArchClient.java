@@ -20,7 +20,7 @@ public class ArchClient {
         this.restTemplate = restTemplate;
     }
 
-    public void postFitnessFunction(String docId) {
+    public void postFitnessFunction(Integer docId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -37,7 +37,7 @@ public class ArchClient {
         }
     }
 
-    public void publicFdm(String docId) {
+    public void publicFdm(Integer docId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -54,7 +54,7 @@ public class ArchClient {
         }
     }
 
-    public void publicToStructurizr(String docId) {
+    public void publicToStructurizr(Integer docId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
