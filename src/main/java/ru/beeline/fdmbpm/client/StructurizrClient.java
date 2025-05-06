@@ -29,6 +29,7 @@ public class StructurizrClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
+            log.error("Structurizr url:" + url + "/json");
             String result = restTemplate.exchange(url + "/json",
                     HttpMethod.GET, entity,
                     String.class).getBody();
