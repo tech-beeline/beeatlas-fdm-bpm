@@ -17,13 +17,15 @@ public class RegisterApplicationDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution delegateExecution) {
         log.info("старт процесса: Регистрация заявки");
-        String processInstanceId = (String) delegateExecution.getVariable("processInstanceId");
+        String processInstanceId = delegateExecution.getProcessInstanceId();
         String businessKey = (String) delegateExecution.getVariable("businessKey");
         Integer authorId = (Integer) delegateExecution.getVariable("authorId");
         String type = (String) delegateExecution.getVariable("type");
         String comment = (String) delegateExecution.getVariable("comment");
         Integer entityId = (Integer) delegateExecution.getVariable("entityId");
         String name = (String) delegateExecution.getVariable("name");
+        log.info("processInstanceId= {}, businessKey= {}, authorId= {}, type= {}, comment= {}, entityId= {}, name= {}",
+                processInstanceId, businessKey, authorId, type, comment, entityId, name);
         applicationProcessService.applicationProcess(processInstanceId, businessKey, authorId, type,
                 comment, entityId, name);
     }
