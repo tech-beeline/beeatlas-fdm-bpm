@@ -24,7 +24,7 @@ public class RegisterApplicationDelegate implements JavaDelegate {
         String comment = (String) delegateExecution.getVariable("comment");
         Integer entityId = (Integer) delegateExecution.getVariable("entityId");
         String name = (String) delegateExecution.getVariable("name");
-        log.info("processInstanceId= {}, businessKey= {}, authorId= {}, type= {}, comment= {}, entityId= {}, name= {}",
+        log.info("переменные процесса: processInstanceId= {}, businessKey= {}, authorId= {}, type= {}, comment= {}, entityId= {}, name= {}",
                 processInstanceId, businessKey, authorId, type, comment, entityId, name);
         applicationProcessService.applicationProcess(processInstanceId, businessKey, authorId, type,
                 comment, entityId, name);
