@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationStatusDTO;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationTypeDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
+import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.ApplicationRepository;
@@ -60,7 +61,7 @@ public class ApplicationService {
     @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
-    public ResponseEntity<Boolean> patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
+    public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
                 new NotFoundException(String.format("Запись с данным business_key: %s не найдена", businessKey)));
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
@@ -74,8 +75,9 @@ public class ApplicationService {
             throw new ValidationException("Исполнитель уже назначен");
         }
         application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
-        if (Boolean.TRUE.equals(patchChangeStatus(businessKey, nextStatus, request, null).getBody())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        ResponseEntity responseEntity = patchChangeStatus(businessKey, nextStatus, request, null);
+        if (responseEntity.getStatusCode().is5xxServerError() || responseEntity.getStatusCode().is4xxClientError()) {
+            return responseEntity;
         } else {
             applicationRepository.save(application);
         }
@@ -87,8 +89,8 @@ public class ApplicationService {
                 .anyMatch(executorRoles::contains);
     }
 
-    public ResponseEntity<Boolean> patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request,
-                                                     CommentDTO commentDTO) {
+    public ResponseEntity patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request,
+                                            CommentDTO commentDTO) {
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         ApplicationTypeStatus targetStatus = applicationTypeStatusRepository
@@ -107,7 +109,7 @@ public class ApplicationService {
         }
         Integer currentSerial = currentStatus.getSerialNumber();
         Integer targetSerial = targetStatus.getSerialNumber();
-        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial + 1);
+        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial - 1);
         if (!canChangeStatus) {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
@@ -118,9 +120,7 @@ public class ApplicationService {
             application.setResponsibleId(application.getExecutorId());
         }
         application.setUpdateDate(LocalDateTime.now());
-        if (sendStatusChangeMessageToProcess(application, targetStatus.getMessage())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(true);
-        }
+        sendStatusChangeMessageToProcess(application, targetStatus.getMessage());
         applicationRepository.save(application);
         saveComment(application, commentDTO, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -166,7 +166,7 @@ public class ApplicationService {
         }
     }
 
-    private boolean sendStatusChangeMessageToProcess(Application application, String message) {
+    private void sendStatusChangeMessageToProcess(Application application, String message) {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("message", message);
@@ -175,13 +175,12 @@ public class ApplicationService {
                     .setVariables(variables)
                     .correlate();
             log.info("Переданы данные в процесс Camunda: {message, " + message + "}");
-            return false;
         } catch (MismatchingMessageCorrelationException e) {
-            log.error("Процесс с ID " + application.getProcessId() + " не найден или уже завершён");
-            return true;
+            log.error("Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
+            throw new CustomCamundaException("Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
         } catch (Exception e) {
             log.error("Ошибка при отправке сообщения в Camunda", e);
-            return true;
+            throw new CustomCamundaException("Ошибка при отправке сообщения в Camunda");
         }
     }
 

@@ -23,7 +23,7 @@ public class GraphClient {
         this.restTemplate = restTemplate;
     }
 
-    public void postLocalGraph(String docId) {
+    public void postLocalGraph(Integer docId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,7 +40,7 @@ public class GraphClient {
         }
     }
 
-    public void postGlobalGraph(String docId) {
+    public void postGlobalGraph(Integer docId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

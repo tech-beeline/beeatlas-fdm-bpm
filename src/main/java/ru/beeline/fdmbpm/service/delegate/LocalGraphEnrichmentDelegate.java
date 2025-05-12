@@ -26,7 +26,7 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
     @Override
     public void execute(DelegateExecution delegateExecution) {
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
-        String docId = (String) delegateExecution.getVariable("docId");
+        Integer docId = (Integer) delegateExecution.getVariable("docId");
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         try {
