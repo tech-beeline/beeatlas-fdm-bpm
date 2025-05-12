@@ -18,7 +18,7 @@ public class RegisterApplicationDelegate implements JavaDelegate {
     public void execute(DelegateExecution delegateExecution) {
         log.info("старт процесса: Регистрация заявки");
         String processInstanceId = delegateExecution.getProcessInstanceId();
-        String businessKey = (String) delegateExecution.getVariable("businessKey");
+        String businessKey = delegateExecution.getProcessBusinessKey();
         Integer authorId = (Integer) delegateExecution.getVariable("authorId");
         String type = (String) delegateExecution.getVariable("type");
         String comment = (String) delegateExecution.getVariable("comment");
