@@ -2,11 +2,7 @@ package ru.beeline.fdmbpm.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
@@ -43,9 +39,10 @@ public class NotifyServiceClient {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
-            restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/api/v1//notify/business-event/group/role/" + role +
-                            "/" + entityType + "/" + entityId,
+            String url = notifyServiceUrl + "/api/v1/notify/business-event/group/role/" + role +
+                    "/" + entityType + "/" + entityId;
+            log.info(url);
+            restTemplate.exchange(url,
                     HttpMethod.POST, new HttpEntity<>(headers), ResponseEntity.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
