@@ -20,7 +20,7 @@
       <bpmn:incoming>Flow_1eae2ql</bpmn:incoming>
       <bpmn:outgoing>Flow_1gdprpe</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1i6z4sr">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1D</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_1eae2ql" sourceRef="Gateway_004frrc" targetRef="Event_138pax1" />
@@ -64,7 +64,7 @@
       <bpmn:incoming>Flow_0nneudj</bpmn:incoming>
       <bpmn:outgoing>Flow_0zdfvrn</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_10le28y">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1D</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_0nneudj" sourceRef="Gateway_0xr8ool" targetRef="Event_0uh9ker" />
