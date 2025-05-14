@@ -30,11 +30,7 @@ import ru.beeline.fdmbpm.repository.CommentRepository;
 import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
@@ -109,7 +105,7 @@ public class ApplicationService {
         }
         Integer currentSerial = currentStatus.getSerialNumber();
         Integer targetSerial = targetStatus.getSerialNumber();
-        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial - 1);
+        boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial + 1);
         if (!canChangeStatus) {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
