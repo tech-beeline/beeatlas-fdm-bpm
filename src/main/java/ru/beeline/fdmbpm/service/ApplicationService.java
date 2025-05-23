@@ -58,8 +58,9 @@ public class ApplicationService {
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
     public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
-        Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
-                new NotFoundException(String.format("Запись с данным business_key: %s не найдена", businessKey)));
+        Application application = applicationRepository.findByBusinessKey(businessKey)
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным business_key: %s не найдена",
+                                                                       businessKey)));
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
         if (executorRoles.isEmpty()) {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
@@ -81,16 +82,17 @@ public class ApplicationService {
     }
 
     private boolean hasAccessRole(List<String> executorRoles, List<String> roles) {
-        return roles.stream()
-                .anyMatch(executorRoles::contains);
+        return roles.stream().anyMatch(executorRoles::contains);
     }
 
-    public ResponseEntity patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request,
+    public ResponseEntity patchChangeStatus(String businessKey,
+                                            String statusAlias,
+                                            HttpServletRequest request,
                                             CommentDTO commentDTO) {
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        ApplicationTypeStatus targetStatus = applicationTypeStatusRepository
-                .findByTypeIdAndAlias(application.getTypeId(), statusAlias);
+        ApplicationTypeStatus targetStatus = applicationTypeStatusRepository.findByTypeIdAndAlias(application.getTypeId(),
+                                                                                                  statusAlias);
         if (targetStatus == null) {
             throw new ValidationException("Данного статуса не существует");
         }
@@ -123,25 +125,29 @@ public class ApplicationService {
     }
 
     public List<ApplicationDTO> getApplicationsByAuthor(Integer userId) {
-        List<Application> application = applicationRepository.findAllByAuthorId(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены", userId)));
+        List<Application> application = applicationRepository.findAllByAuthorId(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены",
+                                                                       userId)));
         return buildApplicationDTO(application);
     }
 
     public List<ApplicationDTO> getApplicationsByExecutor(Integer userId) {
-        List<Application> application = applicationRepository.findAllByExecutorId(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены", userId)));
+        List<Application> application = applicationRepository.findAllByExecutorId(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены",
+                                                                       userId)));
         return buildApplicationDTO(application);
     }
 
     private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
-                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
+                                                                       businessKey)));
         if (request.getHeader(USER_ID_HEADER) == null || request.getHeader(USER_ID_HEADER).isEmpty()) {
             throw new ForbiddenException("Нет прав доступа");
         }
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(), userId)) {
+        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(),
+                                                                                  userId)) {
             throw new ForbiddenException("Нет прав доступа");
         }
         return application;
@@ -154,11 +160,11 @@ public class ApplicationService {
                 throw new NotFoundException("Пользователь с данным id не найден");
             }
             commentRepository.save(Comment.builder()
-                    .applicationId(application.getId())
-                    .comment(commentDTO.getComment())
-                    .createdDate(LocalDateTime.now())
-                    .fullName(userProfileDTO.getFullName())
-                    .build());
+                                           .applicationId(application.getId())
+                                           .comment(commentDTO.getComment())
+                                           .createdDate(LocalDateTime.now())
+                                           .fullName(userProfileDTO.getFullName())
+                                           .build());
         }
     }
 
@@ -188,26 +194,30 @@ public class ApplicationService {
         } else {
             throw new ValidationException("Отсутствует роль в заголовках");
         }
-        List<Application> applicationList = applicationRepository.findAllByTypeIdInAndExecutorIdNull(executorRoles.stream().
-                map(ExecutorRoles::getTypeId).collect(Collectors.toList()));
+        List<Application> applicationList = applicationRepository.findAllByTypeIdInAndExecutorIdNull(executorRoles.stream()
+                                                                                                             .map(ExecutorRoles::getTypeId)
+                                                                                                             .collect(
+                                                                                                                     Collectors.toList()));
         return buildApplicationDTO(applicationList);
     }
 
     private List<ApplicationDTO> buildApplicationDTO(List<Application> applicationList) {
-        return applicationList.stream().
-                map(application -> ApplicationDTO.builder()
+        return applicationList.stream()
+                .map(application -> ApplicationDTO.builder()
                         .id(application.getId())
+                        .business_key(application.getBusinessKey())
                         .type(ApplicationTypeDTO.builder()
-                                .id(application.getApplicationType().getId())
-                                .name(application.getApplicationType().getName())
-                                .description(application.getApplicationType().getDescription())
-                                .entityType(application.getApplicationType().getEntityType())
-                                .build())
+                                      .id(application.getApplicationType().getId())
+                                      .name(application.getApplicationType().getName())
+                                      .description(application.getApplicationType().getDescription())
+                                      .entityType(application.getApplicationType().getEntityType())
+                                      .build())
                         .status(ApplicationStatusDTO.builder()
-                                .id(application.getStatus().getId())
-                                .name(application.getStatus().getName())
-                                .isEndStatus(application.getStatus().getIsEndStatus())
-                                .build())
+                                        .id(application.getStatus().getId())
+                                        .name(application.getStatus().getName())
+                                        .alias(application.getStatus().getAlias())
+                                        .isEndStatus(application.getStatus().getIsEndStatus())
+                                        .build())
                         .authorId(application.getAuthorId())
                         .executorId(application.getExecutorId())
                         .name(application.getName())
@@ -215,18 +225,21 @@ public class ApplicationService {
                         .createDate(application.getCreateDate())
                         .updateDate(application.getUpdateDate())
                         .comments(buildComments(application.getId()))
-                        .build()).toList();
+                        .build())
+                .toList();
     }
 
     private List<ApplicationCommentDTO> buildComments(Integer applicationId) {
         List<Comment> commentList = commentRepository.findAllByApplicationId(applicationId);
         if (!commentList.isEmpty()) {
-            return commentList.stream().map(comment -> ApplicationCommentDTO.builder()
-                    .id(comment.getId())
-                    .comment(comment.getComment())
-                    .createdDate(comment.getCreatedDate())
-                    .fullName(comment.getFullName())
-                    .build()).toList();
+            return commentList.stream()
+                    .map(comment -> ApplicationCommentDTO.builder()
+                            .id(comment.getId())
+                            .comment(comment.getComment())
+                            .createdDate(comment.getCreatedDate())
+                            .fullName(comment.getFullName())
+                            .build())
+                    .toList();
         }
         return new ArrayList<>();
     }

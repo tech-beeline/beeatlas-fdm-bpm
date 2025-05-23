@@ -15,6 +15,7 @@ import java.util.List;
 public class ApplicationDTO {
 
     private Integer id;
+    private String business_key;
     private ApplicationTypeDTO type;
     private ApplicationStatusDTO status;
     private Integer authorId;
