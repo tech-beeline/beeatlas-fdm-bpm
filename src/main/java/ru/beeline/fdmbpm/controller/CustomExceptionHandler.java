@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.S3Exception;
@@ -28,6 +29,15 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(S3Exception.class)
     public ResponseEntity<Object> handleException(S3Exception e) {
+        log.error(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header("content-type", MediaType.APPLICATION_JSON_VALUE)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleException(ResponseStatusException e) {
         log.error(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)

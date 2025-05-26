@@ -13,18 +13,23 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ApplicationDTO {
+public class ApplicationExtendedDTO {
 
     private Integer id;
+    @JsonProperty("entity_id")
+    private Integer entityId;
     @JsonProperty("business_key")
     private String businessKey;
     private ApplicationTypeDTO type;
-    private ApplicationStatusDTO status;
-    private Integer authorId;
-    private Integer executorId;
+    private ApplicationStatusShortDTO status;
+    private AuthorDTO author;
+    private AuthorDTO executor;
     private String name;
+    @JsonProperty("responsible_id")
     private Integer responsibleId;
+    @JsonProperty("create_date")
     private LocalDateTime createDate;
+    @JsonProperty("update_date")
     private LocalDateTime updateDate;
     private List<ApplicationCommentDTO> comments;
 }

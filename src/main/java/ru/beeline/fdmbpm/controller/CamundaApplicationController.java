@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationExtendedDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.service.ApplicationService;
 
@@ -44,6 +45,11 @@ public class CamundaApplicationController {
                                                         @RequestParam(value = "next_status") String nextStatus,
                                                         HttpServletRequest request) {
         return applicationService.patchExecutorProcess(businessKey, nextStatus, request);
+    }
+
+    @GetMapping("/application/{business_key}")
+    public ApplicationExtendedDTO getApplicationsByBusinessKey(@PathVariable("business_key") String businessKey) {
+        return applicationService.getApplicationsByBusinessKey(businessKey);
     }
 
     @PatchMapping("/application/{business_key}/change-status/{status_alias}")

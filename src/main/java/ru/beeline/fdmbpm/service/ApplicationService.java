@@ -15,10 +15,7 @@ import ru.beeline.fdmbpm.domain.Application;
 import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 import ru.beeline.fdmbpm.domain.Comment;
 import ru.beeline.fdmbpm.domain.ExecutorRoles;
-import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationCommentDTO;
-import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationDTO;
-import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationStatusDTO;
-import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationTypeDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.*;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
 import ru.beeline.fdmbpm.exception.CustomCamundaException;
@@ -205,7 +202,7 @@ public class ApplicationService {
         return applicationList.stream()
                 .map(application -> ApplicationDTO.builder()
                         .id(application.getId())
-                        .business_key(application.getBusinessKey())
+                        .businessKey(application.getBusinessKey())
                         .type(ApplicationTypeDTO.builder()
                                       .id(application.getApplicationType().getId())
                                       .name(application.getApplicationType().getName())
@@ -242,5 +239,55 @@ public class ApplicationService {
                     .toList();
         }
         return new ArrayList<>();
+    }
+
+    public ApplicationExtendedDTO getApplicationsByBusinessKey(String businessKey) {
+        Application application = applicationRepository.findByBusinessKey(businessKey)
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
+                                                                       businessKey)));
+        UserProfileDTO authorProfileDTO = userClient.getUserProfile(Integer.parseInt(RequestContext.getUserId()));
+        AuthorDTO author = AuthorDTO.builder()
+                .id(authorProfileDTO.getId())
+                .fullName(authorProfileDTO.getFullName())
+                .email(authorProfileDTO.getEmail())
+                .build();
+        AuthorDTO executor = null;
+        if (application.getExecutorId() != null) {
+            UserProfileDTO executorProfileDTO = userClient.getUserProfile(application.getExecutorId());
+            executor = AuthorDTO.builder()
+                    .id(executorProfileDTO.getId())
+                    .fullName(executorProfileDTO.getFullName())
+                    .email(executorProfileDTO.getEmail())
+                    .build();
+        }
+        return buildApplicationExtendedDTO(application, author, executor);
+    }
+
+    private ApplicationExtendedDTO buildApplicationExtendedDTO(Application application,
+                                                               AuthorDTO author,
+                                                               AuthorDTO executor) {
+        return ApplicationExtendedDTO.builder()
+                .id(application.getId())
+                .entityId(application.getEntityId())
+                .businessKey(application.getBusinessKey())
+                .type(ApplicationTypeDTO.builder()
+                              .id(application.getApplicationType().getId())
+                              .name(application.getApplicationType().getName())
+                              .description(application.getApplicationType().getDescription())
+                              .entityType(application.getApplicationType().getEntityType())
+                              .build())
+                .status(ApplicationStatusShortDTO.builder()
+                                .id(application.getStatus().getId())
+                                .name(application.getStatus().getName())
+                                .isEndStatus(application.getStatus().getIsEndStatus())
+                                .build())
+                .author(author)
+                .executor(executor)
+                .name(application.getName())
+                .responsibleId(application.getResponsibleId())
+                .createDate(application.getCreateDate())
+                .updateDate(application.getUpdateDate())
+                .comments(buildComments(application.getId()))
+                .build();
     }
 }
