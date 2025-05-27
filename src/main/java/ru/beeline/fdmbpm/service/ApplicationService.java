@@ -245,7 +245,7 @@ public class ApplicationService {
         Application application = applicationRepository.findByBusinessKey(businessKey)
                 .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
                                                                        businessKey)));
-        UserProfileDTO authorProfileDTO = userClient.getUserProfile(Integer.parseInt(RequestContext.getUserId()));
+        UserProfileDTO authorProfileDTO = userClient.getUserProfile(application.getAuthorId());
         AuthorDTO author = AuthorDTO.builder()
                 .id(authorProfileDTO.getId())
                 .fullName(authorProfileDTO.getFullName())
