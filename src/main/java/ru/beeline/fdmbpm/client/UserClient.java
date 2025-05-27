@@ -33,10 +33,7 @@ public class UserClient {
             return restTemplate.exchange(userServerUrl + "/api/v1/user/" + id,
                     HttpMethod.GET, entity, new ParameterizedTypeReference<UserProfileDTO>() {
                     }).getBody();
-        } catch (HttpClientErrorException.NotFound e) {
-            log.error(e.getMessage());
-            return null;
-        } catch (Exception e) {
+        }  catch (Exception e) {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         }
