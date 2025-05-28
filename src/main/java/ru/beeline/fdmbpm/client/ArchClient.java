@@ -20,13 +20,13 @@ public class ArchClient {
         this.restTemplate = restTemplate;
     }
 
-    public void postFitnessFunction(Integer docId) {
+    public void postFitnessFunction(Integer docId, Integer processId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(headers);
             ResponseEntity<Void> response = restTemplate.exchange(
-                    archServerUrl + "/api/v1/fitness-function/local/" + docId,
+                    archServerUrl + "/api/v1/fitness-function/local/" + docId + "?pipelineId=" + processId,
                     HttpMethod.POST,
                     requestEntity,
                     Void.class

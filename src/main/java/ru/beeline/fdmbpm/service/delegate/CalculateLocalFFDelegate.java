@@ -33,7 +33,7 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
 
         try {
-            archClient.postFitnessFunction(docId);
+            archClient.postFitnessFunction(docId, processId);
             saveAlias(processId, "ffdn", typeProcess);
         } catch (Exception e) {
             saveAlias(processId, "fferrcd", typeProcess);
