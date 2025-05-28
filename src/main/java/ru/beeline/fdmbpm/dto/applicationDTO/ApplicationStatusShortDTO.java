@@ -14,5 +14,6 @@ public class ApplicationStatusShortDTO {
 
     private Integer id;
     private String name;
+    private String alias;
     private Boolean isEndStatus;
 }

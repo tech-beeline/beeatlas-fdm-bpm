@@ -279,6 +279,7 @@ public class ApplicationService {
                 .status(ApplicationStatusShortDTO.builder()
                                 .id(application.getStatus().getId())
                                 .name(application.getStatus().getName())
+                                .alias(application.getStatus().getAlias())
                                 .isEndStatus(application.getStatus().getIsEndStatus())
                                 .build())
                 .author(author)
