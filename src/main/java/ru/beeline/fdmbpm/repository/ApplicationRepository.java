@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface ApplicationRepository extends JpaRepository<Application, Integer> {
     Optional<Application> findByBusinessKey(String businessKey);
+    Optional<Application> findByProcessId(String processId);
 
     List<Application> findAllByTypeIdInAndExecutorIdNull(List<Integer> typeId);
 
