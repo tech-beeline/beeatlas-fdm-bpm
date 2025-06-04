@@ -145,7 +145,7 @@ public class ApplicationProcessService {
         if(delegateExecution != null) {
             if (applicationTypeEnum.getAlias().equals("create_business_capability") || applicationTypeEnum.getAlias()
                     .equals("update_business_capability")) {
-                Application application = applicationRepository.findById(Integer.parseInt(delegateExecution.getProcessInstanceId()))
+                Application application = applicationRepository.findByProcessId(delegateExecution.getProcessInstanceId())
                         .get();
                 BusinessCapabilityOrderDraftResponseDTO order = capabilityClient.getOrderBc(application.getEntityId());
                 dashboardClient.putCapability(order);
