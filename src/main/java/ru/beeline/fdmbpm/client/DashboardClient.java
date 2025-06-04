@@ -51,14 +51,15 @@ public class DashboardClient {
     public void putCapability(BusinessCapabilityOrderDraftResponseDTO order) {
         try {
             DashboardCapabilityV4DTO dashboardCapabilityV4DTO = DashboardCapabilityV4DTO.builder()
-                    .code(order.getMutable()==null ? null:order.getMutable().getCode())
+                    .code(order.getMutable() == null ? null : order.getMutable().getCode())
                     .isDomain(false)
                     .name(order.getName())
                     .description(order.getDescription())
                     .author(order.getAuthor())
                     .owner(order.getOwner())
                     .status("PROPOSED")
-                    .parent(new DashboardCapabilityV4ParentDTO(order.getParent().getCode()))
+                    .parent(new DashboardCapabilityV4ParentDTO(order.getParent() == null ? null : order.getParent()
+                            .getCode()))
                     .build();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
