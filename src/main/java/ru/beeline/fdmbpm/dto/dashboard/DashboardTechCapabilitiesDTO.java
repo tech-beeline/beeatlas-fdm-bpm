@@ -1,4 +1,4 @@
-package ru.beeline.fdmbpm.dto;
+package ru.beeline.fdmbpm.dto.dashboard;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
