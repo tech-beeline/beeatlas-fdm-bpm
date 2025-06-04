@@ -51,7 +51,7 @@ public class DashboardClient {
     public void putCapability(BusinessCapabilityOrderDraftResponseDTO order) {
         try {
             DashboardCapabilityV4DTO dashboardCapabilityV4DTO = DashboardCapabilityV4DTO.builder()
-                    .code(order.getMutable().getCode())
+                    .code(order.getMutable()==null ? null:order.getMutable().getCode())
                     .isDomain(false)
                     .name(order.getName())
                     .description(order.getDescription())
