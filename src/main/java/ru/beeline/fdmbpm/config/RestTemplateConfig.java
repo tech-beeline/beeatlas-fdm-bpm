@@ -13,7 +13,7 @@ public class RestTemplateConfig {
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setBufferRequestBody(false);
-        factory.setReadTimeout(80_000);
+        factory.setReadTimeout(150_000);
         return builder
                 .requestFactory(() -> factory)
                 .build();
