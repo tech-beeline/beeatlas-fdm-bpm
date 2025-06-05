@@ -64,7 +64,7 @@ public class DashboardClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
-            log.info("response from dashboard:"+restTemplate.exchange(capabilityServerUrl + "/api/capabilities",
+            log.info("response from dashboard:"+restTemplate.exchange(capabilityServerUrl + "/api/v4/capabilities",
                                   HttpMethod.PUT,
                                   requestEntity,
                                   String.class));
