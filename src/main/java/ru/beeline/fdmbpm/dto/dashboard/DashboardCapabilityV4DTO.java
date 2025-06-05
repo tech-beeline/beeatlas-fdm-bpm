@@ -9,12 +9,11 @@ import lombok.*;
 @Builder
 public class DashboardCapabilityV4DTO {
 
-    private String code;
     private Boolean isDomain;
     private String name;
     private String description;
     private String author;
-    private String status;
-    private DashboardCapabilityV4ParentDTO parent;
+    private String parent;
     private String owner;
+    private String self;
 }

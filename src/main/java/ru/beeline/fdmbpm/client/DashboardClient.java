@@ -9,7 +9,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.beeline.fdmbpm.dto.dashboard.*;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityV4DTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardProductsDTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
@@ -51,23 +54,19 @@ public class DashboardClient {
     public void putCapability(BusinessCapabilityOrderDraftResponseDTO order) {
         try {
             DashboardCapabilityV4DTO dashboardCapabilityV4DTO = DashboardCapabilityV4DTO.builder()
-                    .code(order.getMutable() == null ? null : order.getMutable().getCode())
                     .isDomain(false)
                     .name(order.getName())
                     .description(order.getDescription())
                     .author(order.getAuthor())
                     .owner(order.getOwner())
-                    .status("PROPOSED")
-                    .parent(new DashboardCapabilityV4ParentDTO(order.getParent() == null ? null : order.getParent()
-                            .getCode()))
+                    .parent(order.getParent() == null ? null : order.getParent().getCode())
+                    .self("/api/v4/capabilities/undefined")
                     .build();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
-            log.info("response from dashboard:"+restTemplate.exchange(dashboardServerUrl + "/api/v4/capabilities",
-                                                                      HttpMethod.PUT,
-                                                                      requestEntity,
-                                                                      String.class));
+            log.info("response from dashboard:" + restTemplate.exchange(dashboardServerUrl + "/api/capabilities/" + order.getMutable()
+                    .getCode(), HttpMethod.PUT, requestEntity, String.class));
 
         } catch (Exception e) {
             log.error(e.getMessage());
