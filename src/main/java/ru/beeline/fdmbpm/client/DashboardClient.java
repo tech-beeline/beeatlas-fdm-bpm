@@ -19,11 +19,11 @@ import java.util.List;
 public class DashboardClient {
 
     RestTemplate restTemplate;
-    private final String capabilityServerUrl;
+    private final String dashboardServerUrl;
 
-    public DashboardClient(@Value("${integration.dashboard-server-url}") String capabilityServerUrl,
+    public DashboardClient(@Value("${integration.dashboard-server-url}") String dashboardServerUrl,
                            RestTemplate restTemplate) {
-        this.capabilityServerUrl = capabilityServerUrl;
+        this.dashboardServerUrl = dashboardServerUrl;
         this.restTemplate = restTemplate;
     }
 
@@ -33,7 +33,7 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<DashboardCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/capabilities",
+            List<DashboardCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/capabilities",
                                                                         HttpMethod.GET,
                                                                         entity,
                                                                         new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {})
@@ -64,10 +64,10 @@ public class DashboardClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
-            log.info("response from dashboard:"+restTemplate.exchange(capabilityServerUrl + "/api/v4/capabilities",
-                                  HttpMethod.PUT,
-                                  requestEntity,
-                                  String.class));
+            log.info("response from dashboard:"+restTemplate.exchange(dashboardServerUrl + "/api/v4/capabilities",
+                                                                      HttpMethod.PUT,
+                                                                      requestEntity,
+                                                                      String.class));
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -80,7 +80,7 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<DashboardTechCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities",
+            List<DashboardTechCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/tech-capabilities",
                                                                             HttpMethod.GET,
                                                                             entity,
                                                                             new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {})
@@ -101,7 +101,7 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<DashboardProductsDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/v4/systems?level=systems",
+            List<DashboardProductsDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/v4/systems?level=systems",
                                                                       HttpMethod.GET,
                                                                       entity,
                                                                       new ParameterizedTypeReference<List<DashboardProductsDTO>>() {})
