@@ -15,5 +15,6 @@ public class DashboardCapabilityV4DTO {
     private String author;
     private String parent;
     private String owner;
+    private String status;
     private String self;
 }

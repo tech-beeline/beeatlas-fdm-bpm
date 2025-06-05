@@ -60,6 +60,7 @@ public class DashboardClient {
                     .author(order.getAuthor())
                     .owner(order.getOwner())
                     .parent(order.getParent() == null ? null : order.getParent().getCode())
+                    .status("PROPOSED")
                     .self("/api/v4/capabilities/undefined")
                     .build();
             HttpHeaders headers = new HttpHeaders();
