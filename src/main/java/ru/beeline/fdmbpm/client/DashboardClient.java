@@ -9,9 +9,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.beeline.fdmbpm.dto.DashboardCapabilityDTO;
-import ru.beeline.fdmbpm.dto.DashboardProductsDTO;
-import ru.beeline.fdmbpm.dto.DashboardTechCapabilityDTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityDTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityV4DTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardProductsDTO;
+import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
@@ -20,11 +22,11 @@ import java.util.List;
 public class DashboardClient {
 
     RestTemplate restTemplate;
-    private final String capabilityServerUrl;
+    private final String dashboardServerUrl;
 
-    public DashboardClient(@Value("${integration.dashboard-server-url}") String capabilityServerUrl,
+    public DashboardClient(@Value("${integration.dashboard-server-url}") String dashboardServerUrl,
                            RestTemplate restTemplate) {
-        this.capabilityServerUrl = capabilityServerUrl;
+        this.dashboardServerUrl = dashboardServerUrl;
         this.restTemplate = restTemplate;
     }
 
@@ -34,8 +36,11 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<DashboardCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {
-            }).getBody();
+            List<DashboardCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/capabilities",
+                                                                        HttpMethod.GET,
+                                                                        entity,
+                                                                        new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {})
+                    .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's Capabilities aren't received");
             }
@@ -46,14 +51,42 @@ public class DashboardClient {
         return null;
     }
 
+    public void putCapability(BusinessCapabilityOrderDraftResponseDTO order) {
+        try {
+            DashboardCapabilityV4DTO dashboardCapabilityV4DTO = DashboardCapabilityV4DTO.builder()
+                    .isDomain(false)
+                    .name(order.getName())
+                    .description(order.getDescription())
+                    .author(order.getAuthor())
+                    .owner(order.getOwner())
+                    .parent(order.getParent() == null ? null : order.getParent().getCode())
+                    .status("PROPOSED")
+                    .self("/api/v4/capabilities/undefined")
+                    .build();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
+            log.info("response from dashboard:" + restTemplate.exchange(dashboardServerUrl + "/api/capabilities/" + order.getCode(),
+                                                                        HttpMethod.PUT,
+                                                                        requestEntity,
+                                                                        String.class));
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
     public List<DashboardTechCapabilityDTO> getTechCapabilities() {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<DashboardTechCapabilityDTO> result = restTemplate.exchange(capabilityServerUrl + "/api/tech-capabilities", HttpMethod.GET, entity, new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {
-            }).getBody();
+            List<DashboardTechCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/tech-capabilities",
+                                                                            HttpMethod.GET,
+                                                                            entity,
+                                                                            new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {})
+                    .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's TechCapabilities aren't received");
             }
@@ -70,12 +103,11 @@ public class DashboardClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<DashboardProductsDTO> result = restTemplate.exchange(
-                    capabilityServerUrl + "/api/v4/systems?level=systems",
-                    HttpMethod.GET,
-                    entity,
-                    new ParameterizedTypeReference<List<DashboardProductsDTO>>() {
-                    }).getBody();
+            List<DashboardProductsDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/v4/systems?level=systems",
+                                                                      HttpMethod.GET,
+                                                                      entity,
+                                                                      new ParameterizedTypeReference<List<DashboardProductsDTO>>() {})
+                    .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's Products aren't received");
             }

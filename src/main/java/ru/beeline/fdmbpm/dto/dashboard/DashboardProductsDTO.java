@@ -1,10 +1,11 @@
-package ru.beeline.fdmbpm.dto;
+package ru.beeline.fdmbpm.dto.dashboard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import ru.beeline.fdmbpm.dto.LinkDTO;
 
 import java.util.Date;
 

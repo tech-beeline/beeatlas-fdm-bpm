@@ -17,4 +17,14 @@ public class RestTemplateConfig {
                 .requestFactory(() -> factory)
                 .build();
     }
+
+    @Bean(name = "longTimeoutRestTemplate")
+    public RestTemplate longTimeoutRestTemplate(RestTemplateBuilder builder) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setBufferRequestBody(false);
+        factory.setReadTimeout(600_000);
+        return builder
+                .requestFactory(() -> factory)
+                .build();
+    }
 }
