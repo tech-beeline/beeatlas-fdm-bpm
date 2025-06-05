@@ -2,6 +2,7 @@ package ru.beeline.fdmbpm.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -25,11 +26,15 @@ import java.util.List;
 public class ProductClient {
 
     RestTemplate restTemplate;
+    RestTemplate longTimeoutRestTemplate;
     private final String productServerUrl;
 
-    public ProductClient(@Value("${integration.products-server-url}") String productServerUrl, RestTemplate restTemplate) {
+    public ProductClient(@Value("${integration.products-server-url}") String productServerUrl, RestTemplate restTemplate,
+                         @Qualifier("longTimeoutRestTemplate") RestTemplate longTimeoutRestTemplate
+    ) {
         this.productServerUrl = productServerUrl;
         this.restTemplate = restTemplate;
+        this.longTimeoutRestTemplate = longTimeoutRestTemplate;
     }
 
     public void deleteRelation(Integer techId, Integer productId) {
@@ -53,7 +58,7 @@ public class ProductClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(postProductRequest, headers);
-            ResponseEntity<Void> response = restTemplate.exchange(
+            ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(
                     productServerUrl + "/api/v1/infra?product=" + product,
                     HttpMethod.POST,
                     requestEntity,
