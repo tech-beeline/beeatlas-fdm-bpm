@@ -16,12 +16,13 @@ import java.util.List;
 public class ApplicationDTO {
 
     private Integer id;
-    @JsonProperty("business_key")
+    private Integer entityId;
     private String businessKey;
     private ApplicationTypeDTO type;
     private ApplicationStatusDTO status;
-    private Integer authorId;
-    private Integer executorId;
+    private ApplicationParticipantDTO author;
+    private ApplicationParticipantDTO executor;
+    private List<ApplicationAdditionalInfoDTO> additionalInfo;
     private String name;
     private Integer responsibleId;
     private LocalDateTime createDate;

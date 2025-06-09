@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.UserClient;
 import ru.beeline.fdmbpm.controller.RequestContext;
 import ru.beeline.fdmbpm.domain.Application;
@@ -28,6 +29,7 @@ import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
@@ -53,6 +55,8 @@ public class ApplicationService {
 
     @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
+    @Autowired
+    private CapabilityClient capabilityClient;
 
     public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
@@ -125,14 +129,40 @@ public class ApplicationService {
         List<Application> application = applicationRepository.findAllByAuthorId(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены",
                                                                        userId)));
-        return buildApplicationDTO(application);
+        Set<Integer> participantIds = new HashSet<>();
+        application.forEach(app -> {
+            participantIds.add(app.getAuthorId());
+            participantIds.add(app.getExecutorId());
+        });
+        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream()
+                                                                                       .collect(Collectors.toList()));
+        List<AdditionalInfoDTO> additional = capabilityClient.getAdditionalInfoDTO(application.stream()
+                                                                                           .filter(app -> app.getApplicationType()
+                                                                                                   .getEntityType()
+                                                                                                   .equals("BUSINESS_CAPABILITY"))
+                                                                                           .map(Application::getEntityId)
+                                                                                           .collect(Collectors.toList()));
+        return buildApplicationDTO(application, participants, additional);
     }
 
     public List<ApplicationDTO> getApplicationsByExecutor(Integer userId) {
         List<Application> application = applicationRepository.findAllByExecutorId(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены",
                                                                        userId)));
-        return buildApplicationDTO(application);
+        Set<Integer> participantIds = new HashSet<>();
+        application.forEach(app -> {
+            participantIds.add(app.getAuthorId());
+            participantIds.add(app.getExecutorId());
+        });
+        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream()
+                                                                                       .collect(Collectors.toList()));
+        List<AdditionalInfoDTO> additional = capabilityClient.getAdditionalInfoDTO(application.stream()
+                                                                                           .filter(app -> app.getApplicationType()
+                                                                                                   .getEntityType()
+                                                                                                   .equals("BUSINESS_CAPABILITY"))
+                                                                                           .map(Application::getEntityId)
+                                                                                           .collect(Collectors.toList()));
+        return buildApplicationDTO(application, participants, additional);
     }
 
     private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
@@ -195,10 +225,27 @@ public class ApplicationService {
                                                                                                              .map(ExecutorRoles::getTypeId)
                                                                                                              .collect(
                                                                                                                      Collectors.toList()));
-        return buildApplicationDTO(applicationList);
+        Set<Integer> participantIds = new HashSet<>();
+        applicationList.forEach(app -> {
+            participantIds.add(app.getAuthorId());
+            participantIds.add(app.getExecutorId());
+        });
+        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream()
+                                                                                       .collect(Collectors.toList()));
+        List<AdditionalInfoDTO> additional = capabilityClient.getAdditionalInfoDTO(applicationList.stream()
+                                                                                           .filter(app -> app.getApplicationType()
+                                                                                                   .getEntityType()
+                                                                                                   .equals("BUSINESS_CAPABILITY"))
+                                                                                           .map(Application::getEntityId)
+                                                                                           .collect(Collectors.toList()));
+        return buildApplicationDTO(applicationList, participants, additional);
     }
 
-    private List<ApplicationDTO> buildApplicationDTO(List<Application> applicationList) {
+    private List<ApplicationDTO> buildApplicationDTO(List<Application> applicationList,
+                                                     List<ApplicationParticipantDTO> participants,
+                                                     List<AdditionalInfoDTO> additional) {
+        Map<Integer, ApplicationParticipantDTO> participantsMap = participants.stream()
+                .collect(Collectors.toMap(ApplicationParticipantDTO::getId, Function.identity()));
         return applicationList.stream()
                 .map(application -> ApplicationDTO.builder()
                         .id(application.getId())
@@ -215,15 +262,36 @@ public class ApplicationService {
                                         .alias(application.getStatus().getAlias())
                                         .isEndStatus(application.getStatus().getIsEndStatus())
                                         .build())
-                        .authorId(application.getAuthorId())
-                        .executorId(application.getExecutorId())
+                        .author(ApplicationParticipantDTO.builder()
+                                        .id(application.getAuthorId())
+                                        .fullName(participantsMap.get(application.getAuthorId()).getFullName())
+                                        .email(participantsMap.get(application.getAuthorId()).getEmail())
+                                        .build())
+                        .entityId(application.getEntityId())
+                        .executor(ApplicationParticipantDTO.builder()
+                                          .id(application.getExecutorId())
+                                          .fullName(participantsMap.get(application.getExecutorId()).getFullName())
+                                          .email(participantsMap.get(application.getExecutorId()).getEmail())
+                                          .build())
                         .name(application.getName())
                         .responsibleId(application.getResponsibleId())
                         .createDate(application.getCreateDate())
                         .updateDate(application.getUpdateDate())
                         .comments(buildComments(application.getId()))
+                        .additionalInfo(getAdditionalInfo(application, additional))
                         .build())
                 .toList();
+    }
+
+    private List<ApplicationAdditionalInfoDTO> getAdditionalInfo(Application application,
+                                                                 List<AdditionalInfoDTO> additional) {
+        return additional.stream()
+                .filter(additionalInfoDTO -> application.getEntityId().equals(additionalInfoDTO.getOrderBcId()))
+                .map(additionalInfoDTO -> ApplicationAdditionalInfoDTO.builder()
+                        .name(additionalInfoDTO.getDomainName())
+                        .value(additionalInfoDTO.getOrderBcId().toString())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<ApplicationCommentDTO> buildComments(Integer applicationId) {

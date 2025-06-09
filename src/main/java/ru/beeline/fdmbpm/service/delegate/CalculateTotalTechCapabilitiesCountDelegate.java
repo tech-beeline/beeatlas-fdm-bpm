@@ -17,7 +17,7 @@ public class CalculateTotalTechCapabilitiesCountDelegate implements JavaDelegate
     @Override
     public void execute(DelegateExecution delegateExecution) {
         log.info("running process СalculateTotalTechCapabiltiesCount");
-        capabilityClient.сalculateTotalTechCapabiltiesCount();
+        capabilityClient.calculateTotalTechCapabiltiesCount();
 
     }
 }

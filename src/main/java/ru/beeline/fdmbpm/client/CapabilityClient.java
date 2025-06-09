@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.AdditionalInfoDTO;
+import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationParticipantDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilityDTO;
@@ -117,11 +119,11 @@ public class CapabilityClient {
                                          BusinessCapabilityOrderDraftResponseDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw e;
         }
-        return null;
     }
 
-    public void сalculateTotalTechCapabiltiesCount() {
+    public void calculateTotalTechCapabiltiesCount() {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -134,6 +136,23 @@ public class CapabilityClient {
                                   Object.class);
         } catch (Exception e) {
             log.error(e.getMessage());
+        }
+    }
+
+    public List<AdditionalInfoDTO> getAdditionalInfoDTO(List<Integer> ids) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("SOURCE", "Sparx");
+
+            HttpEntity<List<Integer>> entity = new HttpEntity<>(ids, headers);
+            return restTemplate.exchange(capabilityServerUrl + " /api/v1/business-capability/order/domains",
+                                  HttpMethod.POST,
+                                  entity,
+                                  new ParameterizedTypeReference<List<AdditionalInfoDTO>>() {}).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
         }
     }
 
