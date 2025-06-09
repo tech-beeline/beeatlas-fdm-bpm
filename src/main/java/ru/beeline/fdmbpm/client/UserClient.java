@@ -51,7 +51,7 @@ public class UserClient {
             HttpEntity<List<Integer>> entity = new HttpEntity<>(ids, headers);
 
             return restTemplate.exchange(userServerUrl + "/api/v1/user/list",
-                    HttpMethod.GET, entity, new ParameterizedTypeReference<List<ApplicationParticipantDTO>>() {}).getBody();
+                    HttpMethod.POST, entity, new ParameterizedTypeReference<List<ApplicationParticipantDTO>>() {}).getBody();
         }  catch (Exception e) {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
