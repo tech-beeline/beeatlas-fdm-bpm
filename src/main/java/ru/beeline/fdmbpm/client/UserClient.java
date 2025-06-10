@@ -54,7 +54,7 @@ public class UserClient {
                     HttpMethod.POST, entity, new ParameterizedTypeReference<List<ApplicationParticipantDTO>>() {}).getBody();
         }  catch (Exception e) {
             log.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
         }
     }
 }
