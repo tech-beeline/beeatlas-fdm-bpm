@@ -25,7 +25,6 @@ public class InfrastructureService {
     ProductClient productClient;
 
     public void gettingApplicationData(String product) {
-        log.info("!!!!!!!!!!!!!!!!!!!!!! 1");
         CmdbResponseDTO cmdbResponse = cmdbClient.getCmdbInfrastructure(product);
         if (cmdbResponse == null) {
             log.info("Запрос к CMDB /api/cmdb/reports/infrastructure_on_asset_report/ c product вернул:  " +
@@ -35,7 +34,6 @@ public class InfrastructureService {
         log.info("Successfully received the CMDB infrastructure report for product '{}'.", product);
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
         List<InfraDTO> infraDTOList = new ArrayList<>();
-        log.info("!!!!!!!!!!!!!!!!!!!!!! 2");
         assetDTOMap.forEach((key, value) -> {
             List<PropertyDTO> properties = new ArrayList<>();
             switch (value.getClassTitle()) {
@@ -58,20 +56,17 @@ public class InfrastructureService {
                     .cmdbId(value.getInstanceId())
                     .properties(properties)
                     .build());
-            log.info("!!!!!!!!!!!!!!!!!!!!!! 2.x");
 
         });
-        log.info("!!!!!!!!!!!!!!!!!!!!!! 3");
         Map<String, List<String>> infrastructureAssetsRelation = cmdbResponse.getInfrastructureAssetsRelation();
         List<RelationsDTO> relationsDTOList = new ArrayList<>();
-        log.info("!!!!!!!!!!!!!!!!!!!!!! 4");
+
         infrastructureAssetsRelation.forEach((key, value) -> {
             relationsDTOList.add(RelationsDTO.builder()
                     .cmdbId(key)
                     .children(value)
                     .build());
         });
-        log.info("!!!!!!!!!!!!!!!!!!!!!! 5");
         PostProductRequest postProductRequest = PostProductRequest.builder()
                 .infra(infraDTOList)
                 .relations(relationsDTOList)
