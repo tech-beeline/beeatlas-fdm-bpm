@@ -268,11 +268,7 @@ public class ApplicationService {
                                         .email(participantsMap.get(application.getAuthorId()).getEmail())
                                         .build())
                         .entityId(application.getEntityId())
-                        .executor(ApplicationParticipantDTO.builder()
-                                          .id(application.getExecutorId())
-                                          .fullName(participantsMap.get(application.getExecutorId()).getFullName())
-                                          .email(participantsMap.get(application.getExecutorId()).getEmail())
-                                          .build())
+                        .executor(getExecutor(application, participantsMap))
                         .name(application.getName())
                         .responsibleId(application.getResponsibleId())
                         .createDate(application.getCreateDate())
@@ -281,6 +277,17 @@ public class ApplicationService {
                         .additionalInfo(getAdditionalInfo(application, additional))
                         .build())
                 .toList();
+    }
+
+    private ApplicationParticipantDTO getExecutor(Application application, Map<Integer, ApplicationParticipantDTO> participantsMap) {
+        if(application.getExecutorId()==null){
+            return null;
+        }
+        return ApplicationParticipantDTO.builder()
+                .id(application.getExecutorId())
+                .fullName(participantsMap.get(application.getExecutorId()).getFullName())
+                .email(participantsMap.get(application.getExecutorId()).getEmail())
+                .build();
     }
 
     private List<ApplicationAdditionalInfoDTO> getAdditionalInfo(Application application,
