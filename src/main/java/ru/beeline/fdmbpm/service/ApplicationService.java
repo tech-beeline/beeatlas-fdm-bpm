@@ -285,6 +285,9 @@ public class ApplicationService {
 
     private List<ApplicationAdditionalInfoDTO> getAdditionalInfo(Application application,
                                                                  List<AdditionalInfoDTO> additional) {
+        if (additional==null){
+            return null;
+        }
         return additional.stream()
                 .filter(additionalInfoDTO -> application.getEntityId().equals(additionalInfoDTO.getOrderBcId()))
                 .map(additionalInfoDTO -> ApplicationAdditionalInfoDTO.builder()
