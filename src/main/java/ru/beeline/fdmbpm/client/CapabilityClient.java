@@ -146,7 +146,7 @@ public class CapabilityClient {
             headers.add("SOURCE", "Sparx");
 
             HttpEntity<List<Integer>> entity = new HttpEntity<>(ids, headers);
-            return restTemplate.exchange(capabilityServerUrl + " /api/v1/business-capability/order/domains",
+            return restTemplate.exchange(capabilityServerUrl + "/api/v1/business-capability/order/domains",
                                   HttpMethod.POST,
                                   entity,
                                   new ParameterizedTypeReference<List<AdditionalInfoDTO>>() {}).getBody();

@@ -279,8 +279,9 @@ public class ApplicationService {
                 .toList();
     }
 
-    private ApplicationParticipantDTO getExecutor(Application application, Map<Integer, ApplicationParticipantDTO> participantsMap) {
-        if(application.getExecutorId()==null){
+    private ApplicationParticipantDTO getExecutor(Application application,
+                                                  Map<Integer, ApplicationParticipantDTO> participantsMap) {
+        if (application.getExecutorId() == null) {
             return null;
         }
         return ApplicationParticipantDTO.builder()
@@ -292,7 +293,7 @@ public class ApplicationService {
 
     private List<ApplicationAdditionalInfoDTO> getAdditionalInfo(Application application,
                                                                  List<AdditionalInfoDTO> additional) {
-        if (additional==null){
+        if (additional == null) {
             return null;
         }
         return additional.stream()
