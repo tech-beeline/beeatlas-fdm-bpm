@@ -299,7 +299,7 @@ public class ApplicationService {
         return additional.stream()
                 .filter(additionalInfoDTO -> application.getEntityId().equals(additionalInfoDTO.getOrderBcId()))
                 .map(additionalInfoDTO -> ApplicationAdditionalInfoDTO.builder()
-                        .name(additionalInfoDTO.getDomainName())
+                        .name("Домен")
                         .value(additionalInfoDTO.getOrderBcId().toString())
                         .build())
                 .collect(Collectors.toList());
