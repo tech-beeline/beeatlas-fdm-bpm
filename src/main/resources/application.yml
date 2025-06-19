@@ -1,3 +1,5 @@
+server:
+  shutdown: graceful
 camunda:
   bpm:
     admin-user:
