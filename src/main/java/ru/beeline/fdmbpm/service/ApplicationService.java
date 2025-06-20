@@ -300,7 +300,7 @@ public class ApplicationService {
                 .filter(additionalInfoDTO -> application.getEntityId().equals(additionalInfoDTO.getOrderBcId()))
                 .map(additionalInfoDTO -> ApplicationAdditionalInfoDTO.builder()
                         .name("Домен")
-                        .value(additionalInfoDTO.getOrderBcId().toString())
+                        .value(additionalInfoDTO.getDomainName().toString())
                         .build())
                 .collect(Collectors.toList());
     }
