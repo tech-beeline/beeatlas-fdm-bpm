@@ -1,7 +1,10 @@
 server:
   shutdown:
-    mode: force
-    force_timeout: 1s
+    mode: graceful
+    graceful_timeout: 30s
+    force_timeout: 5s
+    delay: 10s
+    notifications: true
 camunda:
   bpm:
     admin-user:
