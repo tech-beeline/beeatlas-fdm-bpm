@@ -109,7 +109,6 @@ public class ApplicationService {
         Integer currentSerial = currentStatus.getSerialNumber();
         Integer targetSerial = targetStatus.getSerialNumber();
         boolean canChangeStatus = targetSerial.equals(currentSerial) || targetSerial.equals(currentSerial + 1);
-
         if (!canChangeStatus) {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
