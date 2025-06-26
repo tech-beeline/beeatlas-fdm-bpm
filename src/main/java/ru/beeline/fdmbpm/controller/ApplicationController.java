@@ -16,6 +16,7 @@ import ru.beeline.fdmbpm.service.InfrastructureService;
 import ru.beeline.fdmbpm.service.RelationsService;
 import ru.beeline.fdmbpm.service.appservice.ApplicationProcessService;
 
+
 @Slf4j
 @RestController
 public class ApplicationController {
@@ -41,14 +42,14 @@ public class ApplicationController {
 
     @GetMapping("/create-relations")
     public String ct() {
-        log.info("running process CapabilityUpload, step: send business capability");
+        log.info("create relations");
         relationsService.createRelations();
         return null;
     }
 
     @GetMapping("/send-tech")
     public String sendTechCapability() {
-        log.info("running process CapabilityUpload, step: send tech capability");
+        log.info("send tech");
         return capabilityService.sendTechCapability().toString();
     }
 
@@ -78,14 +79,14 @@ public class ApplicationController {
 
     @PostMapping("/application-process")
     public String startInfrastructureProcess(@RequestBody ApplicationProcessDTO body) {
-        log.info("running application process1");
+        log.info("running application process");
         applicationProcessService.applicationProcess(body.getProcessInstanceId(), body.getBusinessKey(), body.getAuthorId(),
                 body.getType(), body.getComment(), body.getEntityId(), body.getName());
         return "the process has been completed";
     }
 
     @GetMapping("/application-process/{applicationId}/{type}/{typeId}")
-    public String startInfrastructureProcess(@PathVariable Integer applicationId,
+    public String sendGroupNotifications(@PathVariable Integer applicationId,
                                              @PathVariable String type,
                                              @PathVariable Integer typeId) {
         log.info("running application process 2");
