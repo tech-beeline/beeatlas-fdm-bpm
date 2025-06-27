@@ -59,6 +59,7 @@ public class ApplicationController {
         Integer id = importProcessService.uploadingDataFromExcel(postImportServiceDTO.getEntityType(),
                 postImportServiceDTO.getSync(),
                 postImportServiceDTO.getDocId());
+
         return String.format("the process has been completed, packageId: %s ", id.toString());
     }
 
