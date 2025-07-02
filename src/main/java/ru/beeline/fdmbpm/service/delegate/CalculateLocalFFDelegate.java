@@ -25,16 +25,20 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
+        log.info("Шаг: Расчет Фитнес функции");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-
+        log.info("process_id: {}, docId: {}", processId, docId);
 
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        log.info("camundaProcess: processId={}, procId={}, businessKey={}, typeProcessId={}",
+                processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
 
         try {
             archClient.postFitnessFunction(docId, processId);
             saveAlias(processId, "ffdn", typeProcess);
+            log.info("Шаг: Расчет Фитнес функции, успешно завершен. typeProcess: {} ", typeProcess);
         } catch (Exception e) {
             saveAlias(processId, "fferrcd", typeProcess);
             throw new RuntimeException(e.getMessage());

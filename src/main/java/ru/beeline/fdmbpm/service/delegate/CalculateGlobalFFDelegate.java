@@ -25,6 +25,7 @@ public class CalculateGlobalFFDelegate extends StatusLogic implements JavaDelega
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
+        log.info("Шаг: Расчет Глобальной Фитнес функции");
         //TODO: to be continue
     }
 }

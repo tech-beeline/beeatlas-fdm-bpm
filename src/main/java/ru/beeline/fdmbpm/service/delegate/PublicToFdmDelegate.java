@@ -25,16 +25,19 @@ public class PublicToFdmDelegate extends StatusLogic implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
+        log.info("Шаг: Публикация в ФДМ");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-
+        log.info("process_id: {}, docId: {}", processId, docId);
 
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        log.info("camundaProcess : {}", camundaProcess);
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-
+        log.info("typeProcess : {}", typeProcess);
         try {
             archClient.publicFdm(docId);
             saveAlias(processId, "btls", typeProcess);
+            log.info("Шаг: Публикация в ФДМ, успешно завершен.");
         } catch (Exception e) {
             saveAlias(processId, "btlserr", typeProcess);
             throw new RuntimeException(e.getMessage());

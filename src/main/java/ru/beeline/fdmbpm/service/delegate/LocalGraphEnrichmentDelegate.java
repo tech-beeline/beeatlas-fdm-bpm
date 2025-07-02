@@ -25,13 +25,18 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
+        log.info("Шаг: Обагащение графа локального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
+        log.info("Обработка с processId: {}, docId: {}", processId, docId);
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+            log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
+                    processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         try {
             graphClient.postLocalGraph(docId);
             saveAlias(processId, "lclgrph", typeProcess);
+            log.info("Обогащение графа успешно. processId={}, docId={}", processId, docId);
         } catch (Exception e) {
             saveAlias(processId, "errlclgrph", typeProcess);
             throw new RuntimeException(e.getMessage());
