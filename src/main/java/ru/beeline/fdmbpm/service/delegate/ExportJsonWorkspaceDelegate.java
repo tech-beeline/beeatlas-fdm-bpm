@@ -29,11 +29,15 @@ public class ExportJsonWorkspaceDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution delegateExecution)  {
+        log.info("Шаг: Выгрузка json workspace");
         String cmdb = (String) delegateExecution.getVariable("cmdb");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
+        log.info("cmdb: {}, process_id: {}", cmdb, processId);
         ProductDTO productDTO = productClient.getProductInfoByCmdb(cmdb);
+        log.info("Получение данных из сервиса продуктов по cmdb, имя продукта: {}", productDTO.getName());
         String json = structurizrClient.getDocs(productDTO.getStructurizrApiUrl());
         DocIdDTO docIdDTO = documentClient.postDocument(json);
+        log.info("Создание документа с ID: {} по cmdb: {}", docIdDTO.getDocId(), cmdb);
         delegateExecution.setVariable("docId", docIdDTO.getDocId());
         log.info("docIdDTO: {}", docIdDTO);
         contextRepository.save(Context.builder()
@@ -41,5 +45,6 @@ public class ExportJsonWorkspaceDelegate implements JavaDelegate {
                 .value(docIdDTO.getDocId().toString())
                 .camundaProcessId(processId)
                 .build());
+        log.info("завершен Шаг: Выгрузка json workspace");
     }
 }
