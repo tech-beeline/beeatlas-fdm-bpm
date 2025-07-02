@@ -46,4 +46,10 @@ public class CamundaProcessController {
     public ResponseEntity<GetProcessByIdDTO> getProcessById(@PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(processService.getProcessById(id));
     }
+
+    @PatchMapping("/application/{business_key}/executor/{new_executor_id}")
+    public ResponseEntity changeExecutor(@PathVariable (name = "business_key") String businessKey,
+                                         @PathVariable(name = "new_executor_id") Integer newExecutorId){
+
+    }
 }
