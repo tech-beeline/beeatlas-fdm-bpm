@@ -71,4 +71,13 @@ public class CamundaApplicationController {
                                             HttpServletRequest request) {
         return applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
     }
+
+    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = USER_ID_HEADER, schema = @Schema(type = "integer"))})
+    @PatchMapping("/application/{business_key}/executor/{new_executor_id}")
+    public ResponseEntity changeExecutor(@PathVariable(name = "business_key") String businessKey,
+                                         @PathVariable(name = "new_executor_id") Integer newExecutorId,
+                                         @RequestHeader(value = USER_ID_HEADER, required = false) Integer userId) {
+        applicationService.changeExecutor(businessKey, newExecutorId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
