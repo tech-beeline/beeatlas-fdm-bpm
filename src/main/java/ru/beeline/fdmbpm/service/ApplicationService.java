@@ -13,6 +13,7 @@ import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.UserClient;
 import ru.beeline.fdmbpm.controller.RequestContext;
 import ru.beeline.fdmbpm.domain.Application;
+import ru.beeline.fdmbpm.domain.ApplicationTypeEnum;
 import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 import ru.beeline.fdmbpm.domain.Comment;
 import ru.beeline.fdmbpm.domain.ExecutorRoles;
@@ -24,9 +25,11 @@ import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.ApplicationRepository;
+import ru.beeline.fdmbpm.repository.ApplicationTypeEnumRepository;
 import ru.beeline.fdmbpm.repository.ApplicationTypeStatusRepository;
 import ru.beeline.fdmbpm.repository.CommentRepository;
 import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,7 +58,11 @@ public class ApplicationService {
     ExecutorRolesRepository executorRolesRepository;
 
     @Autowired
+    ApplicationTypeEnumRepository applicationTypeEnumRepository;
+
+    @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
+
     @Autowired
     private CapabilityClient capabilityClient;
 
@@ -370,12 +377,7 @@ public class ApplicationService {
         if (!userId.equals(application.getExecutorId())) {
             throw new ForbiddenException("403 Forbidden");
         }
-        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository
-                .findByIdAndTypeId(application.getStatusId(), application.getTypeId()).orElseThrow(() ->
-                        new NotFoundException("Статус процесса не найден"));
-        if (applicationTypeStatus.getIsEndStatus()) {
-            throw new ValidationException("Заявка завершена");
-        }
+        validateApplicationStatus(application);
         validateUser(newExecutorId);
         if (application.getExecutorId().equals(application.getResponsibleId())) {
             application.setResponsibleId(newExecutorId);
@@ -383,6 +385,16 @@ public class ApplicationService {
         application.setExecutorId(newExecutorId);
         application.setUpdateDate(LocalDateTime.now());
         applicationRepository.save(application);
+    }
+
+    private ApplicationTypeStatus validateApplicationStatus(Application application) {
+        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository
+                .findByIdAndTypeId(application.getStatusId(), application.getTypeId()).orElseThrow(() ->
+                        new NotFoundException("Статус процесса не найден"));
+        if (applicationTypeStatus.getIsEndStatus()) {
+            throw new ValidationException("Заявка завершена");
+        }
+        return applicationTypeStatus;
     }
 
     private void validateUser(Integer userId) {
@@ -393,6 +405,20 @@ public class ApplicationService {
         List<String> roles = user.getRoles().stream().map(RoleInfoDTO::getAlias).toList();
         if (!roles.contains("ADMINISTRATOR")) {
             throw new ValidationException("Новый исполнитель по заявке должен иметь роль ADMINISTRATOR");
+        }
+    }
+
+    public void syncOrder(String businessKey) {
+        Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
+                new NotFoundException("Процесс по данному businessKey не найден"));
+        validateApplicationStatus(application);
+        ApplicationTypeEnum applicationTypeEnum = applicationTypeEnumRepository.findById(application.getTypeId())
+                .orElseThrow(() -> new NotFoundException("Тип заявки не найден"));
+        if (applicationTypeEnum.getEntityType().equals("BUSINESS_CAPABILITY")) {
+            BusinessCapabilityOrderDraftResponseDTO bcOrder = capabilityClient.getBusinessCapabilityOrder(application.getEntityId());
+            application.setName(bcOrder.getName());
+            application.setUpdateDate(LocalDateTime.now());
+            applicationRepository.save(application);
         }
     }
 }
