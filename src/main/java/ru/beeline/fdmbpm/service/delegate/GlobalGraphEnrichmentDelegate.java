@@ -25,14 +25,18 @@ public class GlobalGraphEnrichmentDelegate extends StatusLogic implements JavaDe
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
+        log.info("Таск : Обогащение глобального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
 
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        log.info("camundaProcess : {}", camundaProcess);
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+        log.info("typeProcess : {}", typeProcess);
         try {
             graphClient.postGlobalGraph(docId);
             saveAlias(processId, "glblgrph", typeProcess);
+            log.info("Таск : Обогащение глобального графа, зевершен");
         } catch (Exception e) {
             saveAlias(processId, "errglblgrph", typeProcess);
             throw new RuntimeException(e.getMessage());
