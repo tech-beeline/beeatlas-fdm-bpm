@@ -29,28 +29,23 @@ public class CamundaApplicationController {
     @Autowired
     ApplicationService applicationService;
 
-    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = USER_ROLES_HEADER, required = true, array = @ArraySchema(schema = @Schema(type = "string")))})
     @GetMapping("/application/nobody")
     public ResponseEntity<List<ApplicationDTO>> getAssignedApplications() {
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getAssignedApplications());
     }
 
-    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = USER_ID_HEADER, required = true, schema = @Schema(type = "string"))})
     @GetMapping("/application/author")
     public ResponseEntity<List<ApplicationDTO>> getApplicationsByAuthor(HttpServletRequest request) {
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByAuthor(userId));
     }
 
-    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = USER_ID_HEADER, required = true, schema = @Schema(type = "string"))})
     @GetMapping("/application/executor")
     public ResponseEntity<List<ApplicationDTO>> getApplicationsByExecutor(HttpServletRequest request) {
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByExecutor(userId));
     }
 
-    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = USER_ROLES_HEADER, required = true, array = @ArraySchema(schema = @Schema(type = "string")), description = "Роли пользователя"),
-            @Parameter(in = ParameterIn.HEADER, name = USER_ID_HEADER, required = true, schema = @Schema(type = "string"), description = "ID пользователя")})
     @PatchMapping("/application/{business_key}/executor")
     public ResponseEntity patchExecutorProcess(@PathVariable("business_key") String businessKey,
                                                @RequestParam(value = "next_status") String nextStatus,
@@ -63,7 +58,6 @@ public class CamundaApplicationController {
         return applicationService.getApplicationsByBusinessKey(businessKey);
     }
 
-    @Operation(parameters = {@Parameter(in = ParameterIn.HEADER, name = USER_ID_HEADER, required = true, schema = @Schema(type = "string"))})
     @PatchMapping("/application/{business_key}/change-status/{status_alias}")
     public ResponseEntity patchChangeStatus(@PathVariable("business_key") String businessKey,
                                             @PathVariable("status_alias") String statusAlias,
