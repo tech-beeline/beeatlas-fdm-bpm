@@ -10,5 +10,7 @@ public interface ApplicationTypeStatusRepository extends JpaRepository<Applicati
 
     ApplicationTypeStatus findByTypeIdAndAlias(Integer typeId, String alias);
 
-    Optional <ApplicationTypeStatus> findByTypeIdAndSerialNumber(Integer typeId, Integer serialNumber);
+    Optional<ApplicationTypeStatus> findByTypeIdAndSerialNumber(Integer typeId, Integer serialNumber);
+
+    Optional<ApplicationTypeStatus> findByIdAndTypeId(Integer id, Integer typeId);
 }

@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.client;
 
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -10,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationParticipantDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
+import ru.beeline.fdmbpm.exception.NotFoundException;
 
 import java.util.List;
 
@@ -27,7 +28,6 @@ public class UserClient {
     }
 
     public UserProfileDTO getUserProfile(Integer id) {
-
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -37,11 +37,15 @@ public class UserClient {
             return restTemplate.exchange(userServerUrl + "/api/v1/user/" + id,
                     HttpMethod.GET, entity, new ParameterizedTypeReference<UserProfileDTO>() {
                     }).getBody();
-        }  catch (Exception e) {
+        } catch (HttpClientErrorException.NotFound e) {
+            String message = e.getResponseBodyAsString();
+            throw new NotFoundException(message);
+        } catch (Exception e) {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
+
     public List<ApplicationParticipantDTO> getUsersInfo(List<Integer> ids) {
 
         try {
@@ -52,7 +56,7 @@ public class UserClient {
 
             return restTemplate.exchange(userServerUrl + "/api/v1/user/list",
                     HttpMethod.POST, entity, new ParameterizedTypeReference<List<ApplicationParticipantDTO>>() {}).getBody();
-        }  catch (Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
         }
