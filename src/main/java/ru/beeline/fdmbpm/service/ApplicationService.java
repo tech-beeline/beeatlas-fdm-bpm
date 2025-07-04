@@ -13,7 +13,6 @@ import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.UserClient;
 import ru.beeline.fdmbpm.controller.RequestContext;
 import ru.beeline.fdmbpm.domain.Application;
-import ru.beeline.fdmbpm.domain.ApplicationTypeEnum;
 import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 import ru.beeline.fdmbpm.domain.Comment;
 import ru.beeline.fdmbpm.domain.ExecutorRoles;
@@ -412,9 +411,7 @@ public class ApplicationService {
         Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
                 new NotFoundException("Процесс по данному businessKey не найден"));
         validateApplicationStatus(application);
-        ApplicationTypeEnum applicationTypeEnum = applicationTypeEnumRepository.findById(application.getTypeId())
-                .orElseThrow(() -> new NotFoundException("Тип заявки не найден"));
-        if (applicationTypeEnum.getEntityType().equals("BUSINESS_CAPABILITY")) {
+        if (application.getApplicationType().getEntityType().equals("BUSINESS_CAPABILITY")) {
             BusinessCapabilityOrderDraftResponseDTO bcOrder = capabilityClient.getBusinessCapabilityOrder(application.getEntityId());
             application.setName(bcOrder.getName());
             application.setUpdateDate(LocalDateTime.now());
