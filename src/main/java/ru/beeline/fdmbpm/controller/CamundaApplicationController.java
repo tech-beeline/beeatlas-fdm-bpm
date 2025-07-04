@@ -78,4 +78,10 @@ public class CamundaApplicationController {
         applicationService.changeExecutor(businessKey, newExecutorId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PatchMapping("/application/{business_key}/sync-order")
+    public ResponseEntity syncOrder(@PathVariable(name = "business_key") String businessKey) {
+        applicationService.syncOrder(businessKey);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
