@@ -413,9 +413,11 @@ public class ApplicationService {
         validateApplicationStatus(application);
         if (application.getApplicationType().getEntityType().equals("BUSINESS_CAPABILITY")) {
             BusinessCapabilityOrderDraftResponseDTO bcOrder = capabilityClient.getBusinessCapabilityOrder(application.getEntityId());
-            application.setName(bcOrder.getName());
-            application.setUpdateDate(LocalDateTime.now());
-            applicationRepository.save(application);
+            if(!bcOrder.getName().equals(application.getName())) {
+                application.setName(bcOrder.getName());
+                application.setUpdateDate(LocalDateTime.now());
+                applicationRepository.save(application);
+            }
         }
     }
 }
