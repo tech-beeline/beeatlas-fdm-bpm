@@ -24,9 +24,11 @@ import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.ApplicationRepository;
+import ru.beeline.fdmbpm.repository.ApplicationTypeEnumRepository;
 import ru.beeline.fdmbpm.repository.ApplicationTypeStatusRepository;
 import ru.beeline.fdmbpm.repository.CommentRepository;
 import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,7 +57,11 @@ public class ApplicationService {
     ExecutorRolesRepository executorRolesRepository;
 
     @Autowired
+    ApplicationTypeEnumRepository applicationTypeEnumRepository;
+
+    @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
+
     @Autowired
     private CapabilityClient capabilityClient;
 
@@ -380,6 +386,16 @@ public class ApplicationService {
         applicationRepository.save(application);
     }
 
+    private ApplicationTypeStatus validateApplicationStatus(Application application) {
+        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository
+                .findByIdAndTypeId(application.getStatusId(), application.getTypeId()).orElseThrow(() ->
+                        new NotFoundException("Статус процесса не найден"));
+        if (applicationTypeStatus.getIsEndStatus()) {
+            throw new ValidationException("Заявка завершена");
+        }
+        return applicationTypeStatus;
+    }
+
     private void validateUser(Integer userId) {
         UserProfileDTO user = userClient.getUserProfile(userId);
         if (user == null) {
@@ -391,14 +407,16 @@ public class ApplicationService {
         }
     }
 
-    private ApplicationTypeStatus validateApplicationStatus(Application application) {
-        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository
-                .findByIdAndTypeId(application.getStatusId(), application.getTypeId()).orElseThrow(() ->
-                        new NotFoundException("Статус процесса не найден"));
-        if (applicationTypeStatus.getIsEndStatus()) {
-            throw new ValidationException("Заявка завершена");
+    public void syncOrder(String businessKey) {
+        Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
+                new NotFoundException("Процесс по данному businessKey не найден"));
+        validateApplicationStatus(application);
+        if (application.getApplicationType().getEntityType().equals("BUSINESS_CAPABILITY")) {
+            BusinessCapabilityOrderDraftResponseDTO bcOrder = capabilityClient.getBusinessCapabilityOrder(application.getEntityId());
+            application.setName(bcOrder.getName());
+            application.setUpdateDate(LocalDateTime.now());
+            applicationRepository.save(application);
         }
-        return applicationTypeStatus;
     }
 }
 

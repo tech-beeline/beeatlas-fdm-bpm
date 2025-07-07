@@ -24,7 +24,8 @@ public class HeaderInterceptor implements HandlerInterceptor {
                 || request.getRequestURI().contains("/swagger")
                 || request.getRequestURI().contains("/error")
                 || request.getRequestURI().contains("/api-docs")
-                || request.getRequestURI().contains("/change-status/")) {
+                || request.getRequestURI().contains("/change-status/")
+                || request.getRequestURI().contains("/sync-order")) {
             return true;
         }
         List<String> missingHeaders = new ArrayList<>();
