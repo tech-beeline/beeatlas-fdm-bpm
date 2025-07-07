@@ -23,28 +23,28 @@ import java.lang.annotation.Target;
                         in = ParameterIn.HEADER,
                         name = "user-id",
                         required = true,
-                        schema = @Schema(type = "string"), // Предполагаем, что user-id строка
+                        schema = @Schema(type = "string"),
                         description = "ID пользователя"
                 ),
                 @Parameter(
                         in = ParameterIn.HEADER,
                         name = "user-permission",
                         required = true,
-                        array = @ArraySchema(schema = @Schema(type = "string")), // Массив строк
+                        array = @ArraySchema(schema = @Schema(type = "string")),
                         description = "Права пользователя"
                 ),
                 @Parameter(
                         in = ParameterIn.HEADER,
                         name = "user-products-ids",
                         required = true,
-                        array = @ArraySchema(schema = @Schema(type = "integer")), // Массив чисел
+                        array = @ArraySchema(schema = @Schema(type = "integer")),
                         description = "ID продуктов пользователя"
                 ),
                 @Parameter(
                         in = ParameterIn.HEADER,
                         name = "user-roles",
                         required = true,
-                        array = @ArraySchema(schema = @Schema(type = "string")), // Массив строк
+                        array = @ArraySchema(schema = @Schema(type = "string")),
                         description = "Роли пользователя"
                 )
         }
