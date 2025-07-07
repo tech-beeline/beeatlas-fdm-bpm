@@ -79,7 +79,7 @@ public class GrafanaClient {
     public String getProducts() {
         try {
             long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 3600000;
+            long nowGMTMinus1Hour = nowGMT - 900000;
             String body = String.format(
                     requestRow,
                     nowGMTMinus1Hour,
@@ -102,7 +102,7 @@ public class GrafanaClient {
     public String getMnemonics(ProcessDTO processDTO) {
         try {
             long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 3600000;
+            long nowGMTMinus1Hour = nowGMT - 900000;
             String mnemonicsRequestRow = "{\n" +
                     "    \"queries\": [\n" +
                     "        {\n" +
