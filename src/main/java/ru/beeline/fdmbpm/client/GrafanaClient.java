@@ -78,12 +78,11 @@ public class GrafanaClient {
 
     public String getProducts() {
         try {
-            long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 900000;
+
             String body = String.format(
                     requestRow,
-                    nowGMTMinus1Hour,
-                    nowGMT
+                    "now-15m",
+                    "now"
             );
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -101,8 +100,7 @@ public class GrafanaClient {
 
     public String getMnemonics(ProcessDTO processDTO) {
         try {
-            long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 900000;
+
             String mnemonicsRequestRow = "{\n" +
                     "    \"queries\": [\n" +
                     "        {\n" +
@@ -118,14 +116,12 @@ public class GrafanaClient {
                     "            \"instant\": true\n" +
                     "        }\n" +
                     "    ],\n" +
-                    "    \"from\": \"%s\",\n" +
-                    "    \"to\": \"%s\"\n" +
+                    "    \"from\": \"now-15m\",\n" +
+                    "    \"to\": \"now\"\n" +
                     "}";
             String body = String.format(
                     mnemonicsRequestRow,
-                    processDTO.getProcess(),
-                    nowGMTMinus1Hour,
-                    nowGMT
+                    processDTO.getProcess()
             );
 
             HttpHeaders headers = new HttpHeaders();
