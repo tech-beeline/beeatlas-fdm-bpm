@@ -32,8 +32,8 @@ public class GrafanaClient {
             "            \"maxDataPoints\": 833\n" +
             "        }\n" +
             "    ],\n" +
-            "    \"from\": \"%s\",\n" +
-            "    \"to\": \"%s\"\n" +
+            "    \"from\": \"now-15m\",\n" +
+            "    \"to\": \"now\"\n" +
             "} ";
 
     public GrafanaClient(@Value("${integration.grafana-server-url}") String grafanaServerUrl,
@@ -46,19 +46,11 @@ public class GrafanaClient {
 
     public String getProcessList() {
         try {
-            long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 3600000;
-
-            String body = String.format(
-                    requestRow,
-                    nowGMTMinus1Hour,
-                    nowGMT
-            );
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + bearerToken);
 
-            HttpEntity<String> entity = new HttpEntity<>(body, headers);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
                     grafanaServerUrl + "/api/dashboards/uid/jwCtre6Sz",
@@ -78,18 +70,11 @@ public class GrafanaClient {
 
     public String getProducts() {
         try {
-            long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 3600000;
-            String body = String.format(
-                    requestRow,
-                    nowGMTMinus1Hour,
-                    nowGMT
-            );
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + bearerToken);
 
-            HttpEntity<String> entity = new HttpEntity<>(body, headers);
+            HttpEntity<String> entity = new HttpEntity<>(requestRow, headers);
 
             return restTemplate.exchange(grafanaServerUrl + "/api/ds/query",
                     HttpMethod.POST, entity, String.class).getBody();
@@ -101,8 +86,7 @@ public class GrafanaClient {
 
     public String getMnemonics(ProcessDTO processDTO) {
         try {
-            long nowGMT = Instant.now().toEpochMilli();
-            long nowGMTMinus1Hour = nowGMT - 3600000;
+
             String mnemonicsRequestRow = "{\n" +
                     "    \"queries\": [\n" +
                     "        {\n" +
@@ -118,14 +102,12 @@ public class GrafanaClient {
                     "            \"instant\": true\n" +
                     "        }\n" +
                     "    ],\n" +
-                    "    \"from\": \"%s\",\n" +
-                    "    \"to\": \"%s\"\n" +
+                    "    \"from\": \"now-15m\",\n" +
+                    "    \"to\": \"now\"\n" +
                     "}";
             String body = String.format(
                     mnemonicsRequestRow,
-                    processDTO.getProcess(),
-                    nowGMTMinus1Hour,
-                    nowGMT
+                    processDTO.getProcess()
             );
 
             HttpHeaders headers = new HttpHeaders();

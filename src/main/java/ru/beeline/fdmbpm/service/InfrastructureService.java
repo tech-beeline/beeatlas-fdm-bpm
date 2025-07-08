@@ -56,9 +56,11 @@ public class InfrastructureService {
                     .cmdbId(value.getInstanceId())
                     .properties(properties)
                     .build());
+
         });
         Map<String, List<String>> infrastructureAssetsRelation = cmdbResponse.getInfrastructureAssetsRelation();
         List<RelationsDTO> relationsDTOList = new ArrayList<>();
+
         infrastructureAssetsRelation.forEach((key, value) -> {
             relationsDTOList.add(RelationsDTO.builder()
                     .cmdbId(key)

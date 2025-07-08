@@ -1,6 +1,11 @@
 package ru.beeline.fdmbpm.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,27 +28,31 @@ public class CamundaApplicationController {
     @Autowired
     ApplicationService applicationService;
 
+    @SwaggerCommonHeaders
     @GetMapping("/application/nobody")
     public ResponseEntity<List<ApplicationDTO>> getAssignedApplications() {
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getAssignedApplications());
     }
 
+    @SwaggerCommonHeaders
     @GetMapping("/application/author")
     public ResponseEntity<List<ApplicationDTO>> getApplicationsByAuthor(HttpServletRequest request) {
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByAuthor(userId));
     }
 
+    @SwaggerCommonHeaders
     @GetMapping("/application/executor")
     public ResponseEntity<List<ApplicationDTO>> getApplicationsByExecutor(HttpServletRequest request) {
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
         return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByExecutor(userId));
     }
 
+    @SwaggerCommonHeaders
     @PatchMapping("/application/{business_key}/executor")
     public ResponseEntity patchExecutorProcess(@PathVariable("business_key") String businessKey,
-                                                        @RequestParam(value = "next_status") String nextStatus,
-                                                        HttpServletRequest request) {
+                                               @RequestParam(value = "next_status") String nextStatus,
+                                               HttpServletRequest request) {
         return applicationService.patchExecutorProcess(businessKey, nextStatus, request);
     }
 
@@ -52,11 +61,27 @@ public class CamundaApplicationController {
         return applicationService.getApplicationsByBusinessKey(businessKey);
     }
 
+    @SwaggerCommonHeaders
     @PatchMapping("/application/{business_key}/change-status/{status_alias}")
     public ResponseEntity patchChangeStatus(@PathVariable("business_key") String businessKey,
                                             @PathVariable("status_alias") String statusAlias,
                                             @RequestBody(required = false) CommentDTO commentDTO,
                                             HttpServletRequest request) {
-        return  applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
+        return applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
+    }
+
+    @SwaggerCommonHeaders
+    @PatchMapping("/application/{business_key}/executor/{new_executor_id}")
+    public ResponseEntity changeExecutor(@PathVariable(name = "business_key") String businessKey,
+                                         @PathVariable(name = "new_executor_id") Integer newExecutorId,
+                                         @RequestHeader(value = USER_ID_HEADER, required = false) Integer userId) {
+        applicationService.changeExecutor(businessKey, newExecutorId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/application/{business_key}/sync-order")
+    public ResponseEntity syncOrder(@PathVariable(name = "business_key") String businessKey) {
+        applicationService.syncOrder(businessKey);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

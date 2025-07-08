@@ -1,3 +1,10 @@
+server:
+  shutdown:
+    mode: graceful
+    graceful_timeout: 30s
+    force_timeout: 5s
+    delay: 10s
+    notifications: true
 camunda:
   bpm:
     admin-user:
@@ -8,6 +15,7 @@ camunda:
       schema-update: true
     job-execution:
         enabled: true
+    deployment-aware: true
 
 integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru

@@ -27,6 +27,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
+        log.info("Старт метода: Получение информации и регистрации процесса");
         String cmdb = (String) delegateExecution.getVariable("cmdb");
         log.info("RegisterProcessDelegate: cmdb=", cmdb);
         String processId = delegateExecution.getProcessInstanceId();
@@ -59,5 +60,6 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                     .camundaProcessId(camundaProcess.getId())
                     .build());
         }
+        log.info("Завершение метода: Получение информации и регистрации процесса");
     }
 }
