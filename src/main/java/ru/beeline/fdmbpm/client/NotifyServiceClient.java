@@ -35,12 +35,13 @@ public class NotifyServiceClient {
         return null;
     }
 
-    public void postBusinessEvent(String role, String entityType, Integer entityId) {
+    public void postBusinessEvent(String role, String entityType, Integer entityId, String name) {
         try {
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             String url = notifyServiceUrl + "/api/v1/notify/business-event/group/role/" + role +
-                    "/" + entityType + "/" + entityId;
+                    "/" + entityType + "/" + entityId + "?name=" + name;
             log.info(url);
             restTemplate.exchange(url,
                     HttpMethod.POST, new HttpEntity<>(headers), ResponseEntity.class).getBody();

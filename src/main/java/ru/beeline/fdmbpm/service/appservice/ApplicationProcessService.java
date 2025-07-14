@@ -113,7 +113,7 @@ public class ApplicationProcessService {
                                        .build());
     }
 
-    public void sendGroupNotifications(Integer applicationId, String type, Integer typeId) {
+    public void sendGroupNotifications(Integer applicationId, String type, Integer typeId, String name) {
         log.info("Рассылаем уведомления ответственным. applicationId: {}, type: {}", applicationId, type);
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(typeId);
         for (ExecutorRoles role : executorRoles) {
@@ -121,7 +121,7 @@ public class ApplicationProcessService {
                      role.getRole(),
                      type,
                      applicationId);
-            notifyServiceClient.postBusinessEvent(role.getRole(), type, applicationId);
+            notifyServiceClient.postBusinessEvent(role.getRole(), type, applicationId, name);
         }
     }
 

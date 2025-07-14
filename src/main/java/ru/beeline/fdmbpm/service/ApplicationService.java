@@ -125,7 +125,8 @@ public class ApplicationService {
             application.setResponsibleId(application.getExecutorId());
         }
         application.setUpdateDate(LocalDateTime.now());
-        sendStatusChangeMessageToProcess(application, targetStatus.getMessage());
+        String appName = syncOrder(businessKey);
+        sendStatusChangeMessageToProcess(application, targetStatus.getMessage(), appName);
         applicationRepository.save(application);
         saveComment(application, commentDTO, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -196,10 +197,11 @@ public class ApplicationService {
         }
     }
 
-    private void sendStatusChangeMessageToProcess(Application application, String message) {
+    private void sendStatusChangeMessageToProcess(Application application, String message, String appName) {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("message", message);
+            variables.put("name", appName);
             runtimeService.createMessageCorrelation("change_of_status")
                     .processInstanceId(application.getProcessId())
                     .setVariables(variables)
@@ -320,9 +322,16 @@ public class ApplicationService {
         return new ArrayList<>();
     }
 
-    public ApplicationExtendedDTO getApplicationsByBusinessKey(String businessKey) {
-        Application application = applicationRepository.findByBusinessKey(businessKey)
-                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+    public ApplicationExtendedDTO getApplications(Integer id, String businessKey) {
+        Application application;
+        if(id != null){
+            application = applicationRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException(String.format("Запись с данным id: %s не найдена", id)));
+        } else {
+            application = applicationRepository.findByBusinessKey(businessKey)
+                    .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
+                                                                           businessKey)));
+        }
         UserProfileDTO authorProfileDTO = userClient.getUserProfile(application.getAuthorId());
         AuthorDTO author = AuthorDTO.builder()
                 .id(authorProfileDTO.getId())
@@ -407,7 +416,7 @@ public class ApplicationService {
         }
     }
 
-    public void syncOrder(String businessKey) {
+    public String syncOrder(String businessKey) {
         Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
                 new NotFoundException("Процесс по данному businessKey не найден"));
         validateApplicationStatus(application);
@@ -419,6 +428,7 @@ public class ApplicationService {
                 applicationRepository.save(application);
             }
         }
+        return application.getName();
     }
 }
 

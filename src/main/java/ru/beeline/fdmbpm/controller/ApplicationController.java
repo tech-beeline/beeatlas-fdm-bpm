@@ -91,7 +91,7 @@ public class ApplicationController {
                                              @PathVariable String type,
                                              @PathVariable Integer typeId) {
         log.info("running application process 2");
-        applicationProcessService.sendGroupNotifications(applicationId, type, typeId);
+        applicationProcessService.sendGroupNotifications(applicationId, type, typeId, null);
         return "the process 2 has been completed";
     }
 

@@ -1,11 +1,6 @@
 package ru.beeline.fdmbpm.controller;
 
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,7 +53,13 @@ public class CamundaApplicationController {
 
     @GetMapping("/application/{business_key}")
     public ApplicationExtendedDTO getApplicationsByBusinessKey(@PathVariable("business_key") String businessKey) {
-        return applicationService.getApplicationsByBusinessKey(businessKey);
+        return applicationService.getApplications(null, businessKey);
+    }
+
+    @GetMapping("/application")
+    public ApplicationExtendedDTO getApplicationsById(@RequestParam (required = false) Integer id,
+                                                      @RequestParam (value = "business_key", required = false) String businessKey) {
+        return applicationService.getApplications(id, businessKey);
     }
 
     @SwaggerCommonHeaders
