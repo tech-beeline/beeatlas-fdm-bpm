@@ -7,10 +7,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.AuthSSOClient;
-import ru.beeline.fdmbpm.client.CapabilityClient;
-import ru.beeline.fdmbpm.client.NotifyServiceClient;
-import ru.beeline.fdmbpm.client.TechradarClient;
-import ru.beeline.fdmbpm.dto.DocIdDTO;
 
 @Slf4j
 @Component
@@ -37,6 +33,21 @@ public class RabbitService {
             });
         } catch (Exception e) {
             log.error("Error sending message: ", e);
+        }
+    }
+
+    public void sendToFanoutTcExchange(String exchangeName, Object message) {
+        try {
+            if (!isConnected()) {
+                refreshConnection();
+            }
+            rabbitTemplate.convertAndSend(exchangeName, "", message, messagePostProcessor -> {
+                messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+                return messagePostProcessor;
+            });
+            log.info("Message sent to fanout exchange: {}", exchangeName);
+        } catch (Exception e) {
+            log.error("Error sending message to fanout exchange: ", e);
         }
     }
 
