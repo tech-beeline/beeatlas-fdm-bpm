@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.Connection;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.beeline.fdmbpm.client.AuthSSOClient;
-import ru.beeline.fdmbpm.service.RelationsService;
 
 @Configuration
 public class RabbitConfig {
@@ -36,8 +36,14 @@ public class RabbitConfig {
     @Value("${queue.package-queue.name}")
     private String queueName;
 
+    @Value("${queue.tc-queue.name}")
+    private String descriptionQualityQueueName;
+
     @Value("${spring.rabbitmq.template.exchange}")
     private String topicExchangeName;
+
+    @Value("${rabbitmq.fanout-exchange}")
+    private String fanoutExchangeName;
 
     @Value("${spring.rabbitmq.template.routing-key}")
     private String routingName;
@@ -54,12 +60,28 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue descriptionQualityQueue() {
+        return new Queue(descriptionQualityQueueName, true);
+    }
+
+    @Bean
+    public FanoutExchange techRecalcFanoutExchange() {
+        return new FanoutExchange(fanoutExchangeName, true, false);
+    }
+
+    @Bean
     DirectExchange directExchange(){
         return new DirectExchange(topicExchangeName);
     }
+
     @Bean
     Binding binding(Queue queue, DirectExchange directExchange){
         return BindingBuilder.bind(queue).to(directExchange).with(routingName);
+    }
+
+    @Bean
+    public Binding descriptionQualityBinding(Queue descriptionQualityQueue, FanoutExchange techRecalcFanoutExchange) {
+        return BindingBuilder.bind(descriptionQualityQueue).to(techRecalcFanoutExchange);
     }
 
     @Bean
