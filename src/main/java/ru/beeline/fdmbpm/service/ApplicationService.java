@@ -23,11 +23,7 @@ import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
 import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
-import ru.beeline.fdmbpm.repository.ApplicationRepository;
-import ru.beeline.fdmbpm.repository.ApplicationTypeEnumRepository;
-import ru.beeline.fdmbpm.repository.ApplicationTypeStatusRepository;
-import ru.beeline.fdmbpm.repository.CommentRepository;
-import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
+import ru.beeline.fdmbpm.repository.*;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
@@ -323,6 +319,9 @@ public class ApplicationService {
     }
 
     public ApplicationExtendedDTO getApplications(Integer id, String businessKey) {
+        if (id == null && businessKey == null) {
+            throw new ValidationException("Отсутствует id/business-key");
+        }
         Application application;
         if(id != null){
             application = applicationRepository.findById(id)

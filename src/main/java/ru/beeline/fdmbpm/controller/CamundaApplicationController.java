@@ -58,7 +58,7 @@ public class CamundaApplicationController {
 
     @GetMapping("/application")
     public ApplicationExtendedDTO getApplicationsById(@RequestParam (required = false) Integer id,
-                                                      @RequestParam (value = "business_key", required = false) String businessKey) {
+                                                      @RequestParam (value = "business-key", required = false) String businessKey) {
         return applicationService.getApplications(id, businessKey);
     }
 
