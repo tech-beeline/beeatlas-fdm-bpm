@@ -129,7 +129,7 @@ public class ApplicationProcessService {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new NotFoundException("Запись в таблице application c id: " + applicationId + " не найдена"));
         log.info("Отправка уведомления ответственному. responsibleId: {}", application.getResponsibleId());
-        notifyServiceClient.postExportNotify(applicationId, type, application.getResponsibleId());
+        notifyServiceClient.postExportNotify(applicationId, type, application.getResponsibleId(), application.getName());
     }
 
     public void performTargetAction(DelegateExecution delegateExecution, Integer typeId, Integer entityId) {

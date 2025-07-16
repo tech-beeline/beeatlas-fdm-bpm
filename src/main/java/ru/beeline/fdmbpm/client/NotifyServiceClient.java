@@ -21,13 +21,13 @@ public class NotifyServiceClient {
         this.restTemplate = restTemplate;
     }
 
-    public DocIdDTO postExportNotify(Integer docId, String entityType, Integer userId) {
+    public DocIdDTO postExportNotify(Integer docId, String entityType, Integer userId, String name) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("user-id", String.valueOf(userId));
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            return restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/business-event/" + entityType + "/" + docId,
+            return restTemplate.exchange(notifyServiceUrl + "/api/v1/notify/business-event/" + entityType + "/" + docId+ "?name=" + name,
                     HttpMethod.POST, new HttpEntity<>(headers), DocIdDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
