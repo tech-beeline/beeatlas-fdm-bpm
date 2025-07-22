@@ -9,10 +9,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
-import ru.beeline.fdmbpm.exception.CustomCamundaException;
-import ru.beeline.fdmbpm.exception.NotFoundException;
-import ru.beeline.fdmbpm.exception.S3Exception;
-import ru.beeline.fdmbpm.exception.ValidationException;
+import ru.beeline.fdmbpm.exception.*;
 
 @ControllerAdvice
 @Slf4j
@@ -73,6 +70,13 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> headerException(CustomCamundaException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(ProcessException.class)
+    public ResponseEntity<String> headerException(ProcessException e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(e.getMessage());
     }
 }

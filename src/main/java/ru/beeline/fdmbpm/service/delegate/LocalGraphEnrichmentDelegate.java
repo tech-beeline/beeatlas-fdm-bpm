@@ -6,9 +6,13 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.client.GraphClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.TypeProcessRepository;
 
@@ -22,24 +26,34 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
     TypeProcessRepository typeProcessRepository;
     @Autowired
     CamundaProcessRepository camundaProcessRepository;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Шаг: Обагащение графа локального графа");
+        log.info("Шаг: Обагащение локального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
         log.info("Обработка с processId: {}, docId: {}", processId, docId);
-        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        TypeProcess typeProcess = null;
+        try {
+            CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
             log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
                     processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
-        TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-        try {
+            typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
             graphClient.postLocalGraph(docId);
             saveAlias(processId, "lclgrph", typeProcess);
             log.info("Обогащение графа успешно. processId={}, docId={}", processId, docId);
         } catch (Exception e) {
-            saveAlias(processId, "errlclgrph", typeProcess);
-            throw new RuntimeException(e.getMessage());
+            log.error("Ошибка при Обагащение локального графа. Создание записи с ошибкой", e);
+            TransactionTemplate tt = new TransactionTemplate(transactionManager);
+            tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            TypeProcess finalTypeProcess = typeProcess;
+            tt.execute(status -> {
+                saveAlias(processId, "errlclgrph", finalTypeProcess);
+                return null;
+            });
+            throw new ProcessException("Ошибка процесса на шаге: Обагащение локального графа");
         }
     }
 }
