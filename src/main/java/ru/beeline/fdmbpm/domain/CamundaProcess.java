@@ -22,6 +22,9 @@ public class CamundaProcess {
     @Column(name = "proc_id")
     private String procId;
 
+    @Column(name = "is_async")
+    private Boolean isAsync;
+
     @Column(name = "business_key")
     private String businessKey;
 }

@@ -1,6 +1,8 @@
 package ru.beeline.fdmbpm.service.delegate;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
@@ -15,19 +17,22 @@ import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.TypeProcessRepository;
+import ru.beeline.fdmbpm.service.RabbitService;
 
 @Slf4j
 @Component("LocalGraphEnrichmentDelegate")
 public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDelegate {
 
     @Autowired
-    GraphClient graphClient;
-    @Autowired
     TypeProcessRepository typeProcessRepository;
     @Autowired
     CamundaProcessRepository camundaProcessRepository;
     @Autowired
     private PlatformTransactionManager transactionManager;
+    @Autowired
+    RabbitService rabbitService;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
@@ -37,12 +42,20 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
         log.info("Обработка с processId: {}, docId: {}", processId, docId);
         TypeProcess typeProcess = null;
         try {
-            CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-            log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
-                    processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
-            typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-            graphClient.postLocalGraph(docId);
-            saveAlias(processId, "lclgrph", typeProcess);
+        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
+                 processId,
+                 camundaProcess.getProcId(),
+                 camundaProcess.getBusinessKey(),
+                 camundaProcess.getTypeProcessId());
+        typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+            ObjectNode item = objectMapper.createObjectNode();
+            item.put("taskKey", processId);
+            item.put("docId", docId);
+            log.info("Send to create_loacal_graph");
+            rabbitService.sendMessage("create_loacal_graph", objectMapper.writeValueAsString(item));
+            log.info("Send to create_loacal_graph completed");
+            saveAlias(processId, "lcltskcrt", typeProcess);
             log.info("Обогащение графа успешно. processId={}, docId={}", processId, docId);
         } catch (Exception e) {
             log.error("Ошибка при Обагащение локального графа. Создание записи с ошибкой", e);
