@@ -19,6 +19,7 @@ public class ProcessDTO {
     private Integer processId;
     private Boolean isDone;
     private Boolean isError;
+    private Boolean isAsync;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime createdDate;
 }

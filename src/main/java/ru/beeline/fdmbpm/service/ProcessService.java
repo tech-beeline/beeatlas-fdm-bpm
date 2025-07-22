@@ -60,6 +60,7 @@ public class ProcessService {
                 .name(statusProcess.getName())
                 .processId(camundaProcess.getId())
                 .isDone(statusProcess.getIsDone())
+                .isAsync(camundaProcess.getIsAsync())
                 .isError(statusProcess.getIsError())
                 .createdDate(camundaProcessStatus.getCreatedDate())
                 .build();
