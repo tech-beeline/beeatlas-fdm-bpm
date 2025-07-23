@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "ru.beeline.fdmbpm.repository",
+        basePackages = "ru.beeline.fdmbpm.repository.camunda",
         entityManagerFactoryRef = "processesEntityManagerFactory",
         transactionManagerRef = "processesTransactionManager"
 )

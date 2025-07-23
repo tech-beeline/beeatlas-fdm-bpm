@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
-import ru.beeline.fdmbpm.repository.CamundaProcessStatusRepository;
-import ru.beeline.fdmbpm.repository.StatusProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessStatusRepository;
+import ru.beeline.fdmbpm.repository.camunda.StatusProcessRepository;
 
 import java.time.LocalDateTime;
 

@@ -10,8 +10,8 @@ import ru.beeline.fdmbpm.client.GraphClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.graph.GraphDTO;
-import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
-import ru.beeline.fdmbpm.repository.TypeProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 @Slf4j
 @Component("GlobalGraphCheckDelegate")

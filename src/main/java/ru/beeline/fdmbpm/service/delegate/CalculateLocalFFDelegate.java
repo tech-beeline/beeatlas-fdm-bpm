@@ -13,8 +13,8 @@ import ru.beeline.fdmbpm.client.ArchClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
-import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
-import ru.beeline.fdmbpm.repository.TypeProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 @Slf4j
 @Component("CalculateLocalFFDelegate")

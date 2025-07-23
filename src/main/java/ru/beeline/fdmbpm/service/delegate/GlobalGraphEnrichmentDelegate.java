@@ -14,8 +14,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
-import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
-import ru.beeline.fdmbpm.repository.TypeProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 import ru.beeline.fdmbpm.service.RabbitService;
 
 @Slf4j

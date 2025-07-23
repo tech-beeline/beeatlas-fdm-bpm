@@ -1,4 +1,4 @@
-package ru.beeline.fdmbpm.gitrepository;
+package ru.beeline.fdmbpm.repository.git;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

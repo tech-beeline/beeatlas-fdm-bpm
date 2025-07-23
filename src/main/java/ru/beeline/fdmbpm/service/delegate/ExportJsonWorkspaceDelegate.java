@@ -13,7 +13,7 @@ import ru.beeline.fdmbpm.domain.Context;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
-import ru.beeline.fdmbpm.repository.ContextRepository;
+import ru.beeline.fdmbpm.repository.camunda.ContextRepository;
 
 @Slf4j
 @Component("ExportJsonWorkspaceDelegate")

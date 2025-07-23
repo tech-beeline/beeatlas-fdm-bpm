@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "ru.beeline.fdmbpm.gitrepository",
+        basePackages = "ru.beeline.fdmbpm.repository.git",
         entityManagerFactoryRef = "gitEntityManagerFactory",
         transactionManagerRef = "gitTransactionManager"
 )

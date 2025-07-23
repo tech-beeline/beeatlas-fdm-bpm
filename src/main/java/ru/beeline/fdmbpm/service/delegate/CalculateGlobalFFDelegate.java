@@ -7,10 +7,8 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.ArchClient;
-import ru.beeline.fdmbpm.domain.CamundaProcess;
-import ru.beeline.fdmbpm.domain.TypeProcess;
-import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
-import ru.beeline.fdmbpm.repository.TypeProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 @Slf4j
 @Component("CalculateGlobalFFDelegate")
