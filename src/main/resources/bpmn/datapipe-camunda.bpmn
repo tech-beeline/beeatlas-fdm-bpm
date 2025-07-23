@@ -173,7 +173,7 @@
     <bpmn:sequenceFlow id="Flow_00qu8qn" sourceRef="Gateway_1we72aq" targetRef="Gateway_10n5vqm">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.hasVariable('doneGlobalGraph')}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Activity_1v1mrsj" name="Проверка готовности глобального графа">
+    <bpmn:serviceTask id="Activity_1v1mrsj" name="Проверка готовности глобального графа"  camunda:asyncBefore="true" camunda:delegateExpression="${GlobalGraphCheckDelegate}">
       <bpmn:incoming>Flow_05j455y</bpmn:incoming>
       <bpmn:outgoing>Flow_0m2bqov</bpmn:outgoing>
     </bpmn:serviceTask>
