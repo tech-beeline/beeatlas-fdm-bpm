@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import ru.beeline.fdmbpm.client.GraphClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
@@ -42,13 +41,13 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
         log.info("Обработка с processId: {}, docId: {}", processId, docId);
         TypeProcess typeProcess = null;
         try {
-        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-        log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
-                 processId,
-                 camundaProcess.getProcId(),
-                 camundaProcess.getBusinessKey(),
-                 camundaProcess.getTypeProcessId());
-        typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+            CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+            log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
+                    processId,
+                    camundaProcess.getProcId(),
+                    camundaProcess.getBusinessKey(),
+                    camundaProcess.getTypeProcessId());
+            typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);

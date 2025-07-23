@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import ru.beeline.fdmbpm.client.GraphClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
@@ -41,10 +40,10 @@ public class GlobalGraphEnrichmentDelegate extends StatusLogic implements JavaDe
         Integer docId = (Integer) delegateExecution.getVariable("docId");
         TypeProcess typeProcess = null;
         try {
-        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-        log.info("camundaProcess : {}", camundaProcess);
-        typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-        log.info("typeProcess : {}", typeProcess);
+            CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+            log.info("camundaProcess : {}", camundaProcess);
+            typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+            log.info("typeProcess : {}", typeProcess);
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);
