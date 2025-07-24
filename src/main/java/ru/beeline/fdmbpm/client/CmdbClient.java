@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.cmdb.CmdbResponseDTO;
 
@@ -37,7 +38,10 @@ public class CmdbClient {
                     }).getBody();
 
             return cmdbResponseDTO;
-        } catch (Exception e) {
+        } catch (HttpClientErrorException.Unauthorized e){
+            log.info(" 401 : [no body]");
+        }
+        catch (Exception e) {
             log.error("Error calling CMDB API: " + e.getMessage(), e);
         }
         return null;
