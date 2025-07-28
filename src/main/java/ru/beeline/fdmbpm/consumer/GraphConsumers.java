@@ -16,11 +16,11 @@ import java.util.Map;
 @Slf4j
 @Component
 @EnableRabbit
-public class ChangeTechCapabilityConsumer {
+public class GraphConsumers {
 
     @Autowired
     ApplicationService applicationService;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @RabbitListener(queues = "${queue.result-local-graph.name}")
     public void resultLocalGraph(String message) {
