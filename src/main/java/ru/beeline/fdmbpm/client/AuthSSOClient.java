@@ -3,12 +3,11 @@ package ru.beeline.fdmbpm.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.utils.JwtUtils;
+import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -56,4 +55,20 @@ public class AuthSSOClient {
             throw new RuntimeException("Error while parsing response", e);
         }
     }
+
+    public String getSpecification(Integer id) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(serverUrl + "/api-management/api/v7/api/" + id + "/specification",
+                                         HttpMethod.GET, entity, String.class).getBody();
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 }
