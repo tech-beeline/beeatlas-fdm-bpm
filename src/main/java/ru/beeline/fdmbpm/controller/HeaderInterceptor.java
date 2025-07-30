@@ -19,9 +19,10 @@ public class HeaderInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        if (!request.getRequestURI().contains("/application/")
+        if (!request.getRequestURI().contains("/application")
                 || request.getRequestURI().contains("/actuator")
                 || request.getRequestURI().contains("/swagger")
+                || request.getRequestURI().contains("/error")
                 || request.getRequestURI().contains("/error")
                 || request.getRequestURI().contains("/api-docs")
                 || request.getRequestURI().contains("/change-status/")

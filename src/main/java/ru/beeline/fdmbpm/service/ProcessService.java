@@ -17,11 +17,11 @@ import ru.beeline.fdmbpm.dto.camundaProcess.StatusDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.TypeDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.mapper.ContextDtoMapper;
-import ru.beeline.fdmbpm.repository.CamundaProcessRepository;
-import ru.beeline.fdmbpm.repository.CamundaProcessStatusRepository;
-import ru.beeline.fdmbpm.repository.ContextRepository;
-import ru.beeline.fdmbpm.repository.StatusProcessRepository;
-import ru.beeline.fdmbpm.repository.TypeProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessStatusRepository;
+import ru.beeline.fdmbpm.repository.camunda.ContextRepository;
+import ru.beeline.fdmbpm.repository.camunda.StatusProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,6 +60,7 @@ public class ProcessService {
                 .name(statusProcess.getName())
                 .processId(camundaProcess.getId())
                 .isDone(statusProcess.getIsDone())
+                .isAsync(camundaProcess.getIsAsync())
                 .isError(statusProcess.getIsError())
                 .createdDate(camundaProcessStatus.getCreatedDate())
                 .build();

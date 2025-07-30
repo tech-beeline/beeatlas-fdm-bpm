@@ -15,7 +15,7 @@ import ru.beeline.fdmbpm.domain.*;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
 import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
-import ru.beeline.fdmbpm.repository.*;
+import ru.beeline.fdmbpm.repository.camunda.*;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
@@ -113,7 +113,7 @@ public class ApplicationProcessService {
                                        .build());
     }
 
-    public void sendGroupNotifications(Integer applicationId, String type, Integer typeId) {
+    public void sendGroupNotifications(Integer applicationId, String type, Integer typeId, String name) {
         log.info("Рассылаем уведомления ответственным. applicationId: {}, type: {}", applicationId, type);
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(typeId);
         for (ExecutorRoles role : executorRoles) {
@@ -121,7 +121,7 @@ public class ApplicationProcessService {
                      role.getRole(),
                      type,
                      applicationId);
-            notifyServiceClient.postBusinessEvent(role.getRole(), type, applicationId);
+            notifyServiceClient.postBusinessEvent(role.getRole(), type, applicationId, name);
         }
     }
 
@@ -129,7 +129,7 @@ public class ApplicationProcessService {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new NotFoundException("Запись в таблице application c id: " + applicationId + " не найдена"));
         log.info("Отправка уведомления ответственному. responsibleId: {}", application.getResponsibleId());
-        notifyServiceClient.postExportNotify(applicationId, type, application.getResponsibleId());
+        notifyServiceClient.postExportNotify(applicationId, type, application.getResponsibleId(), application.getName());
     }
 
     public void performTargetAction(DelegateExecution delegateExecution, Integer typeId, Integer entityId) {

@@ -23,11 +23,7 @@ import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
 import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
-import ru.beeline.fdmbpm.repository.ApplicationRepository;
-import ru.beeline.fdmbpm.repository.ApplicationTypeEnumRepository;
-import ru.beeline.fdmbpm.repository.ApplicationTypeStatusRepository;
-import ru.beeline.fdmbpm.repository.CommentRepository;
-import ru.beeline.fdmbpm.repository.ExecutorRolesRepository;
+import ru.beeline.fdmbpm.repository.camunda.*;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
@@ -67,7 +63,8 @@ public class ApplicationService {
 
     public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
-                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным business_key: %s не найдена", businessKey)));
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным business_key: %s не найдена",
+                                                                       businessKey)));
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
         if (executorRoles.isEmpty()) {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
@@ -98,7 +95,8 @@ public class ApplicationService {
                                             CommentDTO commentDTO) {
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        ApplicationTypeStatus targetStatus = applicationTypeStatusRepository.findByTypeIdAndAlias(application.getTypeId(), statusAlias);
+        ApplicationTypeStatus targetStatus = applicationTypeStatusRepository.findByTypeIdAndAlias(application.getTypeId(),
+                                                                                                  statusAlias);
         if (targetStatus == null) {
             throw new ValidationException("Данного статуса не существует");
         }
@@ -125,7 +123,8 @@ public class ApplicationService {
             application.setResponsibleId(application.getExecutorId());
         }
         application.setUpdateDate(LocalDateTime.now());
-        sendStatusChangeMessageToProcess(application, targetStatus.getMessage());
+        String appName = syncOrder(businessKey);
+        sendStatusChangeMessageToProcess(application, targetStatus.getMessage(), appName);
         applicationRepository.save(application);
         saveComment(application, commentDTO, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -133,49 +132,54 @@ public class ApplicationService {
 
     public List<ApplicationDTO> getApplicationsByAuthor(Integer userId) {
         List<Application> application = applicationRepository.findAllByAuthorId(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены", userId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены",
+                                                                       userId)));
         Set<Integer> participantIds = new HashSet<>();
         application.forEach(app -> {
             participantIds.add(app.getAuthorId());
             participantIds.add(app.getExecutorId());
         });
-        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream().collect(Collectors.toList()));
+        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream()
+                                                                                       .collect(Collectors.toList()));
         List<AdditionalInfoDTO> additional = capabilityClient.getAdditionalInfoDTO(application.stream()
-                .filter(app -> app.getApplicationType()
-                        .getEntityType()
-                        .equals("BUSINESS_CAPABILITY"))
-                .map(Application::getEntityId)
-                .collect(Collectors.toList()));
+                                                                                           .filter(app -> app.getApplicationType()
+                                                                                                   .getEntityType()
+                                                                                                   .equals("BUSINESS_CAPABILITY"))
+                                                                                           .map(Application::getEntityId)
+                                                                                           .collect(Collectors.toList()));
         return buildApplicationDTO(application, participants, additional);
     }
 
     public List<ApplicationDTO> getApplicationsByExecutor(Integer userId) {
         List<Application> application = applicationRepository.findAllByExecutorId(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Записи с данным AuthorId: %s не найдены",
-                        userId)));
+                                                                       userId)));
         Set<Integer> participantIds = new HashSet<>();
         application.forEach(app -> {
             participantIds.add(app.getAuthorId());
             participantIds.add(app.getExecutorId());
         });
-        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream().collect(Collectors.toList()));
+        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream()
+                                                                                       .collect(Collectors.toList()));
         List<AdditionalInfoDTO> additional = capabilityClient.getAdditionalInfoDTO(application.stream()
-                .filter(app -> app.getApplicationType()
-                        .getEntityType()
-                        .equals("BUSINESS_CAPABILITY"))
-                .map(Application::getEntityId)
-                .collect(Collectors.toList()));
+                                                                                           .filter(app -> app.getApplicationType()
+                                                                                                   .getEntityType()
+                                                                                                   .equals("BUSINESS_CAPABILITY"))
+                                                                                           .map(Application::getEntityId)
+                                                                                           .collect(Collectors.toList()));
         return buildApplicationDTO(application, participants, additional);
     }
 
     private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
-                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
+                                                                       businessKey)));
         if (request.getHeader(USER_ID_HEADER) == null || request.getHeader(USER_ID_HEADER).isEmpty()) {
             throw new ForbiddenException("Нет прав доступа");
         }
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(), userId)) {
+        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(),
+                                                                                  userId)) {
             throw new ForbiddenException("Нет прав доступа");
         }
         return application;
@@ -188,18 +192,19 @@ public class ApplicationService {
                 throw new NotFoundException("Пользователь с данным id не найден");
             }
             commentRepository.save(Comment.builder()
-                    .applicationId(application.getId())
-                    .comment(commentDTO.getComment())
-                    .createdDate(LocalDateTime.now())
-                    .fullName(userProfileDTO.getFullName())
-                    .build());
+                                           .applicationId(application.getId())
+                                           .comment(commentDTO.getComment())
+                                           .createdDate(LocalDateTime.now())
+                                           .fullName(userProfileDTO.getFullName())
+                                           .build());
         }
     }
 
-    private void sendStatusChangeMessageToProcess(Application application, String message) {
+    private void sendStatusChangeMessageToProcess(Application application, String message, String appName) {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("message", message);
+            variables.put("name", appName);
             runtimeService.createMessageCorrelation("change_of_status")
                     .processInstanceId(application.getProcessId())
                     .setVariables(variables)
@@ -208,6 +213,19 @@ public class ApplicationService {
         } catch (MismatchingMessageCorrelationException e) {
             log.error("Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
             throw new CustomCamundaException("Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
+        } catch (Exception e) {
+            log.error("Ошибка при отправке сообщения в Camunda", e);
+            throw new CustomCamundaException("Ошибка при отправке сообщения в Camunda");
+        }
+    }
+
+    public void sendMessageToProcess(String taskKey, Map<String, Object> variables) {
+        try {
+            runtimeService.createMessageCorrelation("MessageName")
+                    .processInstanceId(taskKey)
+                    .setVariables(variables)
+                    .correlate();
+            log.info("Переданы данные в процесс Camunda: {taskKey, " + taskKey + "}");
         } catch (Exception e) {
             log.error("Ошибка при отправке сообщения в Camunda", e);
             throw new CustomCamundaException("Ошибка при отправке сообщения в Camunda");
@@ -223,21 +241,22 @@ public class ApplicationService {
             throw new ValidationException("Отсутствует роль в заголовках");
         }
         List<Application> applicationList = applicationRepository.findAllByTypeIdInAndExecutorIdNull(executorRoles.stream()
-                .map(ExecutorRoles::getTypeId)
-                .collect(
-                        Collectors.toList()));
+                                                                                                             .map(ExecutorRoles::getTypeId)
+                                                                                                             .collect(
+                                                                                                                     Collectors.toList()));
         Set<Integer> participantIds = new HashSet<>();
         applicationList.forEach(app -> {
             participantIds.add(app.getAuthorId());
             participantIds.add(app.getExecutorId());
         });
-        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream().collect(Collectors.toList()));
+        List<ApplicationParticipantDTO> participants = userClient.getUsersInfo(participantIds.stream()
+                                                                                       .collect(Collectors.toList()));
         List<AdditionalInfoDTO> additional = capabilityClient.getAdditionalInfoDTO(applicationList.stream()
-                .filter(app -> app.getApplicationType()
-                        .getEntityType()
-                        .equals("BUSINESS_CAPABILITY"))
-                .map(Application::getEntityId)
-                .collect(Collectors.toList()));
+                                                                                           .filter(app -> app.getApplicationType()
+                                                                                                   .getEntityType()
+                                                                                                   .equals("BUSINESS_CAPABILITY"))
+                                                                                           .map(Application::getEntityId)
+                                                                                           .collect(Collectors.toList()));
         return buildApplicationDTO(applicationList, participants, additional);
     }
 
@@ -251,22 +270,22 @@ public class ApplicationService {
                         .id(application.getId())
                         .businessKey(application.getBusinessKey())
                         .type(ApplicationTypeDTO.builder()
-                                .id(application.getApplicationType().getId())
-                                .name(application.getApplicationType().getName())
-                                .description(application.getApplicationType().getDescription())
-                                .entityType(application.getApplicationType().getEntityType())
-                                .build())
+                                      .id(application.getApplicationType().getId())
+                                      .name(application.getApplicationType().getName())
+                                      .description(application.getApplicationType().getDescription())
+                                      .entityType(application.getApplicationType().getEntityType())
+                                      .build())
                         .status(ApplicationStatusDTO.builder()
-                                .id(application.getStatus().getId())
-                                .name(application.getStatus().getName())
-                                .alias(application.getStatus().getAlias())
-                                .isEndStatus(application.getStatus().getIsEndStatus())
-                                .build())
+                                        .id(application.getStatus().getId())
+                                        .name(application.getStatus().getName())
+                                        .alias(application.getStatus().getAlias())
+                                        .isEndStatus(application.getStatus().getIsEndStatus())
+                                        .build())
                         .author(ApplicationParticipantDTO.builder()
-                                .id(application.getAuthorId())
-                                .fullName(participantsMap.get(application.getAuthorId()).getFullName())
-                                .email(participantsMap.get(application.getAuthorId()).getEmail())
-                                .build())
+                                        .id(application.getAuthorId())
+                                        .fullName(participantsMap.get(application.getAuthorId()).getFullName())
+                                        .email(participantsMap.get(application.getAuthorId()).getEmail())
+                                        .build())
                         .entityId(application.getEntityId())
                         .executor(getExecutor(application, participantsMap))
                         .name(application.getName())
@@ -320,9 +339,19 @@ public class ApplicationService {
         return new ArrayList<>();
     }
 
-    public ApplicationExtendedDTO getApplicationsByBusinessKey(String businessKey) {
-        Application application = applicationRepository.findByBusinessKey(businessKey)
-                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена", businessKey)));
+    public ApplicationExtendedDTO getApplications(Integer id, String businessKey) {
+        if (id == null && businessKey == null) {
+            throw new ValidationException("Отсутствует id/business-key");
+        }
+        Application application;
+        if (id != null) {
+            application = applicationRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException(String.format("Запись с данным id: %s не найдена", id)));
+        } else {
+            application = applicationRepository.findByBusinessKey(businessKey)
+                    .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
+                                                                           businessKey)));
+        }
         UserProfileDTO authorProfileDTO = userClient.getUserProfile(application.getAuthorId());
         AuthorDTO author = AuthorDTO.builder()
                 .id(authorProfileDTO.getId())
@@ -349,17 +378,17 @@ public class ApplicationService {
                 .entityId(application.getEntityId())
                 .businessKey(application.getBusinessKey())
                 .type(ApplicationTypeDTO.builder()
-                        .id(application.getApplicationType().getId())
-                        .name(application.getApplicationType().getName())
-                        .description(application.getApplicationType().getDescription())
-                        .entityType(application.getApplicationType().getEntityType())
-                        .build())
+                              .id(application.getApplicationType().getId())
+                              .name(application.getApplicationType().getName())
+                              .description(application.getApplicationType().getDescription())
+                              .entityType(application.getApplicationType().getEntityType())
+                              .build())
                 .status(ApplicationStatusShortDTO.builder()
-                        .id(application.getStatus().getId())
-                        .name(application.getStatus().getName())
-                        .alias(application.getStatus().getAlias())
-                        .isEndStatus(application.getStatus().getIsEndStatus())
-                        .build())
+                                .id(application.getStatus().getId())
+                                .name(application.getStatus().getName())
+                                .alias(application.getStatus().getAlias())
+                                .isEndStatus(application.getStatus().getIsEndStatus())
+                                .build())
                 .author(author)
                 .executor(executor)
                 .name(application.getName())
@@ -371,8 +400,8 @@ public class ApplicationService {
     }
 
     public void changeExecutor(String businessKey, Integer newExecutorId, Integer userId) {
-        Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
-                new NotFoundException("Процесс по данному businessKey не найден"));
+        Application application = applicationRepository.findByBusinessKey(businessKey)
+                .orElseThrow(() -> new NotFoundException("Процесс по данному businessKey не найден"));
         if (!userId.equals(application.getExecutorId())) {
             throw new ForbiddenException("403 Forbidden");
         }
@@ -387,9 +416,9 @@ public class ApplicationService {
     }
 
     private ApplicationTypeStatus validateApplicationStatus(Application application) {
-        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository
-                .findByIdAndTypeId(application.getStatusId(), application.getTypeId()).orElseThrow(() ->
-                        new NotFoundException("Статус процесса не найден"));
+        ApplicationTypeStatus applicationTypeStatus = applicationTypeStatusRepository.findByIdAndTypeId(application.getStatusId(),
+                                                                                                        application.getTypeId())
+                .orElseThrow(() -> new NotFoundException("Статус процесса не найден"));
         if (applicationTypeStatus.getIsEndStatus()) {
             throw new ValidationException("Заявка завершена");
         }
@@ -407,18 +436,19 @@ public class ApplicationService {
         }
     }
 
-    public void syncOrder(String businessKey) {
-        Application application = applicationRepository.findByBusinessKey(businessKey).orElseThrow(() ->
-                new NotFoundException("Процесс по данному businessKey не найден"));
+    public String syncOrder(String businessKey) {
+        Application application = applicationRepository.findByBusinessKey(businessKey)
+                .orElseThrow(() -> new NotFoundException("Процесс по данному businessKey не найден"));
         validateApplicationStatus(application);
         if (application.getApplicationType().getEntityType().equals("BUSINESS_CAPABILITY")) {
             BusinessCapabilityOrderDraftResponseDTO bcOrder = capabilityClient.getBusinessCapabilityOrder(application.getEntityId());
-            if(!bcOrder.getName().equals(application.getName())) {
+            if (!bcOrder.getName().equals(application.getName())) {
                 application.setName(bcOrder.getName());
                 application.setUpdateDate(LocalDateTime.now());
                 applicationRepository.save(application);
             }
         }
+        return application.getName();
     }
 }
 

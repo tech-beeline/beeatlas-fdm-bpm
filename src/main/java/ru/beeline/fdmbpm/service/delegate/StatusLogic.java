@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
-import ru.beeline.fdmbpm.repository.CamundaProcessStatusRepository;
-import ru.beeline.fdmbpm.repository.StatusProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessStatusRepository;
+import ru.beeline.fdmbpm.repository.camunda.StatusProcessRepository;
 
 import java.time.LocalDateTime;
 
@@ -24,9 +24,7 @@ public class StatusLogic {
     protected void saveAlias(Integer processId, String alias, TypeProcess typeProcess) {
         log.info("saveAlias: processId=", processId);
         log.info("saveAlias: alias=", alias);
-        log.info("saveAlias: typeProcess=", typeProcess.toString());
         StatusProcess statusProcess = statusProcessRepository.findByAliasAndTypeProcessId(alias, typeProcess.getId());
-        log.info("saveAlias: processId=", statusProcess.toString());
         camundaProcessStatusRepository.save(CamundaProcessStatus.builder()
                 .statusProcessId(statusProcess.getId())
                 .camundaProcessId(processId)

@@ -21,9 +21,17 @@ integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
   dashboard-server-url: https://dashboard-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
   grafana-server-url: https://inside.beeline.ru
+rabbitmq:
+  fanout-exchange: TECH_CAPABILITY
 queue:
   package-queue:
     name: package_queue
+  tc-queue:
+    name: tc_description_quality
+  result-local-graph:
+    name: result_local_graph
+  result-global-graph:
+    name: result_global_graph
 
 spring:
   datasource:

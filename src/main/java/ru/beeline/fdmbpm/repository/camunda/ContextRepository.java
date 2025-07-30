@@ -1,4 +1,4 @@
-package ru.beeline.fdmbpm.repository;
+package ru.beeline.fdmbpm.repository.camunda;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.beeline.fdmbpm.domain.Context;

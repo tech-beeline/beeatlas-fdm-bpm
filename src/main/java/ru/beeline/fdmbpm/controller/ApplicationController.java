@@ -14,6 +14,7 @@ import ru.beeline.fdmbpm.service.ExportProcessService;
 import ru.beeline.fdmbpm.service.ImportProcessService;
 import ru.beeline.fdmbpm.service.InfrastructureService;
 import ru.beeline.fdmbpm.service.RelationsService;
+import ru.beeline.fdmbpm.service.TechRecalculationService;
 import ru.beeline.fdmbpm.service.appservice.ApplicationProcessService;
 
 
@@ -30,9 +31,11 @@ public class ApplicationController {
     ExportProcessService exportProcessService;
     @Autowired
     InfrastructureService infrastructureService;
-
     @Autowired
     ApplicationProcessService applicationProcessService;
+    @Autowired
+    TechRecalculationService techRecalculationService;
+
 
     @GetMapping("/send-business")
     public String sendBusinessCapability() {
@@ -91,7 +94,7 @@ public class ApplicationController {
                                              @PathVariable String type,
                                              @PathVariable Integer typeId) {
         log.info("running application process 2");
-        applicationProcessService.sendGroupNotifications(applicationId, type, typeId);
+        applicationProcessService.sendGroupNotifications(applicationId, type, typeId, null);
         return "the process 2 has been completed";
     }
 
@@ -109,5 +112,11 @@ public class ApplicationController {
         log.info("running application process 3");
         applicationProcessService.performTargetAction(null, typeId, entityId);
         return "the process 3 has been completed";
+    }
+
+    @GetMapping("/tech-recalculation")
+    public String techRecalculation() {
+        techRecalculationService.getTechRecalculation();
+        return null;
     }
 }

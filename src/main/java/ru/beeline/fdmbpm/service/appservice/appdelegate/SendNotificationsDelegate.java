@@ -19,6 +19,7 @@ public class SendNotificationsDelegate implements JavaDelegate {
         Integer applicationId = (Integer) delegateExecution.getVariable("applicationId");
         Integer typeId = (Integer) delegateExecution.getVariable("typeId");
         String type = (String) delegateExecution.getVariable("type");
-        applicationProcessService.sendGroupNotifications(applicationId, type, typeId);
+        String name = (String) delegateExecution.getVariable("name");
+        applicationProcessService.sendGroupNotifications(applicationId, type, typeId, name);
     }
 }
