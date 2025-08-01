@@ -121,6 +121,9 @@ public class ApplicationService {
         if (!canChangeStatus) {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
+        application.setUpdateDate(LocalDateTime.now());
+        log.info("syc order");
+        String appName = syncOrder(businessKey);
         application.setStatusId(targetStatus.getId());
         log.info("set status");
         if (targetStatus.getIsAuthorResponsible()) {
@@ -128,9 +131,6 @@ public class ApplicationService {
         } else {
             application.setResponsibleId(application.getExecutorId());
         }
-        application.setUpdateDate(LocalDateTime.now());
-        log.info("syc order");
-        String appName = syncOrder(businessKey);
         sendStatusChangeMessageToProcess(application, targetStatus.getMessage(), appName);
         applicationRepository.save(application);
         log.info("save comment");
