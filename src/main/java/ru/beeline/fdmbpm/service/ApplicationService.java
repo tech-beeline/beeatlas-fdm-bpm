@@ -93,13 +93,16 @@ public class ApplicationService {
                                             String statusAlias,
                                             HttpServletRequest request,
                                             CommentDTO commentDTO) {
+        log.info("start ChangeStatus process");
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
+        log.info("get target status");
         ApplicationTypeStatus targetStatus = applicationTypeStatusRepository.findByTypeIdAndAlias(application.getTypeId(),
                                                                                                   statusAlias);
         if (targetStatus == null) {
             throw new ValidationException("Данного статуса не существует");
         }
+        log.info("get current status");
         ApplicationTypeStatus currentStatus = applicationTypeStatusRepository.findById(application.getStatusId())
                 .orElseThrow(() -> new NotFoundException("Статус с данным id не найден"));
         if (currentStatus.getAlias().equals(targetStatus.getAlias())) {
@@ -117,15 +120,18 @@ public class ApplicationService {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
         application.setStatusId(targetStatus.getId());
+        log.info("get target status");
         if (targetStatus.getIsAuthorResponsible()) {
             application.setResponsibleId(application.getAuthorId());
         } else {
             application.setResponsibleId(application.getExecutorId());
         }
         application.setUpdateDate(LocalDateTime.now());
+        log.info("syc order");
         String appName = syncOrder(businessKey);
         sendStatusChangeMessageToProcess(application, targetStatus.getMessage(), appName);
         applicationRepository.save(application);
+        log.info("save comment");
         saveComment(application, commentDTO, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
