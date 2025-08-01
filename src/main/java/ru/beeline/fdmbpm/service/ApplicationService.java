@@ -93,22 +93,24 @@ public class ApplicationService {
                                             String statusAlias,
                                             HttpServletRequest request,
                                             CommentDTO commentDTO) {
-        log.info("start ChangeStatus process");
+        log.info("start ChangeStatus process to statusAlias=" + statusAlias);
         Application application = getAuthorizedApplication(businessKey, request);
         Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        log.info("get target status");
         ApplicationTypeStatus targetStatus = applicationTypeStatusRepository.findByTypeIdAndAlias(application.getTypeId(),
                                                                                                   statusAlias);
+        log.info(" target status is " + targetStatus.getId());
         if (targetStatus == null) {
             throw new ValidationException("Данного статуса не существует");
         }
-        log.info("get current status");
+
         ApplicationTypeStatus currentStatus = applicationTypeStatusRepository.findById(application.getStatusId())
                 .orElseThrow(() -> new NotFoundException("Статус с данным id не найден"));
+        log.info(" current status is " + currentStatus.getId());
         if (currentStatus.getAlias().equals(targetStatus.getAlias())) {
             log.info("id текущего статуса и статуса из пути запроса совпадают");
             return ResponseEntity.status(HttpStatus.OK).build();
         }
+        log.info(" currentStatus.getIsEndStatus() is " + currentStatus.getIsEndStatus());
         if (currentStatus.getIsEndStatus()) {
             throw new ValidationException("Заявка завершена");
         }
@@ -120,7 +122,7 @@ public class ApplicationService {
             throw new ValidationException("Переход к этому статусу невозможен");
         }
         application.setStatusId(targetStatus.getId());
-        log.info("get target status");
+        log.info("set status");
         if (targetStatus.getIsAuthorResponsible()) {
             application.setResponsibleId(application.getAuthorId());
         } else {
