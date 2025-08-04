@@ -46,22 +46,11 @@ spring:
         properties:
           hibernate:
             dialect: org.hibernate.dialect.PostgreSQL95Dialect
-      url: jdbc:postgresql://yd-infradb001.nix.vimpelcom.ru/infra_db
-      username: tech-fdm-reader
-      password: ia22PsDR-31M
-      driver-class-name: org.postgresql.Driver
+
+
     processes:
-      url: jdbc:postgresql://yd-fdmtestdb01.nix.vimpelcom.ru:5432/fdm_db
-      username: fdm_user
-      password: 12fdmuser)(
       driver-class-name: org.postgresql.Driver
-      hikari:
-        maximum-pool-size: 10
-    camunda:
-      url: jdbc:postgresql://yd-fdmtestdb01.nix.vimpelcom.ru:5432/fdm_bpm
-      username: fdm_user
-      password: 12fdmuser)(
-      driver-class-name: org.postgresql.Driver
+
   jpa:
     processes:
       hibernate:
@@ -80,8 +69,3 @@ spring:
     baseline-on-migrate: true
     clean-disabled: true
     locations: classpath:db/migration
-logging:
-  level:
-    com:
-      zaxxer:
-        hikari: DEBUG
