@@ -53,9 +53,6 @@ public class ApplicationService {
     ExecutorRolesRepository executorRolesRepository;
 
     @Autowired
-    ApplicationTypeEnumRepository applicationTypeEnumRepository;
-
-    @Autowired
     ApplicationTypeStatusRepository applicationTypeStatusRepository;
 
     @Autowired

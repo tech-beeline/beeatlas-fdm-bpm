@@ -46,7 +46,7 @@ public class DashboardClient {
             }
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/capabilities " + e.getMessage());
         }
         return null;
     }
@@ -72,7 +72,7 @@ public class DashboardClient {
                                                                         String.class));
 
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/capabilities/code " + e.getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ public class DashboardClient {
             }
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/tech-capabilities " + e.getMessage());
         }
         return null;
     }
@@ -113,7 +113,7 @@ public class DashboardClient {
             }
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/v4/systems " + e.getMessage());
         }
         return null;
     }
