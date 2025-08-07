@@ -17,6 +17,7 @@ public class MapicSpecDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution delegateExecution) {
         Integer apiId = (Integer) delegateExecution.getVariable("apiId");
+        log.info("run MapicSpecDelegate with id:" + apiId);
         mapicSpecService.uploadSpec(apiId);
     }
 }
