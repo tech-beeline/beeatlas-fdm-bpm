@@ -25,11 +25,13 @@ public class StageMapicClient {
 
     public String getSpecification(Integer id) {
         try {
+            String url = serverUrl + "/api-management/api/v7/api/" + id + "/specification";
+            log.info("send request to:" + url);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(serverUrl + "/api-management/api/v7/api/" + id + "/specification",
+            return restTemplate.exchange(url,
                                          HttpMethod.GET,
                                          entity,
                                          String.class).getBody();
