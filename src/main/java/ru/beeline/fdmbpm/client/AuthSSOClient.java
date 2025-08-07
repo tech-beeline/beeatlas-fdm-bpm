@@ -55,20 +55,4 @@ public class AuthSSOClient {
             throw new RuntimeException("Error while parsing response", e);
         }
     }
-
-    public String getSpecification(Integer id) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(serverUrl + "/api-management/api/v7/api/" + id + "/specification",
-                                         HttpMethod.GET, entity, String.class).getBody();
-
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
 }
