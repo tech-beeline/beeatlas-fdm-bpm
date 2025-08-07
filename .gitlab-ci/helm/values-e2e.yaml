@@ -44,6 +44,7 @@ env:
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#documentserverurl"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/test/e2e/ambassador#authsso"
+  INTEGRATION_STAGE_MAPIC_SERVER_URL: "vault:eafdmmart/data/test/e2e/ambassador#stagemapicserverurl"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/test/e2e/grafana#url"
   INTEGRATION_CMDB_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#cmdbserver"
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#authserverurl"

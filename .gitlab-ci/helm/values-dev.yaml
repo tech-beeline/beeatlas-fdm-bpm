@@ -44,6 +44,7 @@ env:
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/dev/fdm#documentserverurl"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/dev/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#authsso"
+  INTEGRATION_STAGE_MAPIC_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#stagemapicserverurl"
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#authserverurl"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/dev/grafana#url"
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/dev/grafana#token"

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.AuthSSOClient;
 import ru.beeline.fdmbpm.client.ProductClient;
+import ru.beeline.fdmbpm.client.StageMapicClient;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.mapic.ParameterDTO;
 import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
@@ -25,14 +26,14 @@ public class MapicSpecService {
     ProductClient productClient;
 
     @Autowired
-    AuthSSOClient authSSOClient;
+    StageMapicClient stageMapicClient;
 
     @Autowired
     ObjectMapper objectMapper;
 
     public void uploadSpec(Integer apiId) {
         DiscoveredInterfaceDTO discoveredInterface = productClient.getInterfaceOperations(apiId);
-        String specification = authSSOClient.getSpecification(discoveredInterface.getApiId());
+        String specification = stageMapicClient.getSpecification(discoveredInterface.getApiId());
         try {
             List<MethodDTO> methods = parseOpenApiSpec(specification);
             productClient.updateInterfaceOperations(methods, apiId);
