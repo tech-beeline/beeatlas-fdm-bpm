@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class DashboardCapabilityV4DTO {
 
     private Boolean isDomain;

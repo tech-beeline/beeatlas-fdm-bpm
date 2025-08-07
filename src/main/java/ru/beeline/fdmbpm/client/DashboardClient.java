@@ -64,6 +64,7 @@ public class DashboardClient {
                     .self("/api/v4/capabilities/undefined")
                     .build();
             HttpHeaders headers = new HttpHeaders();
+            log.info("body for request:" + dashboardCapabilityV4DTO);
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
             log.info("response from dashboard:" + restTemplate.exchange(dashboardServerUrl + "/api/capabilities/" + order.getCode(),
