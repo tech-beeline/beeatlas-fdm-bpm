@@ -44,6 +44,7 @@ public class MapicSpecService {
     }
 
     public List<MethodDTO> parseOpenApiSpec(String specJson) throws Exception {
+        log.info("specification:" + specJson);
         JsonNode root = objectMapper.readTree(specJson);
 
         String serverUrl = root.path("servers").get(0).path("url").asText();
