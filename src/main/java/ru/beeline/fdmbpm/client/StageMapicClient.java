@@ -37,7 +37,7 @@ public class StageMapicClient {
                                          String.class).getBody();
 
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error get specification from mapic " + e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
