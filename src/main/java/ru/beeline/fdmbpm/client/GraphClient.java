@@ -26,7 +26,8 @@ public class GraphClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<GraphDTO> response = restTemplate.exchange(graphServerUrl + "api/v1/local/graph/task/" + processId,
+            ResponseEntity<GraphDTO> response =
+                    restTemplate.exchange(graphServerUrl + "/api/v1/local/graph/task/" + processId,
                                                                       HttpMethod.GET,
                                                                       requestEntity,
                                                                       GraphDTO.class);
@@ -45,7 +46,8 @@ public class GraphClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<GraphDTO> response = restTemplate.exchange(graphServerUrl + "api/v1/global/graph/task/" + processId,
+            ResponseEntity<GraphDTO> response =
+                    restTemplate.exchange(graphServerUrl + "/api/v1/global/graph/task/" + processId,
                                                                       HttpMethod.GET,
                                                                       requestEntity,
                                                                       GraphDTO.class);
