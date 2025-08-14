@@ -2,16 +2,22 @@ package ru.beeline.fdmbpm.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.beeline.fdmbpm.client.AuthSSOClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.StageMapicClient;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.mapic.ParameterDTO;
+import ru.beeline.fdmbpm.dto.wsdlSoap.DefinitionsDTO;
+import ru.beeline.fdmbpm.dto.wsdlSoap.OperationDTO;
+import ru.beeline.fdmbpm.dto.wsdlSoap.PortDTO;
+import ru.beeline.fdmbpm.dto.wsdlSoap.PortTypeDTO;
 import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,14 +40,61 @@ public class MapicSpecService {
     public void uploadSpec(Integer apiId) {
         DiscoveredInterfaceDTO discoveredInterface = productClient.getInterfaceOperations(apiId);
         String specification = stageMapicClient.getSpecification(discoveredInterface.getApiId());
+        String normalized = specification.trim();
         try {
-            List<MethodDTO> methods = parseOpenApiSpec(specification);
-            productClient.updateInterfaceOperations(methods, apiId);
+            if (normalized.startsWith("<?xml")) {
+                List<MethodDTO> soapMethods = parseWsdlSoap(normalized);
+                if (!soapMethods.isEmpty()) {
+                    productClient.updateInterfaceOperations(soapMethods, apiId);
+                }
+            } else {
+                List<MethodDTO> methods = parseOpenApiSpec(specification);
+                productClient.updateInterfaceOperations(methods, apiId);
+            }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error while uploading spec", e);
             throw new RuntimeException(e);
         }
+    }
 
+    public List<MethodDTO> parseWsdlSoap(String wsdlContent) throws Exception {
+        JAXBContext jaxbContext = JAXBContext.newInstance(DefinitionsDTO.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        DefinitionsDTO definitions = (DefinitionsDTO) unmarshaller.unmarshal(new StringReader(wsdlContent));
+        List<MethodDTO> result = new ArrayList<>();
+        String context = getContext(definitions);
+        if (definitions.getPortTypes() != null) {
+            for (PortTypeDTO portType : definitions.getPortTypes()) {
+                if (portType.getOperations() != null) {
+                    for (OperationDTO operationDTO : portType.getOperations()) {
+                        MethodDTO soapMethod = MethodDTO.builder()
+                                .name(operationDTO.getName())
+                                .context(context)
+                                .type("SOAP")
+                                .build();
+                        result.add(soapMethod);
+                        log.info("SOAP method added to list: {}", soapMethod);
+                    }
+                }
+            }
+        }
+        if (result.isEmpty()) {
+            log.info("SOAP methods list is empty for given WSDL");
+        }
+        return result;
+    }
+
+    private String getContext(DefinitionsDTO definitions) {
+        String context = null;
+        if (definitions.getService() != null && definitions.getService().getPorts() != null) {
+            for (PortDTO port : definitions.getService().getPorts()) {
+                if (port.getAddress() != null && port.getAddress().getLocation() != null) {
+                    context = port.getAddress().getLocation();
+                    break;
+                }
+            }
+        }
+        return context;
     }
 
     public List<MethodDTO> parseOpenApiSpec(String specJson) throws Exception {
