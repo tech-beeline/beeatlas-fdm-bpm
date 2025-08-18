@@ -19,6 +19,6 @@ public class PerformTargetActionDelegate implements JavaDelegate {
         log.info("Старт процесса: Целевое действие по заявке");
         Integer typeId = (Integer) delegateExecution.getVariable("typeId");
         Integer entityId = (Integer) delegateExecution.getVariable("entityId");
-        applicationProcessService.performTargetAction(delegateExecution, typeId, entityId);
+        applicationProcessService.performTargetAction(typeId, entityId);
     }
 }

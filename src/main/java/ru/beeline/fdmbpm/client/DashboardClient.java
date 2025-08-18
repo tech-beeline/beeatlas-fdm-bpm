@@ -51,32 +51,6 @@ public class DashboardClient {
         return null;
     }
 
-    public void putCapability(BusinessCapabilityOrderDraftResponseDTO order) {
-        try {
-            DashboardCapabilityV4DTO dashboardCapabilityV4DTO = DashboardCapabilityV4DTO.builder()
-                    .isDomain(false)
-                    .name(order.getName())
-                    .description(order.getDescription())
-                    .author(order.getAuthor())
-                    .owner(order.getOwner())
-                    .parent(order.getParent() == null ? null : order.getParent().getCode())
-                    .status("PROPOSED")
-                    .self("/api/v4/capabilities/undefined")
-                    .build();
-            HttpHeaders headers = new HttpHeaders();
-            log.info("body for request:" + dashboardCapabilityV4DTO);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
-            log.info("response from dashboard:" + restTemplate.exchange(dashboardServerUrl + "/api/capabilities/" + order.getCode(),
-                                                                        HttpMethod.PUT,
-                                                                        requestEntity,
-                                                                        String.class));
-
-        } catch (Exception e) {
-            log.error("ERROR SEND TO /api/capabilities/code " + e.getMessage());
-        }
-    }
-
     public List<DashboardTechCapabilityDTO> getTechCapabilities() {
         try {
             HttpHeaders headers = new HttpHeaders();

@@ -109,23 +109,6 @@ public class CapabilityClient {
         return null;
     }
 
-    public BusinessCapabilityOrderDraftResponseDTO getOrderBc(int entityId) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("SOURCE", "Sparx");
-
-            HttpEntity<List<DashboardCapabilityDTO>> entity = new HttpEntity<>(null, headers);
-            return restTemplate.exchange(capabilityServerUrl + "/api/v1/business-capability/order/" + entityId,
-                    HttpMethod.GET,
-                    entity,
-                    BusinessCapabilityOrderDraftResponseDTO.class).getBody();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw e;
-        }
-    }
-
     public void calculateTotalTechCapabiltiesCount() {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -233,12 +216,12 @@ public class CapabilityClient {
                             })
                     .getBody();
             return result;
-        }catch (HttpClientErrorException.NotFound e) {
-                String message = e.getResponseBodyAsString();
-                throw new NotFoundException(message);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
-            }
+        } catch (HttpClientErrorException.NotFound e) {
+            String message = e.getResponseBodyAsString();
+            throw new NotFoundException(message);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+        }
     }
 }
