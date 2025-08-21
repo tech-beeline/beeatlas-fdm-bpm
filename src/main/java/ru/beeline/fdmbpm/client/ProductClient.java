@@ -14,7 +14,9 @@ import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
+import ru.beeline.fdmlib.dto.product.PublishedApiDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -99,6 +101,43 @@ public class ProductClient {
         return null;
     }
 
+    public List<PublishedApiDTO> getInterfaces(String cmdb) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<PublishedApiDTO> result = restTemplate.exchange(productServerUrl + "/api/v1/mapic/product/" + cmdb + "/published-api",
+                                                                 HttpMethod.GET,
+                                                                 entity,
+                                                                 new ParameterizedTypeReference<List<PublishedApiDTO>>() {})
+                    .getBody();
+            if (result == null || result.size() == 0) {
+                throw new RuntimeException("Interfaces aren't received");
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("Interfaces aren't received" + e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    public ProductDTO getProduct(String product) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(productServerUrl + "/api/v1/products/" + product,
+                                         HttpMethod.GET,
+                                         entity,
+                                         ProductDTO.class).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
     public DiscoveredInterfaceDTO getInterfaceOperations(Integer id) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -126,6 +165,23 @@ public class ProductClient {
                                                                       HttpMethod.PUT,
                                                                       requestEntity,
                                                                       String.class));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void updateInterface(DiscoveredInterfaceDTO body) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            List<DiscoveredInterfaceDTO> discoveredInterfaceDTOS = new ArrayList<>();
+            discoveredInterfaceDTOS.add(body);
+            HttpEntity<List<DiscoveredInterfaceDTO>> requestEntity = new HttpEntity<>(discoveredInterfaceDTOS, headers);
+            log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered" + "-interface/",
+                                                                             HttpMethod.PUT,
+                                                                             requestEntity,
+                                                                             String.class));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
