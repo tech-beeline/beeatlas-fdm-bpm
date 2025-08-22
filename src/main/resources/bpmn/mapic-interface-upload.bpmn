@@ -15,9 +15,12 @@
       <bpmn:outgoing>Flow_1sqyfw7</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:callActivity id="Activity_0kz746z" name="Получение спецификации интерфейса" calledElement="Process_1lgs3vo">
+      <bpmn:extensionElements>
+        <camunda:in source="apiId" target="apiId" />
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1sqyfw7</bpmn:incoming>
       <bpmn:outgoing>Flow_1oa9nq2</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${apiIds}" camunda:elementVariable="apiId" />
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="apiIds" camunda:elementVariable="apiId" />
     </bpmn:callActivity>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
