@@ -128,7 +128,7 @@ public class ProductClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(productServerUrl + "/api/v1/products/" + product,
+            return restTemplate.exchange(productServerUrl + "/api/v1/product/" + product,
                                          HttpMethod.GET,
                                          entity,
                                          ProductDTO.class).getBody();
