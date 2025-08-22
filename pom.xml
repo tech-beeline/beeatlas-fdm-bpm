@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.beeline</groupId>
     <artifactId>fdm-bpm</artifactId>
-    <version>1.2.10</version>
+    <version>1.2.11</version>
     <name>fdm-bpm</name>
     <description>fdm-bpm</description>
     <properties>
@@ -32,6 +32,12 @@
                 <version>7.20.0</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.camunda.bpm.webapp</groupId>
+                <artifactId>camunda-webapp</artifactId>
+                <version>7.20.0</version> <!-- или ту же версию, что у тебя используется -->
+                <type>war</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
