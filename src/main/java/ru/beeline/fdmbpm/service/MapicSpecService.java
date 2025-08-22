@@ -31,9 +31,6 @@ public class MapicSpecService {
     ProductClient productClient;
 
     @Autowired
-    StageMapicClient stageMapicClient;
-
-    @Autowired
     ObjectMapper objectMapper;
 
     public void uploadSpec(Integer apiId) {

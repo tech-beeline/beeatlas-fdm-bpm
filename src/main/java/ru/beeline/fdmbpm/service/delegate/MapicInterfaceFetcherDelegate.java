@@ -49,6 +49,7 @@ public class MapicInterfaceFetcherDelegate implements JavaDelegate {
                     apiIds.add(publishedApiDTO.getApiId());
                 }
             });
+            log.info("apiIds" + apiIds);
             delegateExecution.setVariable("apiIds", apiIds);
         }
     }
