@@ -130,10 +130,10 @@ public class ProductClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(productServerUrl + "/api/v1/products/" + product,
-                    HttpMethod.GET,
-                    entity,
-                    ProductDTO.class).getBody();
+            return restTemplate.exchange(productServerUrl + "/api/v1/product/" + product,
+                                         HttpMethod.GET,
+                                         entity,
+                                         ProductDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -180,10 +180,10 @@ public class ProductClient {
             List<DiscoveredInterfaceDTO> discoveredInterfaceDTOS = new ArrayList<>();
             discoveredInterfaceDTOS.add(body);
             HttpEntity<List<DiscoveredInterfaceDTO>> requestEntity = new HttpEntity<>(discoveredInterfaceDTOS, headers);
-            log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered" + "-interface/",
-                    HttpMethod.PUT,
-                    requestEntity,
-                    String.class));
+            log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered-interfaces",
+                                                                             HttpMethod.PUT,
+                                                                             requestEntity,
+                                                                             String.class));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());

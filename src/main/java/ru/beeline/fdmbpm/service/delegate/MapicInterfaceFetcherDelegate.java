@@ -24,6 +24,7 @@ public class MapicInterfaceFetcherDelegate implements JavaDelegate {
     public void execute(DelegateExecution delegateExecution) {
         log.info("MapicInterfaceFetcherDelegate start");
         String product = (String) delegateExecution.getVariable("product");
+        log.info("product is" + product);
         if (product == null) {
             throw new RuntimeException("product is null");
         }

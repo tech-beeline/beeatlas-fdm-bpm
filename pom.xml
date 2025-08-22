@@ -33,12 +33,6 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-            <dependency>
-                <groupId>org.camunda.bpm.webapp</groupId>
-                <artifactId>camunda-webapp</artifactId>
-                <version>7.20.0</version> <!-- или ту же версию, что у тебя используется -->
-                <type>war</type>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
