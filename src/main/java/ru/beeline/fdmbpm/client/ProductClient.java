@@ -43,9 +43,9 @@ public class ProductClient {
             headers.add("SOURCE", "Sparx");
 
             restTemplate.exchange(productServerUrl + "/api/v1/product-tech-relation/" + techId + "/" + productId,
-                                  HttpMethod.DELETE,
-                                  new HttpEntity(headers),
-                                  Object.class).getBody();
+                    HttpMethod.DELETE,
+                    new HttpEntity(headers),
+                    Object.class).getBody();
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -60,9 +60,9 @@ public class ProductClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(postProductRequest, headers);
             ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(productServerUrl + "/api/v1/infra?product=" + product,
-                                                                             HttpMethod.POST,
-                                                                             requestEntity,
-                                                                             Void.class);
+                    HttpMethod.POST,
+                    requestEntity,
+                    Void.class);
             if (response.getStatusCode() != HttpStatus.CREATED) {
                 log.error("Unexpected status code from CMDB: {}", response.getStatusCode());
                 throw new RuntimeException("Failed to post product. HTTP Status: " + response.getStatusCode());
@@ -70,10 +70,10 @@ public class ProductClient {
             log.info("Product posted successfully with status 201.");
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("HTTP error while posting product '{}'. Status: {}, Body: {}",
-                      product,
-                      e.getStatusCode(),
-                      e.getResponseBodyAsString(),
-                      e);
+                    product,
+                    e.getStatusCode(),
+                    e.getResponseBodyAsString(),
+                    e);
             throw new RuntimeException("Error during post request", e);
         } catch (Exception e) {
             log.error("General error while posting product '{}', Message: {}", product, e.getMessage(), e);
@@ -88,9 +88,10 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<String> result = restTemplate.exchange(productServerUrl + "/api/v1/products/mnemonic",
-                                                        HttpMethod.GET,
-                                                        entity,
-                                                        new ParameterizedTypeReference<List<String>>() {}).getBody();
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<String>>() {
+                    }).getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("Mnemonics aren't received");
             }
@@ -108,9 +109,10 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<PublishedApiDTO> result = restTemplate.exchange(productServerUrl + "/api/v1/mapic/product/" + cmdb + "/published-api",
-                                                                 HttpMethod.GET,
-                                                                 entity,
-                                                                 new ParameterizedTypeReference<List<PublishedApiDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<PublishedApiDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("Interfaces aren't received");
@@ -145,9 +147,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface/" + id,
-                                         HttpMethod.GET,
-                                         entity,
-                                         DiscoveredInterfaceDTO.class).getBody();
+                    HttpMethod.GET,
+                    entity,
+                    DiscoveredInterfaceDTO.class).getBody();
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -162,9 +164,9 @@ public class ProductClient {
 
             HttpEntity<List<MethodDTO>> requestEntity = new HttpEntity<>(methods, headers);
             log.info("response from product:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface/" + id + "/operations",
-                                                                      HttpMethod.PUT,
-                                                                      requestEntity,
-                                                                      String.class));
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -195,12 +197,28 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             ProductDTO result = restTemplate.exchange(productServerUrl + "/api/v1/product/" + cmdb,
-                                                      HttpMethod.GET,
-                                                      entity,
-                                                      ProductDTO.class).getBody();
+                    HttpMethod.GET,
+                    entity,
+                    ProductDTO.class).getBody();
             return result;
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public String getMapicSpec(Integer apiId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(productServerUrl + "/api/v1/mapic/spec/" + apiId,
+                    HttpMethod.GET,
+                    entity,
+                    String.class).getBody();
+        } catch (Exception e) {
+            log.error("Error get specification from mapic " + e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
