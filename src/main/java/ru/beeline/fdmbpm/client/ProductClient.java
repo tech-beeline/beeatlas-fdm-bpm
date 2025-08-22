@@ -178,7 +178,7 @@ public class ProductClient {
             List<DiscoveredInterfaceDTO> discoveredInterfaceDTOS = new ArrayList<>();
             discoveredInterfaceDTOS.add(body);
             HttpEntity<List<DiscoveredInterfaceDTO>> requestEntity = new HttpEntity<>(discoveredInterfaceDTOS, headers);
-            log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered" + "-interface/",
+            log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered-interfaces",
                                                                              HttpMethod.PUT,
                                                                              requestEntity,
                                                                              String.class));
