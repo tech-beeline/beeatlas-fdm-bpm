@@ -12,6 +12,9 @@
       <bpmn:outgoing>Flow_1h85v9v</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:callActivity id="Activity_1mkcrbq" name="Получение интерфейсов мапика для продукта" calledElement="Process_1sfffbf">
+          <bpmn:extensionElements>
+            <camunda:in source="product" target="product" />
+          </bpmn:extensionElements>
       <bpmn:incoming>Flow_1h85v9v</bpmn:incoming>
       <bpmn:outgoing>Flow_1ss2tyz</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="products" camunda:elementVariable="product" />
