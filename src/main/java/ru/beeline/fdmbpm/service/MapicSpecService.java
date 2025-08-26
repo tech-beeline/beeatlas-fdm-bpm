@@ -15,6 +15,7 @@ import ru.beeline.fdmbpm.dto.wsdlSoap.DefinitionsDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.OperationDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.PortDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.PortTypeDTO;
+import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 
 import java.io.StringReader;
 import java.net.URI;
@@ -37,17 +38,18 @@ public class MapicSpecService {
     ObjectMapper objectMapper;
 
     public void uploadSpec(Integer apiId) {
+        DiscoveredInterfaceDTO discoveredInterface = productClient.getInterfaceOperations(apiId);
         String specification = productClient.getMapicSpec(apiId);
         String normalized = specification.trim();
         try {
             if (normalized.startsWith("<?xml")) {
                 List<MethodDTO> soapMethods = parseWsdlSoap(normalized);
                 if (!soapMethods.isEmpty()) {
-                    productClient.updateInterfaceOperations(soapMethods, apiId);
+                    productClient.updateInterfaceOperations(soapMethods, discoveredInterface.getApiId());
                 }
             } else {
                 List<MethodDTO> methods = parseOpenApiSpec(specification);
-                productClient.updateInterfaceOperations(methods, apiId);
+                productClient.updateInterfaceOperations(methods, discoveredInterface.getApiId());
             }
         } catch (Exception e) {
             log.error("Error while uploading spec", e);
