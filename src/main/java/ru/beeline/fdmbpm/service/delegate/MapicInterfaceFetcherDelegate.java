@@ -12,6 +12,7 @@ import ru.beeline.fdmlib.dto.product.PublishedApiDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component("MapicInterfaceFetcherDelegate")
@@ -23,6 +24,9 @@ public class MapicInterfaceFetcherDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution delegateExecution) {
         log.info("MapicInterfaceFetcherDelegate start");
+        for (Map.Entry<String, Object> entry : delegateExecution.getVariables().entrySet()) {
+            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+        }
         String product = (String) delegateExecution.getVariable("product");
         log.info("product is" + product);
         if (product == null) {
