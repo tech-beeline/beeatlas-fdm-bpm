@@ -51,8 +51,8 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);
-            log.info("Send to create_loacal_graph");
-            rabbitService.sendMessage("create_loacal_graph", objectMapper.writeValueAsString(item));
+            log.info("Send to create_local_graph");
+            rabbitService.sendMessage("create_local_graph", objectMapper.writeValueAsString(item));
             log.info("Send to create_loacal_graph completed");
             saveAlias(processId, "lcltskcrt", typeProcess);
             log.info("Обогащение графа успешно. processId={}, docId={}", processId, docId);
