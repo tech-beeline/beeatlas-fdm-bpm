@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
+import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 import ru.beeline.fdmlib.dto.product.PublishedApiDTO;
 
@@ -131,9 +132,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/product/" + product,
-                                         HttpMethod.GET,
-                                         entity,
-                                         ProductDTO.class).getBody();
+                    HttpMethod.GET,
+                    entity,
+                    ProductDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -151,6 +152,9 @@ public class ProductClient {
                     entity,
                     DiscoveredInterfaceDTO.class).getBody();
 
+        } catch (HttpClientErrorException.BadRequest e) {
+            log.error("Ошибка запроса к product-service: {}", e.getMessage());
+            throw new ValidationException(e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -181,9 +185,9 @@ public class ProductClient {
             discoveredInterfaceDTOS.add(body);
             HttpEntity<List<DiscoveredInterfaceDTO>> requestEntity = new HttpEntity<>(discoveredInterfaceDTOS, headers);
             log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered-interfaces",
-                                                                             HttpMethod.PUT,
-                                                                             requestEntity,
-                                                                             String.class));
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
