@@ -141,13 +141,13 @@ public class ProductClient {
         return null;
     }
 
-    public DiscoveredInterfaceDTO getInterfaceOperations(Integer id) {
+    public DiscoveredInterfaceDTO getInterfaceOperations(Integer apiId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface/" + id,
+            return restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface?api-id=" + apiId,
                     HttpMethod.GET,
                     entity,
                     DiscoveredInterfaceDTO.class).getBody();
