@@ -42,11 +42,11 @@ public class MapicSpecService {
             if (normalized.startsWith("<?xml")) {
                 List<MethodDTO> soapMethods = parseWsdlSoap(normalized);
                 if (!soapMethods.isEmpty()) {
-                    productClient.updateInterfaceOperations(soapMethods, discoveredInterface.getApiId());
+                    productClient.updateInterfaceOperations(soapMethods, discoveredInterface.getId());
                 }
             } else {
                 List<MethodDTO> methods = parseOpenApiSpec(specification);
-                productClient.updateInterfaceOperations(methods, discoveredInterface.getApiId());
+                productClient.updateInterfaceOperations(methods, discoveredInterface.getId());
             }
         } catch (Exception e) {
             log.error("Error while uploading spec", e);
