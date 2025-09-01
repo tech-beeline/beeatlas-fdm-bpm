@@ -219,9 +219,9 @@ public class ApplicationService {
         }
     }
 
-    public void sendMessageToProcess(String taskKey, Map<String, Object> variables) {
+    public void sendMessageToProcess(String taskKey, Map<String, Object> variables, String messageName) {
         try {
-            runtimeService.createMessageCorrelation("MessageName")
+            runtimeService.createMessageCorrelation(messageName)
                     .processInstanceId(taskKey)
                     .setVariables(variables)
                     .correlate();
