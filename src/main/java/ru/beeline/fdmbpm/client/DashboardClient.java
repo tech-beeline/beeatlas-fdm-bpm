@@ -10,10 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityDTO;
-import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityV4DTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
@@ -37,9 +35,10 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/capabilities",
-                                                                        HttpMethod.GET,
-                                                                        entity,
-                                                                        new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's Capabilities aren't received");
@@ -58,9 +57,10 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardTechCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/tech-capabilities",
-                                                                            HttpMethod.GET,
-                                                                            entity,
-                                                                            new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's TechCapabilities aren't received");
@@ -79,9 +79,10 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardProductsDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/v4/systems?level=systems",
-                                                                      HttpMethod.GET,
-                                                                      entity,
-                                                                      new ParameterizedTypeReference<List<DashboardProductsDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<DashboardProductsDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's Products aren't received");
