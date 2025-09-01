@@ -16,7 +16,7 @@ import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 @Slf4j
-@Component("LocalGraphEnrichmentDelegate")
+@Component("LocalGraphResultCheckDelegate")
 public class LocalGraphResultCheckDelegate extends StatusLogic implements JavaDelegate {
     @Autowired
     private PlatformTransactionManager transactionManager;
