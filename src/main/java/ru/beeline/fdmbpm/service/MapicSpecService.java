@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.ProductClient;
-import ru.beeline.fdmbpm.client.StageMapicClient;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.mapic.ParameterDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.DefinitionsDTO;
@@ -36,15 +35,21 @@ public class MapicSpecService {
 
     public void uploadSpec(Integer apiId) {
         DiscoveredInterfaceDTO discoveredInterface = productClient.getInterfaceOperations(apiId);
+        log.info("Запрос спецификации в mapic c api-id: " + apiId);
         String specification = productClient.getMapicSpec(apiId);
+        log.info("Получена спецификация от /api/v1/mapic/spec/" + "c api-id: " + apiId);
         String normalized = specification.trim();
+        String specPreview = normalized.substring(0, Math.min(200, normalized.length()));
+        log.info("Первые 200 символов спецификации (apiId={}):\n{}", apiId, specPreview);
         try {
-            if (normalized.startsWith("<?xml")) {
+            if (isSoapOrWsdl(normalized)) {
+                log.info("Спецификация soap wsdl");
                 List<MethodDTO> soapMethods = parseWsdlSoap(normalized);
                 if (!soapMethods.isEmpty()) {
                     productClient.updateInterfaceOperations(soapMethods, discoveredInterface.getId());
                 }
             } else {
+                log.info("Спецификация не soap wsdl");
                 List<MethodDTO> methods = parseOpenApiSpec(specification);
                 productClient.updateInterfaceOperations(methods, discoveredInterface.getId());
             }
@@ -54,7 +59,17 @@ public class MapicSpecService {
         }
     }
 
+    public boolean isSoapOrWsdl(String specification) {
+        if (specification == null) return false;
+        String trimmed = specification.trim();
+        return trimmed.startsWith("<?xml") ||
+                trimmed.startsWith("<wsdl:definitions") ||
+                trimmed.startsWith("<definitions") ||
+                trimmed.startsWith("<soap:Envelope");
+    }
+
     public List<MethodDTO> parseWsdlSoap(String wsdlContent) throws Exception {
+        log.info("Парсинг wsdl soap");
         JAXBContext jaxbContext = JAXBContext.newInstance(DefinitionsDTO.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         DefinitionsDTO definitions = (DefinitionsDTO) unmarshaller.unmarshal(new StringReader(wsdlContent));
@@ -95,7 +110,7 @@ public class MapicSpecService {
     }
 
     public List<MethodDTO> parseOpenApiSpec(String specJson) throws Exception {
-        log.info("specification:" + specJson);
+        log.info("parse open api spec, specification: " + specJson);
         JsonNode root = objectMapper.readTree(specJson);
 
         String serverUrl = root.path("servers").get(0).path("url").asText();
