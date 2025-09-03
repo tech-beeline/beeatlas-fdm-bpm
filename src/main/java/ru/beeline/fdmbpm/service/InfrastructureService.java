@@ -31,7 +31,7 @@ public class InfrastructureService {
                     product + " = null");
             return;
         }
-        log.info("Successfully received the CMDB infrastructure report for product '{}'.", product);
+        log.info("Успешно получен отчет об инфраструктуре CMDB для продукта '{}'.", product);
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
         List<InfraDTO> infraDTOList = new ArrayList<>();
         assetDTOMap.forEach((key, value) -> {
@@ -72,6 +72,6 @@ public class InfrastructureService {
                 .relations(relationsDTOList)
                 .build();
         productClient.postProductCMDB(product, postProductRequest);
-        log.info("Successfully Product infrastructure synchronization");
+        log.info("Успешная синхронизация инфраструктуры продукта");
     }
 }
