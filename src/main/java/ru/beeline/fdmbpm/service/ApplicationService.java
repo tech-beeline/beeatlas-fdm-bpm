@@ -57,6 +57,8 @@ public class ApplicationService {
 
     @Autowired
     private CapabilityClient capabilityClient;
+    @Autowired
+    private CamundaProcessRepository camundaProcessRepository;
 
     public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
@@ -221,8 +223,9 @@ public class ApplicationService {
 
     public void sendMessageToProcess(String taskKey, Map<String, Object> variables, String messageName) {
         try {
+            String processId = camundaProcessRepository.findById(Integer.valueOf(taskKey)).get().getProcId();
             runtimeService.createMessageCorrelation(messageName)
-                    .processInstanceId(taskKey)
+                    .processInstanceId(processId)
                     .setVariables(variables)
                     .correlate();
             log.info("Переданы данные в процесс Camunda: {taskKey, " + taskKey + "}");
