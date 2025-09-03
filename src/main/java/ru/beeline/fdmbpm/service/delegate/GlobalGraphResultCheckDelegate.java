@@ -31,8 +31,7 @@ public class GlobalGraphResultCheckDelegate extends StatusLogic implements JavaD
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Boolean doneGlobalGraph = (Boolean) delegateExecution.getVariable("doneGlobalGraph");
 
-        if (doneGlobalGraph) {
-        } else {
+        if (!doneGlobalGraph) {
             log.info("Ошибка при проверке результата локального графа. Создание записи с ошибкой");
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
             log.info("Обработка процесса. processId={}, procId={}, businessKey={}, typeProcessId={}",
