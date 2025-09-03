@@ -41,7 +41,7 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                     delegateExecution.setVariable("globalGraphCount", globalGraphCount + 1);
                 }
                 if (localGraphDTO.getStatus().equals("DONE")) {
-                    delegateExecution.setVariable("doneGlobalGraph ", true);
+                    delegateExecution.setVariable("doneGlobalGraph", true);
                     saveAlias(processId, "glblgrph", typeProcess);
                 }
             } catch (Exception e) {
