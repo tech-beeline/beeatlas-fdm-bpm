@@ -37,24 +37,26 @@ public class MapicInterfaceFetcherDelegate implements JavaDelegate {
         log.info("MapicInterfaceFetcherDelegate get interfaces");
         List<PublishedApiDTO> publishedApiDTOS = productClient.getInterfaces(product);
         log.info("MapicInterfaceFetcherDelegate iterator");
+        List<Integer> apiIds = new ArrayList<>();
         if (!publishedApiDTOS.isEmpty()) {
-            List<Integer> apiIds = new ArrayList<>();
             publishedApiDTOS.forEach(publishedApiDTO -> {
                 if (publishedApiDTO.getStatusName().equals("Deployed") || publishedApiDTO.getStatusName()
                         .equals("Hidden")) {
                     productClient.updateInterface(DiscoveredInterfaceDTO.builder()
-                                                          .name(publishedApiDTO.getApiContext())
-                                                          .externalId(publishedApiDTO.getId())
-                                                          .apiId(publishedApiDTO.getApiId())
-                                                          .status(publishedApiDTO.getStatusName())
-                                                          .context(publishedApiDTO.getApiContext())
-                                                          .productId(productDto.getId())
-                                                          .build());
+                            .name(publishedApiDTO.getApiContext())
+                            .externalId(publishedApiDTO.getId())
+                            .apiId(publishedApiDTO.getApiId())
+                            .status(publishedApiDTO.getStatusName())
+                            .context(publishedApiDTO.getApiContext())
+                            .productId(productDto.getId())
+                            .build());
                     apiIds.add(publishedApiDTO.getApiId());
                 }
             });
             log.info("apiIds" + apiIds);
             delegateExecution.setVariable("apiIds", apiIds);
         }
+        log.info("apiIds is empty");
+        delegateExecution.setVariable("apiIds", apiIds);
     }
 }
