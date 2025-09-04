@@ -15,6 +15,7 @@ camunda:
       schema-update: true
     job-execution:
         enabled: true
+        lock-time-in-millis: 900000
     deployment-aware: true
 
 integration:

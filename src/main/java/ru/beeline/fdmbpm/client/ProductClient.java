@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -60,9 +61,10 @@ public class ProductClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(postProductRequest, headers);
-            ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(productServerUrl + "/api/v1/infra?product=" + product,
-                    HttpMethod.POST,
-                    requestEntity,
+            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/infra")
+                    .queryParam("product", product).toUriString();
+            log.info("POST: {}", url);
+            ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
                     Void.class);
             if (response.getStatusCode() != HttpStatus.CREATED) {
                 log.error("Unexpected status code from CMDB: {}", response.getStatusCode());
@@ -70,11 +72,8 @@ public class ProductClient {
             }
             log.info("Product posted successfully with status 201.");
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            log.error("HTTP error while posting product '{}'. Status: {}, Body: {}",
-                    product,
-                    e.getStatusCode(),
-                    e.getResponseBodyAsString(),
-                    e);
+            log.error("HTTP error while posting product '{}'. Status: {}, Body: {}", product, e.getStatusCode(),
+                    e.getResponseBodyAsString(), e);
             throw new RuntimeException("Error during post request", e);
         } catch (Exception e) {
             log.error("General error while posting product '{}', Message: {}", product, e.getMessage(), e);
