@@ -34,6 +34,9 @@ public class MapicInterfaceFetcherDelegate implements JavaDelegate {
         }
         log.info("MapicInterfaceFetcherDelegate get product");
         ProductDTO productDto = productClient.getProduct(product);
+        if (productDto == null) {
+            throw new RuntimeException("Запрос в сервис продуктов, productDto is null");
+        }
         log.info("MapicInterfaceFetcherDelegate get interfaces");
         List<PublishedApiDTO> publishedApiDTOS = productClient.getInterfaces(product);
         log.info("MapicInterfaceFetcherDelegate iterator");
