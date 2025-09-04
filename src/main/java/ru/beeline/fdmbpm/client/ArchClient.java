@@ -22,7 +22,7 @@ public class ArchClient {
 
     public void postFitnessFunction(Integer docId, Integer processId) {
         try {
-            log.info("try postFitnessFunction for serv:" + archServerUrl);
+            log.info("try postFitnessFunction for serv:" + archServerUrl + "/api/v1/fitness-function/local/" + docId + "?pipelineId=" + processId);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(headers);
