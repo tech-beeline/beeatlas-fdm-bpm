@@ -146,7 +146,7 @@ public class ProductClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface?api-id=" + apiId,
+            return restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface?external-id=" + apiId,
                     HttpMethod.GET,
                     entity,
                     DiscoveredInterfaceDTO.class).getBody();
