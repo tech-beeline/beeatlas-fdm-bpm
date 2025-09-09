@@ -113,7 +113,8 @@ public class MapicSpecService {
         log.info("parse open api spec, specification: " + specJson);
         JsonNode root = objectMapper.readTree(specJson);
 
-        String serverUrl = root.path("servers").get(0).path("url").asText();
+        String serverUrlRaw = root.path("servers").get(0).path("url").asText();
+        String serverUrl = serverUrlRaw.replaceAll("\\{[^}]+\\}", "placeholder");
         URI uri = new URI(serverUrl);
         String apiContext = uri.getPath();
 
