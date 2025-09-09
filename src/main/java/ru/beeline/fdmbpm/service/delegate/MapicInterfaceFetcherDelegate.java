@@ -53,7 +53,7 @@ public class MapicInterfaceFetcherDelegate implements JavaDelegate {
                             .context(publishedApiDTO.getApiContext())
                             .productId(productDto.getId())
                             .build());
-                    apiIds.add(publishedApiDTO.getApiId());
+                    apiIds.add(publishedApiDTO.getId());
                 }
             });
             log.info("apiIds" + apiIds);

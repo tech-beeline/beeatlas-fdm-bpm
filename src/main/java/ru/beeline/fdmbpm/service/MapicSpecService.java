@@ -37,7 +37,7 @@ public class MapicSpecService {
         DiscoveredInterfaceDTO discoveredInterface = productClient.getInterfaceOperations(apiId);
         log.info("Запрос спецификации в mapic c api-id: " + apiId);
         String specification = productClient.getMapicSpec(discoveredInterface.getApiId());
-        log.info("Получена спецификация от /api/v1/mapic/spec/" + "c api-id: " + apiId);
+        log.info("Получена спецификация от /api/v1/mapic/spec/ " + "c api-id: " + apiId);
         String normalized = specification.trim();
         String specPreview = normalized.substring(0, Math.min(200, normalized.length()));
         log.info("Первые 200 символов спецификации (apiId={}):\n{}", apiId, specPreview);
