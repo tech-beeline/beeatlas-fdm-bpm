@@ -13,8 +13,7 @@
     </bpmn:serviceTask>
     <bpmn:callActivity id="Activity_1fh72w7"
                        name="Получение инфраструктуры для приложения"
-                       calledElement="Process_1d2437g"
-                        camunda:asyncBefore="true">
+                       calledElement="Process_1d2437g">
       <bpmn:extensionElements>
         <camunda:in source="product" target="product" />
       </bpmn:extensionElements>
