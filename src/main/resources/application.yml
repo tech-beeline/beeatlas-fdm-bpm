@@ -36,6 +36,10 @@ queue:
 
 spring:
   datasource:
+    camundaDataSource:
+      hikari:
+        maximum-pool-size: 20
+        leak-detection-threshold: 20000
     git:
       hikari:
         maximum-pool-size: 2
@@ -47,8 +51,6 @@ spring:
         properties:
           hibernate:
             dialect: org.hibernate.dialect.PostgreSQL95Dialect
-
-
     processes:
       driver-class-name: org.postgresql.Driver
 
