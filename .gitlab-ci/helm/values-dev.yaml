@@ -52,6 +52,7 @@ env:
   INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/dev/fdm#cmdbtoken"
   INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#archserverurl"
   INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#graphserverurl"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "vault:eafdmmart/data/dev/fdm#opentelemetry"
 
   GWURL: "vault:eafdmmart/data/dev/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/dev/fdm#mapicauth"

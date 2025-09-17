@@ -70,3 +70,25 @@ spring:
     baseline-on-migrate: true
     clean-disabled: true
     locations: classpath:db/migration
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://otel-collector.opentelemetry:4318
+      protocol: http/protobuf
+  resource:
+    attributes:
+      host:
+        name: @project.name@
+      service:
+        namespace: @project.name@
+  service:
+    name: @project.name@
+  instrumentation:
+    log4j-appender:
+      enabled: true
+  logs:
+    exporter: none
+
+
+
