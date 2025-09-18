@@ -18,6 +18,10 @@ camunda:
         lock-time-in-millis: 900000
     deployment-aware: true
 
+logging:
+  level:
+    io.opentelemetry.exporter.internal.http.HttpExporter: ERROR
+
 integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
   dashboard-server-url: https://dashboard-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
