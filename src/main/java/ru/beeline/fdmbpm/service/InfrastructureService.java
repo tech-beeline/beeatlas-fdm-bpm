@@ -25,6 +25,11 @@ public class InfrastructureService {
     ProductClient productClient;
 
     public void gettingApplicationData(String product) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         CmdbResponseDTO cmdbResponse = cmdbClient.getCmdbInfrastructure(product);
         if (cmdbResponse == null) {
             log.info("Запрос к CMDB /api/cmdb/reports/infrastructure_on_asset_report/ c product вернул:  " +
