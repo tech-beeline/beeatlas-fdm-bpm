@@ -74,10 +74,10 @@ public class ProductClient {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("HTTP error while posting product '{}'. Status: {}, Body: {}", product, e.getStatusCode(),
                     e.getResponseBodyAsString(), e);
-            throw new RuntimeException("Error during post request", e);
+            throw new RuntimeException("Error during post request to server " + productServerUrl, e);
         } catch (Exception e) {
             log.error("General error while posting product '{}', Message: {}", product, e.getMessage(), e);
-            throw new RuntimeException("Error during post request", e);
+            throw new RuntimeException("Error during post request to server " + productServerUrl, e);
         }
     }
 

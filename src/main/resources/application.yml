@@ -80,7 +80,7 @@ spring:
 otel:
   exporter:
     otlp:
-      endpoint: http://otel-collector.opentelemetry:4318
+      endpoint: http://mn-insidetrnginx001.tracing.cloud.vimpelcom.ru:4318
       protocol: http/protobuf
   resource:
     attributes:
