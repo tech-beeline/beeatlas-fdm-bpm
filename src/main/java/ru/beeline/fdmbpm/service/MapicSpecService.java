@@ -18,6 +18,7 @@ import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 
 import java.io.StringReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -97,16 +98,21 @@ public class MapicSpecService {
     }
 
     private String getContext(DefinitionsDTO definitions) {
-        String context = null;
         if (definitions.getService() != null && definitions.getService().getPorts() != null) {
             for (PortDTO port : definitions.getService().getPorts()) {
                 if (port.getAddress() != null && port.getAddress().getLocation() != null) {
-                    context = port.getAddress().getLocation();
-                    break;
+                    String fullUrl = port.getAddress().getLocation();
+                    try {
+                        URI uri = new URI(fullUrl);
+                        return uri.getPath();
+                    } catch (URISyntaxException e) {
+                        log.error("Ошибка парсинга URL: {}", fullUrl, e);
+                        return fullUrl;
+                    }
                 }
             }
         }
-        return context;
+        return null;
     }
 
     public List<MethodDTO> parseOpenApiSpec(String specJson) throws Exception {
