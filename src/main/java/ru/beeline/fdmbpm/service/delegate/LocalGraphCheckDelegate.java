@@ -41,7 +41,7 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
                     delegateExecution.setVariable("localGraphCount", localGraphCount + 1);
                 }
                 if (localGraphDTO.getStatus().equals("DONE")) {
-                    delegateExecution.setVariable("doneLocalGraph ", true);
+                    delegateExecution.setVariable("doneLocalGraph", true);
                     saveAlias(processId, "lclgrph", typeProcess);
                 }
             } catch (Exception e) {

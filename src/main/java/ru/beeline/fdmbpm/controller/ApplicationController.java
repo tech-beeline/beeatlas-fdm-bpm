@@ -110,7 +110,7 @@ public class ApplicationController {
     public String startPerformTargetAction(@PathVariable Integer typeId,
                                            @PathVariable Integer entityId) {
         log.info("running application process 3");
-        applicationProcessService.performTargetAction(null, typeId, entityId);
+        applicationProcessService.performTargetAction(typeId, entityId);
         return "the process 3 has been completed";
     }
 

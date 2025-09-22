@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ApplicationTypeStatusRepository extends JpaRepository<ApplicationTypeStatus, Integer> {
 
-    ApplicationTypeStatus findByTypeIdAndAlias(Integer typeId, String alias);
+    Optional<ApplicationTypeStatus> findByTypeIdAndAlias(Integer typeId, String alias);
 
     Optional<ApplicationTypeStatus> findByTypeIdAndSerialNumber(Integer typeId, Integer serialNumber);
 

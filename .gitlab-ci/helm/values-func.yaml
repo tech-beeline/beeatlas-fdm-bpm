@@ -45,6 +45,7 @@ env:
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#documentserverurl"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#notificationserver"
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/test/func/ambassador#authsso"
+  INTEGRATION_STAGE_MAPIC_SERVER_URL: "vault:eafdmmart/data/test/func/ambassador#stagemapicserverurl"
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/test/func/grafana#url"
   INTEGRATION_CMDB_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#cmdbserver"
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#authserverurl"
@@ -52,6 +53,7 @@ env:
   INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#graphserverurl"
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/test/func/grafana#token"
   INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/test/func/fdm#cmdbtoken"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "vault:eafdmmart/data/test/func/fdm#opentelemetry"
 
   GWURL: "vault:eafdmmart/data/test/func/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/test/func/fdm#mapicauth"

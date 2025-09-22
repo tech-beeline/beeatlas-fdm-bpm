@@ -41,7 +41,7 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                     delegateExecution.setVariable("globalGraphCount", globalGraphCount + 1);
                 }
                 if (localGraphDTO.getStatus().equals("DONE")) {
-                    delegateExecution.setVariable("doneLocalGraph ", true);
+                    delegateExecution.setVariable("doneGlobalGraph", true);
                     saveAlias(processId, "glblgrph", typeProcess);
                 }
             } catch (Exception e) {
@@ -50,7 +50,7 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                 throw new RuntimeException(e.getMessage());
             }
         } else {
-            delegateExecution.setVariable("localGraphCount", 1);
+            delegateExecution.setVariable("globalGraphCount", 1);
         }
     }
 }

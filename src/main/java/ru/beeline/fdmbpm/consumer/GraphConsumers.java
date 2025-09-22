@@ -27,13 +27,16 @@ public class GraphConsumers {
         log.info("Received from result-local-graph: " + message, new String(message.getBytes()));
         try {
             JsonNode jsonNode = objectMapper.readTree(message);
-            if (jsonNode.has("taskKey") && jsonNode.has("docId")) {
+            if (jsonNode.has("taskKey") && jsonNode.has("status")) {
                 String taskKey = jsonNode.get("taskKey").asText();
-
-                Map<String, Object> variables = new HashMap<>();
-                variables.put("doneLocalGraph", true);
-
-                applicationService.sendMessageToProcess(taskKey, variables);
+                String status = jsonNode.get("status").asText();
+                if (status.equals("DONE") || status.equals("ERROR")) {
+                    Map<String, Object> variables = new HashMap<>();
+                    variables.put("doneLocalGraph", true);
+                    applicationService.sendMessageToProcess(taskKey, variables, "create_local_graph");
+                } else {
+                    log.error("Message does not match the required status");
+                }
             } else {
                 log.error("Message does not match the required format");
             }
@@ -47,11 +50,16 @@ public class GraphConsumers {
         log.info("Received from result_global_graph: " + message, new String(message.getBytes()));
         try {
             JsonNode jsonNode = objectMapper.readTree(message);
-            if (jsonNode.has("taskKey") && jsonNode.has("docId")) {
+            if (jsonNode.has("taskKey") && jsonNode.has("status")) {
                 String taskKey = jsonNode.get("taskKey").asText();
-                Map<String, Object> variables = new HashMap<>();
-                variables.put("doneGlobalGraph", true);
-                applicationService.sendMessageToProcess(taskKey, variables);
+                String status = jsonNode.get("status").asText();
+                if (status.equals("DONE") || status.equals("ERROR")) {
+                    Map<String, Object> variables = new HashMap<>();
+                    variables.put("doneGlobalGraph", true);
+                    applicationService.sendMessageToProcess(taskKey, variables, "create_global_graph");
+                } else {
+                    log.error("Message does not match the required status");
+                }
             } else {
                 log.error("Message does not match the required format");
             }

@@ -51,13 +51,13 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);
-            log.info("Send to create_loacal_graph");
-            rabbitService.sendMessage("create_loacal_graph", objectMapper.writeValueAsString(item));
-            log.info("Send to create_loacal_graph completed");
+            log.info("Send to create_local_graph");
+            rabbitService.sendMessage("create_local_graph", objectMapper.writeValueAsString(item));
+            log.info("Send to create_local_graph completed");
             saveAlias(processId, "lcltskcrt", typeProcess);
             log.info("Обогащение графа успешно. processId={}, docId={}", processId, docId);
         } catch (Exception e) {
-            log.error("Ошибка при Обагащение локального графа. Создание записи с ошибкой", e);
+            log.error("Ошибка при обагащении локального графа. Создание записи с ошибкой", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;

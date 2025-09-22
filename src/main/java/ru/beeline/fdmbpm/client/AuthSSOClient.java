@@ -3,12 +3,11 @@ package ru.beeline.fdmbpm.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.utils.JwtUtils;
+import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 
 import java.time.Instant;
 import java.time.ZoneId;

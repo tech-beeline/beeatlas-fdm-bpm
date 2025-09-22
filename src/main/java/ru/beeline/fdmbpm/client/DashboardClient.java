@@ -10,10 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityDTO;
-import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityV4DTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
@@ -37,43 +35,19 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/capabilities",
-                                                                        HttpMethod.GET,
-                                                                        entity,
-                                                                        new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<DashboardCapabilityDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's Capabilities aren't received");
             }
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/capabilities " + e.getMessage());
         }
         return null;
-    }
-
-    public void putCapability(BusinessCapabilityOrderDraftResponseDTO order) {
-        try {
-            DashboardCapabilityV4DTO dashboardCapabilityV4DTO = DashboardCapabilityV4DTO.builder()
-                    .isDomain(false)
-                    .name(order.getName())
-                    .description(order.getDescription())
-                    .author(order.getAuthor())
-                    .owner(order.getOwner())
-                    .parent(order.getParent() == null ? null : order.getParent().getCode())
-                    .status("PROPOSED")
-                    .self("/api/v4/capabilities/undefined")
-                    .build();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<DashboardCapabilityV4DTO> requestEntity = new HttpEntity<>(dashboardCapabilityV4DTO, headers);
-            log.info("response from dashboard:" + restTemplate.exchange(dashboardServerUrl + "/api/capabilities/" + order.getCode(),
-                                                                        HttpMethod.PUT,
-                                                                        requestEntity,
-                                                                        String.class));
-
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
     }
 
     public List<DashboardTechCapabilityDTO> getTechCapabilities() {
@@ -83,16 +57,17 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardTechCapabilityDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/tech-capabilities",
-                                                                            HttpMethod.GET,
-                                                                            entity,
-                                                                            new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<DashboardTechCapabilityDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's TechCapabilities aren't received");
             }
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/tech-capabilities " + e.getMessage());
         }
         return null;
     }
@@ -104,16 +79,17 @@ public class DashboardClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<DashboardProductsDTO> result = restTemplate.exchange(dashboardServerUrl + "/api/v4/systems?level=systems",
-                                                                      HttpMethod.GET,
-                                                                      entity,
-                                                                      new ParameterizedTypeReference<List<DashboardProductsDTO>>() {})
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<DashboardProductsDTO>>() {
+                            })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("dashboard's Products aren't received");
             }
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ERROR SEND TO /api/v4/systems " + e.getMessage());
         }
         return null;
     }

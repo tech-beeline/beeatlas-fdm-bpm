@@ -15,7 +15,12 @@ camunda:
       schema-update: true
     job-execution:
         enabled: true
+        lock-time-in-millis: 900000
     deployment-aware: true
+
+logging:
+  level:
+    io.opentelemetry.exporter.internal.http.HttpExporter: ERROR
 
 integration:
   capability-server-url: https://capability-backend-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
@@ -35,6 +40,10 @@ queue:
 
 spring:
   datasource:
+    camundaDataSource:
+      hikari:
+        maximum-pool-size: 20
+        leak-detection-threshold: 20000
     git:
       hikari:
         maximum-pool-size: 2
@@ -46,8 +55,6 @@ spring:
         properties:
           hibernate:
             dialect: org.hibernate.dialect.PostgreSQL95Dialect
-
-
     processes:
       driver-class-name: org.postgresql.Driver
 
@@ -69,3 +76,25 @@ spring:
     baseline-on-migrate: true
     clean-disabled: true
     locations: classpath:db/migration
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://mn-insidetrnginx001.tracing.cloud.vimpelcom.ru:4318
+      protocol: http/protobuf
+  resource:
+    attributes:
+      host:
+        name: @project.name@
+      service:
+        namespace: @project.name@
+  service:
+    name: @project.name@
+  instrumentation:
+    log4j-appender:
+      enabled: true
+  logs:
+    exporter: none
+
+
+
