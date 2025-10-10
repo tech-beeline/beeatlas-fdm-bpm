@@ -104,9 +104,7 @@ public class InfrastructureService {
             ownerNode.put("email", peopleDto.getInternetEmail());
             ownerNode.put("extId", peopleDto.getCorporateId());
             ownerNode.put("login", peopleDto.getLoginMsad());
-
             item.set("owner", ownerNode);
-
             log.info("Send to  update-product-owner-and-priority-by-cmdb");
             rabbitService.sendMessage(" update-product-owner-and-priority-by-cmdb", objectMapper.writeValueAsString(item));
         } catch (JsonProcessingException e) {
