@@ -41,7 +41,7 @@ public class InfrastructureService {
         log.info("Успешно получен отчет об инфраструктуре CMDB для продукта '{}'.", product);
         List<CmdbResponsibilityDTO> responsibilities = cmdbClient.getCmdbResponsibilities(cmdbResponse.getAsset()
                                                                                                   .getReconciliationId());
-        sendMessage(cmdbResponse, responsibilities);
+        sendMessage(product, cmdbResponse, responsibilities);
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
         List<InfraDTO> infraDTOList = new ArrayList<>();
         assetDTOMap.forEach((key, value) -> {
@@ -87,7 +87,8 @@ public class InfrastructureService {
         log.info("Успешная синхронизация инфраструктуры продукта");
     }
 
-    private void sendMessage(CmdbResponseDTO cmdbResponse, List<CmdbResponsibilityDTO> responsibilities) {
+    private void sendMessage(String product, CmdbResponseDTO cmdbResponse,
+                             List<CmdbResponsibilityDTO> responsibilities) {
         try {
             PeopleDTO peopleDto = responsibilities.stream()
                     .filter(responsibility -> responsibility.getVimChrPersonRoleTitle().equals("Владелец приложения"))
@@ -95,6 +96,7 @@ public class InfrastructureService {
                     .get()
                     .getPeople();
             ObjectNode item = objectMapper.createObjectNode();
+            item.put("cmdb", product);
             item.put("critical", cmdbResponse.getAsset().getPriority());
 
             ObjectNode ownerNode = objectMapper.createObjectNode();
