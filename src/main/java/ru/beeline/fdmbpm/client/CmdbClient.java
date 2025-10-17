@@ -56,8 +56,8 @@ public class CmdbClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("AuthenticationToken", "Bearer " + authenticationToken);
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            log.info("Request URL: " + cmdbUrl + " /asset/responsibilities/" + reconciliationId);
-            return restTemplate.exchange(cmdbUrl + "/asset/responsibilities/" + reconciliationId, HttpMethod.GET, entity,
+            log.info("Request URL: " + cmdbUrl + "/asset/responsibilities/" + reconciliationId);
+            return restTemplate.exchange(cmdbUrl + "/api/asset/responsibilities/" + reconciliationId, HttpMethod.GET, entity,
                                                                     new ParameterizedTypeReference<List<CmdbResponsibilityDTO>>() {
                                                                     }).getBody();
 
