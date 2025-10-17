@@ -5,12 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
@@ -223,6 +224,22 @@ public class ProductClient {
         } catch (Exception e) {
             log.error("Error get specification from mapic " + e.getMessage());
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<ProductDTO> getProductByCmdb(String cmdb) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(productServerUrl + "/api/v1/product/" + cmdb + "/info",
+                    HttpMethod.GET,
+                    entity,
+                    ProductDTO.class);
+        } catch (RestClientResponseException e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).build();
         }
     }
 }

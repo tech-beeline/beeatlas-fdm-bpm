@@ -22,8 +22,8 @@ public class StatusLogic {
     CamundaProcessStatusRepository camundaProcessStatusRepository;
 
     protected void saveAlias(Integer processId, String alias, TypeProcess typeProcess) {
-        log.info("saveAlias: processId=", processId);
-        log.info("saveAlias: alias=", alias);
+        log.info("saveAlias: processId= {}", processId);
+        log.info("saveAlias: alias= {}", alias);
         StatusProcess statusProcess = statusProcessRepository.findByAliasAndTypeProcessId(alias, typeProcess.getId());
         camundaProcessStatusRepository.save(CamundaProcessStatus.builder()
                 .statusProcessId(statusProcess.getId())
