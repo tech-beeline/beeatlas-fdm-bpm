@@ -106,7 +106,7 @@ public class InfrastructureService {
             ownerNode.put("login", peopleDto.getLoginMsad());
             item.set("owner", ownerNode);
             log.info("Send to  update-product-owner-and-priority-by-cmdb");
-            rabbitService.sendMessage(" update-product-owner-and-priority-by-cmdb", objectMapper.writeValueAsString(item));
+            rabbitService.sendMessage("update-product-owner-and-priority-by-cmdb", objectMapper.writeValueAsString(item));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
