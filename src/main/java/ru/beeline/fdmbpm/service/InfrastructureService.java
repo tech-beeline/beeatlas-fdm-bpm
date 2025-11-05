@@ -15,6 +15,7 @@ import ru.beeline.fdmbpm.dto.cmdb.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -95,11 +96,14 @@ public class InfrastructureService {
     private void sendMessage(String product, CmdbResponseDTO cmdbResponse,
                              List<CmdbResponsibilityDTO> responsibilities) {
         try {
-            PeopleDTO peopleDto = responsibilities.stream()
+            Optional<CmdbResponsibilityDTO> ownerResponsibility = responsibilities.stream()
                     .filter(responsibility -> responsibility.getVimChrPersonRoleTitle().equals("Владелец приложения"))
-                    .findFirst()
-                    .get()
-                    .getPeople();
+                    .findFirst();
+            if (ownerResponsibility.isEmpty()) {
+                log.warn("⚠️ Не найден владелец приложения для продукта: {}. Сообщение не отправлено.", product);
+                return;
+            }
+            PeopleDTO peopleDto = ownerResponsibility.get().getPeople();
             ObjectNode item = objectMapper.createObjectNode();
             item.put("cmdb", product);
             item.put("critical", cmdbResponse.getAsset().getPriority());
@@ -110,7 +114,7 @@ public class InfrastructureService {
             ownerNode.put("extId", peopleDto.getCorporateId());
             ownerNode.put("login", peopleDto.getLoginMsad());
             item.set("owner", ownerNode);
-            log.info("Send to  update-product-owner-and-priority-by-cmdb");
+            log.info("Send to update-product-owner-and-priority-by-cmdb");
             rabbitService.sendMessage("update-product-owner-and-priority-by-cmdb", objectMapper.writeValueAsString(item));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
