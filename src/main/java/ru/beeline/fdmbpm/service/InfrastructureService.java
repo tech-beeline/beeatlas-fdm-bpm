@@ -38,10 +38,15 @@ public class InfrastructureService {
             log.info("Запрос к CMDB /api/cmdb/reports/infrastructure_on_asset_report/ c product вернул:  " + product + " = null");
             return;
         }
-        log.info("Успешно получен отчет об инфраструктуре CMDB для продукта '{}'.", product);
+        log.info("✅ Успешно получен отчет об инфраструктуре CMDB для продукта '{}'.", product);
         List<CmdbResponsibilityDTO> responsibilities = cmdbClient.getCmdbResponsibilities(cmdbResponse.getAsset()
-                                                                                                  .getReconciliationId());
-        sendMessage(product, cmdbResponse, responsibilities);
+                .getReconciliationId());
+        if (!responsibilities.isEmpty()) {
+            log.info("responsibilities size: {}", responsibilities.size());
+            sendMessage(product, cmdbResponse, responsibilities);
+        } else {
+            log.info("⚠️ responsibilities is empty");
+        }
         Map<String, AssetDTO> assetDTOMap = cmdbResponse.getInfrastructureAssets();
         List<InfraDTO> infraDTOList = new ArrayList<>();
         assetDTOMap.forEach((key, value) -> {
@@ -51,26 +56,26 @@ public class InfrastructureService {
                 case "Серверный домен (виртуальный)" -> {
                     properties.add(new PropertyDTO("item", value.getItem()));
                     properties.add(new PropertyDTO("vimServerDomainCpuCores",
-                                                   value.getAssetAdditionalData().getVimServerDomainCpuCores()));
+                            value.getAssetAdditionalData().getVimServerDomainCpuCores()));
                     properties.add(new PropertyDTO("vimServerDomainCpuType",
-                                                   value.getAssetAdditionalData().getVimServerDomainCpuType()));
+                            value.getAssetAdditionalData().getVimServerDomainCpuType()));
                     properties.add(new PropertyDTO("totalPhysicalMemory",
-                                                   value.getAssetAdditionalData().getTotalPhysicalMemory()));
+                            value.getAssetAdditionalData().getTotalPhysicalMemory()));
                     properties.add(new PropertyDTO("vimServerDomainLogicalDrives",
-                                                   value.getAssetAdditionalData().getVimServerDomainLogicalDrives()));
+                            value.getAssetAdditionalData().getVimServerDomainLogicalDrives()));
                     properties.add(new PropertyDTO("vimIp", value.getAssetAdditionalData().getVimIp()));
                     properties.add(new PropertyDTO("vimServerDomainOs",
-                                                   value.getAssetAdditionalData().getVimServerDomainOs()));
+                            value.getAssetAdditionalData().getVimServerDomainOs()));
                 }
                 case "Экземпляр приложения" ->
                         properties.add(new PropertyDTO("appEnvType", value.getAssetAdditionalData().getAppEnvType()));
             }
             infraDTOList.add(InfraDTO.builder()
-                                     .name(value.getName())
-                                     .type(value.getClassTitle())
-                                     .cmdbId(value.getInstanceId())
-                                     .properties(properties)
-                                     .build());
+                    .name(value.getName())
+                    .type(value.getClassTitle())
+                    .cmdbId(value.getInstanceId())
+                    .properties(properties)
+                    .build());
 
         });
         Map<String, List<String>> infrastructureAssetsRelation = cmdbResponse.getInfrastructureAssetsRelation();
