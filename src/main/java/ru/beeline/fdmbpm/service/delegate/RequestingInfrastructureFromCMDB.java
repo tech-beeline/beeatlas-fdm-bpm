@@ -17,7 +17,7 @@ public class RequestingInfrastructureFromCMDB implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("running process requesting infrastructure from CMDB");
+        log.info("ℹ️ Старт процесса requesting infrastructure from CMDB");
         String product = (String) delegateExecution.getVariable("product");
         infrastructureService.gettingApplicationData(product);
     }
