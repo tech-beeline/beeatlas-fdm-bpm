@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.cmdb.CmdbResponseDTO;
+import ru.beeline.fdmbpm.dto.cmdb.CmdbResponsibilityDTO;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -38,6 +41,26 @@ public class CmdbClient {
                     }).getBody();
 
             return cmdbResponseDTO;
+        } catch (HttpClientErrorException.Unauthorized e){
+            log.info(" 401 : [no body]");
+        }
+        catch (Exception e) {
+            log.error("Error calling CMDB API: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public List<CmdbResponsibilityDTO> getCmdbResponsibilities(String reconciliationId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("AuthenticationToken", "Bearer " + authenticationToken);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            log.info("Request URL: " + cmdbUrl + "/asset/responsibilities/" + reconciliationId);
+            return restTemplate.exchange(cmdbUrl + "/api/asset/responsibilities/" + reconciliationId, HttpMethod.GET, entity,
+                                                                    new ParameterizedTypeReference<List<CmdbResponsibilityDTO>>() {
+                                                                    }).getBody();
+
         } catch (HttpClientErrorException.Unauthorized e){
             log.info(" 401 : [no body]");
         }
