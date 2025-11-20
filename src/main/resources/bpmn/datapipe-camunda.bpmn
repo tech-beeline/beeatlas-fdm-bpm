@@ -183,13 +183,13 @@
     <bpmn:sequenceFlow id="Flow_19m38ce" sourceRef="Gateway_11yffam" targetRef="Event_0iz9uh9" />
     <bpmn:sequenceFlow id="Flow_15bkt95" sourceRef="Gateway_11yffam" targetRef="Event_0rz7wds" />
     <bpmn:sequenceFlow id="Flow_0xn5jmm" sourceRef="Gateway_1we72aq" targetRef="Gateway_11yffam" />
-    <bpmn:serviceTask id="Activity_0qnilwk" name="Проверка результата локального графа" camunda:delegateExpression="${LocalGraphEnrichmentDelegate}">
+    <bpmn:serviceTask id="Activity_0qnilwk" name="Проверка результата локального графа" camunda:delegateExpression="${LocalGraphCheckResultDelegate}">
       <bpmn:incoming>Flow_0ctq0ls</bpmn:incoming>
       <bpmn:outgoing>Flow_1tur253</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0ctq0ls" sourceRef="Event_1cb08zp" targetRef="Activity_0qnilwk" />
     <bpmn:sequenceFlow id="Flow_1tur253" sourceRef="Activity_0qnilwk" targetRef="Gateway_0mk38sr" />
-    <bpmn:serviceTask id="Activity_0k42n7x" name="Проверка результата глобального графа" camunda:delegateExpression="${GlobalGraphEnrichmentDelegate}">
+    <bpmn:serviceTask id="Activity_0k42n7x" name="Проверка результата глобального графа" camunda:delegateExpression="${GlobalGraphCheckResultDelegate}">
       <bpmn:incoming>Flow_08tuor8</bpmn:incoming>
       <bpmn:outgoing>Flow_1xv42bh</bpmn:outgoing>
     </bpmn:serviceTask>

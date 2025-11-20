@@ -37,7 +37,7 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
             TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
             try {
                 GraphDTO localGraphDTO = graphClient.getLocalGraph(processId);
-                if (localGraphDTO.getStatus().equals("PROCESS")) {
+                if (localGraphDTO.getStatus().equals("PROCESS") || localGraphDTO.getStatus().equals("QUEUE")) {
                     delegateExecution.setVariable("localGraphCount", localGraphCount + 1);
                 }
                 if (localGraphDTO.getStatus().equals("DONE")) {
