@@ -55,7 +55,7 @@ public class GraphConsumers {
                 String status = jsonNode.get("status").asText();
                 if (status.equals("DONE") || status.equals("ERROR")) {
                     Map<String, Object> variables = new HashMap<>();
-                    variables.put("doneGlobalGraph", true);
+                    variables.put("doneGlobalGraph", status.equals("DONE"));
                     applicationService.sendMessageToProcess(taskKey, variables, "create_global_graph");
                 } else {
                     log.error("Message does not match the required status");
