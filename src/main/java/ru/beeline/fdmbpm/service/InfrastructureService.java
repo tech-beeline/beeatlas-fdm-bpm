@@ -99,7 +99,7 @@ public class InfrastructureService {
             Optional<CmdbResponsibilityDTO> ownerResponsibility = responsibilities.stream()
                     .filter(responsibility -> responsibility.getVimChrPersonRoleTitle().equals("Владелец приложения"))
                     .findFirst();
-            if (ownerResponsibility.isEmpty()) {
+            if (ownerResponsibility.isEmpty() || ownerResponsibility.get().getPeople() == null) {
                 log.warn("⚠️ Не найден владелец приложения для продукта: {}. Сообщение не отправлено.", product);
                 return;
             }
