@@ -21,13 +21,14 @@ public class LocalGraphCheckResultDelegate extends StatusLogic implements JavaDe
     CamundaProcessRepository camundaProcessRepository;
 
     @Override
-    public void execute(DelegateExecution delegateExecution) {
+    public void execute(DelegateExecution delegateExecution) throws Exception {
         log.info("Проверка результата локального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         if (!Boolean.parseBoolean(delegateExecution.getVariable("doneLocalGraph").toString())) {
             saveAlias(processId, "errlclgrph", typeProcess);
+            throw new Exception("doneLocalGraph is" + delegateExecution.getVariable("doneLocalGraph").toString());
         }
     }
 }
