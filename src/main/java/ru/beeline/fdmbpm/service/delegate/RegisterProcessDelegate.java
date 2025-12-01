@@ -72,9 +72,10 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                 }
             } else {
                 saveAlias(camundaProcess.getId(), "errcrt", typeProcess);
+                throw new ProcessException(productDTOResponseEntity.getStatusCode().toString());
             }
         } catch (Exception e) {
-            log.error("Ошибка при регистрации процесса. Создание записи с ошибкой", e);
+            log.error("❌ Ошибка при регистрации процесса. Создание записи с ошибкой");
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             tt.execute(status -> {
