@@ -11,8 +11,12 @@ import java.util.Optional;
 public interface CamundaProcessRepository extends JpaRepository<CamundaProcess, Integer> {
 
     Optional<CamundaProcess> findByProcId(String id);
+
     Optional<CamundaProcess> findByBusinessKey(String id);
+
     @Modifying
     @Query("update CamundaProcess p set p.isAsync = true where p.id = :procId and p.isAsync = false")
     int markAsyncTrueIfFalse(@Param("procId") Integer procId);
+
+    Optional<CamundaProcess> findByProcIdAndBusinessKey(String processId, String businessKey);
 }
