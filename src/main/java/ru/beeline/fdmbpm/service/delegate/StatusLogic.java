@@ -25,7 +25,7 @@ public class StatusLogic {
         log.info("saveAlias: processId= {}", processId);
         log.info("saveAlias: alias= {}", alias);
         StatusProcess statusProcess = statusProcessRepository.findByAliasAndTypeProcessId(alias, typeProcess.getId());
-        camundaProcessStatusRepository.save(CamundaProcessStatus.builder()
+        camundaProcessStatusRepository.saveAndFlush(CamundaProcessStatus.builder()
                 .statusProcessId(statusProcess.getId())
                 .camundaProcessId(processId)
                 .createdDate(LocalDateTime.now())
