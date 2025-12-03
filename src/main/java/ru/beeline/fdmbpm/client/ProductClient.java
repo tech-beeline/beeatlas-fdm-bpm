@@ -68,16 +68,16 @@ public class ProductClient {
             ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
                     Void.class);
             if (response.getStatusCode() != HttpStatus.CREATED) {
-                log.error("Unexpected status code from CMDB: {}", response.getStatusCode());
+                log.error("❌ Unexpected status code from CMDB: {}", response.getStatusCode());
                 throw new RuntimeException("Failed to post product. HTTP Status: " + response.getStatusCode());
             }
             log.info("Product posted successfully with status 201.");
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            log.error("HTTP error while posting product '{}'. Status: {}, Body: {}", product, e.getStatusCode(),
+            log.error("❌ HTTP error while posting product '{}'. Status: {}, Body: {}", product, e.getStatusCode(),
                     e.getResponseBodyAsString(), e);
             throw new RuntimeException("Error during post request to server " + productServerUrl, e);
         } catch (Exception e) {
-            log.error("General error while posting product '{}', Message: {}", product, e.getMessage(), e);
+            log.error("❌ General error while posting product '{}', Message: {}", product, e.getMessage(), e);
             throw new RuntimeException("Error during post request to server " + productServerUrl, e);
         }
     }
@@ -120,7 +120,7 @@ public class ProductClient {
             }
             return result;
         } catch (Exception e) {
-            log.error("Interfaces aren't received" + e.getMessage());
+            log.error("❌ Interfaces aren't received" + e.getMessage());
         }
         return new ArrayList<>();
     }
@@ -153,7 +153,7 @@ public class ProductClient {
                     DiscoveredInterfaceDTO.class).getBody();
 
         } catch (HttpClientErrorException.BadRequest e) {
-            log.error("Ошибка запроса к product-service: {}", e.getMessage());
+            log.error("❌ Ошибка запроса к product-service: {}", e.getMessage());
             throw new ValidationException(e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -222,7 +222,7 @@ public class ProductClient {
                     entity,
                     String.class).getBody();
         } catch (Exception e) {
-            log.error("Error get specification from mapic " + e.getMessage());
+            log.error("❌ Error get specification from mapic " + e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -238,7 +238,7 @@ public class ProductClient {
                     entity,
                     ProductDTO.class);
         } catch (RestClientResponseException e) {
-            log.error(e.getMessage());
+            log.error("❌ " + e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).build();
         }
     }
