@@ -6,10 +6,15 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.client.GraphClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
+import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.graph.GraphDTO;
+import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
@@ -18,18 +23,24 @@ import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegate {
 
     @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
     TypeProcessRepository typeProcessRepository;
+
     @Autowired
     CamundaProcessRepository camundaProcessRepository;
+
     @Autowired
     GraphClient graphClient;
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Проверка готовности глобального графа");
+        log.info("ℹ️ Проверка готовности глобального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer globalGraphCount = (Integer) delegateExecution.getVariable("globalGraphCount");
         if (globalGraphCount != null) {
+            log.info("ℹ️ globalGraphCount: {}", globalGraphCount);
             if (globalGraphCount > 3) {
                 camundaProcessRepository.markAsyncTrueIfFalse(processId);
             }
@@ -45,11 +56,22 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                     saveAlias(processId, "glblgrph", typeProcess);
                 }
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                saveAlias(processId, "errglblgrph", typeProcess);
-                throw new RuntimeException(e.getMessage());
+                log.info("❌ Ошибка при проверке готовности глобального графа. Создание записи с ошибкой");
+                TransactionTemplate tt = new TransactionTemplate(transactionManager);
+                tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                tt.execute(status -> {
+                    StatusProcess statusProcess =
+                            statusProcessRepository.findByAliasAndTypeProcessId("errglblgrph", typeProcess.getId());
+                    if (camundaProcessStatusRepository.findByCamundaProcessIdAndStatusProcessId(processId,
+                            statusProcess.getId()).isEmpty()) {
+                        saveAlias(processId, "errglblgrph", typeProcess);
+                    }
+                    return null;
+                });
+                throw new ProcessException("❌ Ошибка процесса на шаге: Проверка готовности глобального графа");
             }
         } else {
+            log.info("ℹ️ globalGraphCount = null , устанавливаем globalGraphCount = 1");
             delegateExecution.setVariable("globalGraphCount", 1);
         }
     }
