@@ -11,4 +11,6 @@ public interface CamundaProcessStatusRepository extends JpaRepository<CamundaPro
     Optional<CamundaProcessStatus> findFirstByCamundaProcessIdOrderByCreatedDateDesc(Integer id);
 
     List<CamundaProcessStatus> findByCamundaProcessId(Integer id);
+
+    Optional<CamundaProcessStatus> findByCamundaProcessIdAndStatusProcessId(Integer id, Integer statusProcessId);
 }
