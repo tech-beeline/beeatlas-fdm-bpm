@@ -24,6 +24,9 @@ import ru.beeline.fdmbpm.client.AuthSSOClient;
 public class RabbitConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitConfig.class);
 
+    @Value("${app.ambassador-auth}")
+    private Boolean ambassadorAuth;
+
     @Value("${spring.rabbitmq.username}")
     private String userName;
 
@@ -86,8 +89,17 @@ public class RabbitConfig {
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
-        return createConnectionFactoryWithToken();
+        return ambassadorAuth ? createConnectionFactoryWithToken() : createConnectionFactoryWithPass();
     }
+
+    public CachingConnectionFactory createConnectionFactoryWithPass() {
+        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(connectFactoryName);
+        cachingConnectionFactory.setUsername(userName);
+        cachingConnectionFactory.setPassword(password);
+        cachingConnectionFactory.setVirtualHost(virtualHost);
+        return cachingConnectionFactory;
+    }
+
 
     private CachingConnectionFactory createConnectionFactoryWithToken() {
         CachingConnectionFactory factory = new CachingConnectionFactory(connectFactoryName);

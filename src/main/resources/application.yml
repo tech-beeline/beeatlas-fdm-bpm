@@ -1,3 +1,5 @@
+app:
+  ambassador-auth: true
 server:
   shutdown:
     mode: graceful
