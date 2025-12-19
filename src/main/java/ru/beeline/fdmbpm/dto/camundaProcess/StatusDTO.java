@@ -19,5 +19,7 @@ public class StatusDTO {
     private String alias;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime createdDate;
+    private Boolean isDone;
+    private Boolean isError;
 }
 

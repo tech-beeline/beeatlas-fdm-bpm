@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CamundaProcessRepository extends JpaRepository<CamundaProcess, Integer> {
@@ -19,4 +20,6 @@ public interface CamundaProcessRepository extends JpaRepository<CamundaProcess, 
     int markAsyncTrueIfFalse(@Param("procId") Integer procId);
 
     Optional<CamundaProcess> findByProcIdAndBusinessKey(String processId, String businessKey);
+
+    List<CamundaProcess> findByIdIn(List<Integer> ids);
 }

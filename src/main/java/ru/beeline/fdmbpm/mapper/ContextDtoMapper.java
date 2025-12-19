@@ -29,6 +29,8 @@ public class ContextDtoMapper {
                         .id(statusProcess.getId())
                         .alias(statusProcess.getAlias())
                         .name(statusProcess.getName())
+                        .isDone(statusProcess.getIsDone())
+                        .isError(statusProcess.getIsError())
                         .createdDate(camundaProcessStatus.getCreatedDate())
                         .build())
                 .build();
