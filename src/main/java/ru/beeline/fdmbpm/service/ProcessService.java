@@ -26,7 +26,8 @@ import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -117,20 +118,30 @@ public class ProcessService {
         List<Context> contextList = contextRepository.findByNameAndValue(name, value);
         List<GetContextDTO> result = new ArrayList<>();
         if (!contextList.isEmpty()) {
+            List<CamundaProcess> camundaProcessList = camundaProcessRepository
+                    .findByIdIn(contextList.stream().map(Context::getCamundaProcessId).distinct().toList());
+            Map<Integer, CamundaProcess> camundaProcessMap = camundaProcessList.stream().collect(Collectors.toMap(
+                    CamundaProcess::getId, camundaProcess -> camundaProcess));
+            Map<Integer, TypeProcess> typeProcessMap = typeProcessRepository.findAll().stream().collect(Collectors.toMap(
+                    TypeProcess::getId, typeProcess -> typeProcess));
+            Map<Integer, StatusProcess> statusProcessMap = statusProcessRepository.findAll().stream().collect(Collectors.toMap(
+                    StatusProcess::getId, statusProcess -> statusProcess));
             for (Context context : contextList) {
-                Optional<CamundaProcess> optionalCamundaProcess = camundaProcessRepository.findById(context.getCamundaProcessId());
-                if (optionalCamundaProcess.isPresent()) {
-                    CamundaProcess camundaProcess = optionalCamundaProcess.get();
-                    TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId())
-                            .orElseThrow(() -> new NotFoundException(String.format("Type process, для camunda process, с type process id: %s не найден",
-                                    camundaProcess.getTypeProcessId())));
+                CamundaProcess camundaProcess = camundaProcessMap.get(context.getCamundaProcessId());
+                if (camundaProcess != null) {
+                    TypeProcess typeProcess = typeProcessMap.get(camundaProcess.getTypeProcessId());
+                    if (typeProcess == null) {
+                        throw new NotFoundException(String.format("Type process, для camunda process, с type process id: %s не найден",
+                                camundaProcess.getTypeProcessId()));
+                    }
                     CamundaProcessStatus camundaProcessStatus =
                             camundaProcessStatusRepository.findFirstByCamundaProcessIdOrderByCreatedDateDesc(camundaProcess.getId())
                                     .orElseThrow(() -> new NotFoundException(String.format("Camunda process status для camunda process с id: %s не найден",
                                             camundaProcess.getId())));
-                    StatusProcess statusProcess =
-                            statusProcessRepository.findById(camundaProcessStatus.getStatusProcessId())
-                                    .orElseThrow(() -> new NotFoundException("Status Process не найден"));
+                    StatusProcess statusProcess = statusProcessMap.get(camundaProcessStatus.getStatusProcessId());
+                    if (statusProcess == null) {
+                        throw new NotFoundException("Status Process не найден");
+                    }
                     result.add(contextDtoMapper.convert(camundaProcess, typeProcess, statusProcess, camundaProcessStatus));
                 }
             }
