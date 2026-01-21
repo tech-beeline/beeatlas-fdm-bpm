@@ -99,6 +99,8 @@ otel:
       enabled: true
   logs:
     exporter: none
+  sdk:
+    disabled: true
 
 
 
