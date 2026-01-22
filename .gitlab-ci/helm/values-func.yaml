@@ -54,6 +54,9 @@ env:
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/test/func/grafana#token"
   INTEGRATION_CMDB_BEARER: "vault:eafdmmart/data/test/func/fdm#cmdbtoken"
   OTEL_EXPORTER_OTLP_ENDPOINT: "vault:eafdmmart/data/test/func/fdm#opentelemetry"
+  INTEGRATION_VIEW_PLATFORM_SERVER_URL: "vault:eafdmmart/data/test/func/fdm#viewplatformurl"
+  INTEGRATION_OBSERVABILITY_LOGIN: "vault:eafdmmart/data/test/func/fdm#observability.login"
+  INTEGRATION_OBSERVABILITY_PASS: "vault:eafdmmart/data/test/func/fdm#observability.pass"
 
   GWURL: "vault:eafdmmart/data/test/func/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/test/func/fdm#mapicauth"

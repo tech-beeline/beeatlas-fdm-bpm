@@ -50,6 +50,9 @@ env:
   INTEGRATION_GRAFANA_SERVER_URL: "vault:eafdmmart/data/prod/grafana#url"
   INTEGRATION_GRAFANA_BEARER: "vault:eafdmmart/data/prod/grafana#token"
   OTEL_EXPORTER_OTLP_ENDPOINT: "vault:eafdmmart/data/prod/fdm#opentelemetry"
+  INTEGRATION_VIEW_PLATFORM_SERVER_URL: "vault:eafdmmart/data/prod/fdm#viewplatformurl"
+  INTEGRATION_OBSERVABILITY_LOGIN: "vault:eafdmmart/data/prod/fdm#observability.login"
+  INTEGRATION_OBSERVABILITY_PASS: "vault:eafdmmart/data/prod/fdm#observability.pass
 
   GWURL: "vault:eafdmmart/data/prod/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/prod/fdm#mapicauth"
