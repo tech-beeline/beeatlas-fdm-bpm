@@ -53,6 +53,9 @@ env:
   INTEGRATION_ARCH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#archserverurl"
   INTEGRATION_GRAPH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#graphserverurl"
   OTEL_EXPORTER_OTLP_ENDPOINT: "vault:eafdmmart/data/dev/fdm#opentelemetry"
+  INTEGRATION_VIEW_PLATFORM_SERVER_URL: "vault:eafdmmart/data/dev/fdm#viewplatformurl"
+  INTEGRATION_OBSERVABILITY_LOGIN: "vault:eafdmmart/data/dev/fdm#observability.login"
+  INTEGRATION_OBSERVABILITY_PASS: "vault:eafdmmart/data/dev/fdm#observability.pass"
 
   GWURL: "vault:eafdmmart/data/dev/fdm#mapicurl"
   AUTHBASIC: "vault:eafdmmart/data/dev/fdm#mapicauth"
