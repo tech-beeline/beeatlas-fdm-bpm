@@ -1,6 +1,6 @@
 app:
   ambassador-auth: true
-  auth_view_platform: true
+  auth_view_platform: false
 server:
   shutdown:
     mode: graceful
