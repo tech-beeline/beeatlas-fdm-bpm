@@ -38,7 +38,7 @@ public class ViewPlatformClient {
         }
     }
 
-    public void postStructurizrModel(String token, Integer modelId) {
+    public void postStructurizrModel(String token, Long modelId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

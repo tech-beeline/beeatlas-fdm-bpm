@@ -10,5 +10,5 @@ import lombok.*;
 @ToString
 public class ModelIdDTO {
 
-    Integer modelId;
+    Long modelId;
 }
