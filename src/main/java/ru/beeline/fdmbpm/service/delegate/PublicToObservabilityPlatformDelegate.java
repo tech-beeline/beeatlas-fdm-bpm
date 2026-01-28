@@ -57,6 +57,10 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
         log.info("process_id: {}", processId);
         String cmdb = (String) delegateExecution.getVariable("cmdb");
         TypeProcess typeProcess = null;
+        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        log.info("camundaProcess : {}", camundaProcess);
+        typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+        log.info("typeProcess : {}", typeProcess);
         try {
             ProductDTO productDTO = productClient.getProductByCmdb(cmdb).getBody();
             Long modelId;
@@ -77,10 +81,6 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
                 log.info("auth_view_platform: {}. POST запрос в Платформу наблюдаемости", authViewPlatform);
                 viewPlatformClient.postStructurizrModel(null, modelId);
             }
-            CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-            log.info("camundaProcess : {}", camundaProcess);
-            typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-            log.info("typeProcess : {}", typeProcess);
             saveAlias(processId, "vpcrt", typeProcess);
             log.info("Шаг: Публикация в платформу наблюдаемости: завершен! ");
         } catch (Exception e) {
