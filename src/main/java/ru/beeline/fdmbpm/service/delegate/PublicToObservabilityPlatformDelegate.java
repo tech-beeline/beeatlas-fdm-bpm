@@ -12,6 +12,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.ViewPlatformClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
+import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.TokenDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
@@ -56,10 +57,9 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         log.info("process_id: {}", processId);
         String cmdb = (String) delegateExecution.getVariable("cmdb");
-        TypeProcess typeProcess = null;
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         log.info("camundaProcess : {}", camundaProcess);
-        typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+        TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         log.info("typeProcess : {}", typeProcess);
         try {
             ProductDTO productDTO = productClient.getProductByCmdb(cmdb).getBody();
@@ -87,9 +87,13 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
             log.error("Ошибка при Публикация в платформу наблюдаемости. Создание записи с ошибкой", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            TypeProcess finalTypeProcess = typeProcess;
             tt.execute(status -> {
-                saveAlias(processId, "vperr", finalTypeProcess);
+                StatusProcess statusProcess =
+                        statusProcessRepository.findByAliasAndTypeProcessId("vperr", typeProcess.getId());
+                if (camundaProcessStatusRepository.findByCamundaProcessIdAndStatusProcessId(processId,
+                        statusProcess.getId()).isEmpty()) {
+                    saveAlias(processId, "vperr", typeProcess);
+                }
                 return null;
             });
             throw new ProcessException("Ошибка процесса на шаге: Публикация в платформу наблюдаемости");
