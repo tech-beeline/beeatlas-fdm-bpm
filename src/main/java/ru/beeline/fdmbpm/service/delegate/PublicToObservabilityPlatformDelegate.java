@@ -18,7 +18,7 @@ import java.util.Base64;
 @Component("PublicToObservabilityPlatformDelegate")
 public class PublicToObservabilityPlatformDelegate implements JavaDelegate {
 
-    @Value("${app.auth_view_platform:false}")
+    @Value("${app.auth_view_platform:true}")
     private boolean authViewPlatform;
 
     @Value("${integration.observability-login}")
