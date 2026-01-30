@@ -59,4 +59,4 @@ env:
   TECHUSER: "vault:eafdmmart/data/prod/fdm#techuser"
   TECHPASSWORD: "vault:eafdmmart/data/prod/fdm#techpassword"
 
-replicaCount: 3
+replicaCount: 2
