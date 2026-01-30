@@ -1,5 +1,6 @@
 app:
   ambassador-auth: true
+  auth_view_platform: true
 server:
   shutdown:
     mode: graceful
@@ -58,6 +59,8 @@ spring:
           hibernate:
             dialect: org.hibernate.dialect.PostgreSQL95Dialect
     processes:
+      hikari:
+        maximum-pool-size: 25
       driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -97,6 +100,8 @@ otel:
       enabled: true
   logs:
     exporter: none
+  sdk:
+    disabled: true
 
 
 

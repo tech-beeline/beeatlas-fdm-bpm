@@ -62,7 +62,7 @@ public class ApplicationProcessService {
                 .orElseThrow(() -> new CustomCamundaException(String.format(
                         "Запись в таблице application_type_status с typeId: %s , и SerialNumber 1 не найдена.", typeId)));
         log.info("Статус для типа заявки найден. statusId: {}", applicationTypeStatus.getId());
-        Application saveApplication = applicationRepository.save(Application.builder()
+        Application saveApplication = applicationRepository.saveAndFlush(Application.builder()
                 .typeId(applicationTypeEnum.getId())
                 .statusId(applicationTypeStatus.getId())
                 .authorId(authorId)
