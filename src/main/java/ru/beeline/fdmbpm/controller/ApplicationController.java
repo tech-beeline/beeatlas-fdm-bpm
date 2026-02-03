@@ -91,8 +91,8 @@ public class ApplicationController {
 
     @GetMapping("/application-process/{applicationId}/{type}/{typeId}")
     public String sendGroupNotifications(@PathVariable Integer applicationId,
-                                             @PathVariable String type,
-                                             @PathVariable Integer typeId) {
+                                         @PathVariable String type,
+                                         @PathVariable Integer typeId) {
         log.info("running application process 2");
         applicationProcessService.sendGroupNotifications(applicationId, type, typeId, null);
         return "the process 2 has been completed";
