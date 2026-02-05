@@ -78,7 +78,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                         workspaceCmdb = extractWorkspaceCmdb(response);
                         if (workspaceCmdb != null) {
                             log.info("ℹ️ workspaceСmdb = {}", workspaceCmdb);
-                            if (cmdb.equals(workspaceCmdb)) {
+                            if (cmdb.equalsIgnoreCase(workspaceCmdb)) {
                                 log.info("ℹ️ cmdb equals workspaceСmdb, Saving a process with a status: crt");
                                 saveAlias(camundaProcess.getId(), "crt", typeProcess);
                             } else {
