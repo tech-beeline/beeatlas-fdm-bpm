@@ -76,7 +76,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                     String workspaceCmdb = null;
                     if (isJson(response.getHeaders().getContentDisposition().getFilename())) {
                         workspaceCmdb = extractWorkspaceCmdb(response);
-                        if (workspaceCmdb != null) {
+                        if (workspaceCmdb != null && !workspaceCmdb.isEmpty()) {
                             log.info("ℹ️ workspaceСmdb = {}", workspaceCmdb);
                             if (cmdb.equalsIgnoreCase(workspaceCmdb)) {
                                 log.info("ℹ️ cmdb equals workspaceСmdb, Saving a process with a status: crt");
