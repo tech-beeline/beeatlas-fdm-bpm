@@ -101,28 +101,28 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                 throw new ProcessException(productDTOResponseEntity.getStatusCode().toString());
             }
         } catch (VldterrException e) {
-            saveErrStatus("vldterr", processId, businessKey, typeProcess, camundaProcess, cmdb, docId);
+            saveErrStatus("vldterr", processId, businessKey, typeProcess, cmdb, docId);
         } catch (CmdberrException e) {
-            saveErrStatus("cmdberr", processId, businessKey, typeProcess, camundaProcess, cmdb, docId);
+            saveErrStatus("cmdberr", processId, businessKey, typeProcess, cmdb, docId);
         } catch (Exception e) {
-            saveErrStatus("errcrt", processId, businessKey, typeProcess, camundaProcess, cmdb, docId);
+            saveErrStatus("errcrt", processId, businessKey, typeProcess, cmdb, docId);
         }
         log.info("ℹ️Завершение метода: Получение информации и регистрации процесса");
     }
 
-    private void saveErrStatus(String statusAlias, String processId, String businessKey, TypeProcess typeProcess,
-                               CamundaProcess camundaProcess, String cmdb, Integer docId) {
+    private void saveErrStatus(String statusAlias, String processId, String businessKey, TypeProcess typeProcess
+            , String cmdb, Integer docId) {
         log.error("❌ Ошибка при регистрации процесса. Создание записи с ошибкой");
         TransactionTemplate tt = new TransactionTemplate(transactionManager);
         tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         tt.execute(status -> {
-            saveToContextRepository("cmdb", cmdb, camundaProcess);
-            if (docId != null) {
-                saveToContextRepository("doc_id", docId.toString(), camundaProcess);
-            }
             if (camundaProcessRepository.findByProcIdAndBusinessKey(processId, businessKey).isEmpty()) {
                 CamundaProcess failedProcess = saveProcess(typeProcess.getId(), processId, businessKey);
                 saveAlias(failedProcess.getId(), statusAlias, typeProcess);
+                saveToContextRepository("cmdb", cmdb, failedProcess);
+                if (docId != null) {
+                    saveToContextRepository("doc_id", docId.toString(), failedProcess);
+                }
             }
             return null;
         });
