@@ -24,7 +24,7 @@ import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.camunda.*;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
+import ru.beeline.fdmbpm.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;

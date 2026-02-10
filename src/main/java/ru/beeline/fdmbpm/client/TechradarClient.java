@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
-import ru.beeline.fdmlib.dto.techradar.ProcessDTO;
+import ru.beeline.fdmbpm.dto.techradar.ProcessDTO;
 
 import java.util.List;
 

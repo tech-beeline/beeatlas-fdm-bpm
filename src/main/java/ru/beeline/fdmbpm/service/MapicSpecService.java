@@ -14,7 +14,7 @@ import ru.beeline.fdmbpm.dto.wsdlSoap.DefinitionsDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.OperationDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.PortDTO;
 import ru.beeline.fdmbpm.dto.wsdlSoap.PortTypeDTO;
-import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
+import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
 
 import java.io.StringReader;
 import java.net.URI;
