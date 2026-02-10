@@ -5,8 +5,6 @@
 package ru.beeline.fdmbpm.dto.capability;
 
 import lombok.*;
-import ru.beeline.fdmlib.dto.capability.ParentOrMutableDTO;
-
 import java.time.LocalDateTime;
 
 @Setter
