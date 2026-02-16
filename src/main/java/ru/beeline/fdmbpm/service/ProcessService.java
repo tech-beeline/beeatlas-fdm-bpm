@@ -115,7 +115,7 @@ public class ProcessService {
     }
 
     public List<GetContextDTO> getAllProcessByContext(String name, String value) {
-        List<Context> contextList = contextRepository.findByNameAndValue(name, value);
+        List<Context> contextList = contextRepository.findByNameAndValueIgnoreCase(name, value);
         List<GetContextDTO> result = new ArrayList<>();
         if (!contextList.isEmpty()) {
             List<CamundaProcess> camundaProcessList = camundaProcessRepository
