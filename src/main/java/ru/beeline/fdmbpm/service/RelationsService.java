@@ -18,7 +18,7 @@ import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
 import ru.beeline.fdmbpm.gitdomain.FdmGitlabLanguages;
 import ru.beeline.fdmbpm.repository.git.FdmGitlabLanguagesRepository;
-import ru.beeline.fdmlib.dto.techradar.ProcessDTO;
+import ru.beeline.fdmbpm.dto.techradar.ProcessDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;

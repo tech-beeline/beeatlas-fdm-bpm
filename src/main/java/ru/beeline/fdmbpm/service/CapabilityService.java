@@ -14,8 +14,8 @@ import ru.beeline.fdmbpm.dto.dashboard.DashboardCapabilityDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardProductsDTO;
 import ru.beeline.fdmbpm.dto.dashboard.DashboardTechCapabilitiesDTO;
 import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
+import ru.beeline.fdmbpm.dto.capability.BusinessCapabilityDTO;
+import ru.beeline.fdmbpm.dto.capability.TechCapabilityShortDTO;
 
 import java.util.ArrayList;
 import java.util.List;

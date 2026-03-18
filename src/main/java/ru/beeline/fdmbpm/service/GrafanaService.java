@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.GrafanaClient;
-import ru.beeline.fdmlib.dto.techradar.ProcessDTO;
+import ru.beeline.fdmbpm.dto.techradar.ProcessDTO;
 
 import java.util.*;
 

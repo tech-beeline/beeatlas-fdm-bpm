@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.CapabilityClient;
-import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
+import ru.beeline.fdmbpm.dto.capability.TechCapabilityShortDTO;
 
 import java.util.List;
 

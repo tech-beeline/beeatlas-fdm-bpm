@@ -23,8 +23,8 @@ import ru.beeline.fdmbpm.exception.S3Exception;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.mapper.ExcelBCMapper;
 import ru.beeline.fdmbpm.mapper.ExcelTcMapper;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
+import ru.beeline.fdmbpm.dto.capability.BusinessCapabilityDTO;
+import ru.beeline.fdmbpm.dto.capability.TechCapabilityShortDTO;
 
 import java.io.*;
 import java.util.*;

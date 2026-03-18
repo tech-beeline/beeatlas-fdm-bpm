@@ -5,9 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.beeline.fdmlib.dto.techradar.ProcessDTO;
+import ru.beeline.fdmbpm.dto.techradar.ProcessDTO;
 
-import java.time.Instant;
 
 @Slf4j
 @Service

@@ -16,8 +16,8 @@ import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
-import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
-import ru.beeline.fdmlib.dto.product.PublishedApiDTO;
+import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
+import ru.beeline.fdmbpm.dto.product.PublishedApiDTO;
 
 import java.util.ArrayList;
 import java.util.List;

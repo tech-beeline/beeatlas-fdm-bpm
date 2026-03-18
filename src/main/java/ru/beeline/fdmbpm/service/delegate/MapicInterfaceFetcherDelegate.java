@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
-import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
-import ru.beeline.fdmlib.dto.product.PublishedApiDTO;
+import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
+import ru.beeline.fdmbpm.dto.product.PublishedApiDTO;
 
 import java.util.ArrayList;
 import java.util.List;

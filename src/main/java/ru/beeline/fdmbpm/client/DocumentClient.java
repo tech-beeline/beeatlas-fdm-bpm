@@ -35,6 +35,7 @@ public class DocumentClient {
     }
 
     public ResponseEntity<byte[]> getDocument(Integer docId) {
+        log.info("ℹ️ Запрос к сервису документов:" + documentServiceUrl + "/api/v1/documents/" + docId);
         try {
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<String> entity = new HttpEntity<>(headers);

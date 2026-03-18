@@ -7,7 +7,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.utils.JwtUtils;
-import ru.beeline.fdmlib.dto.product.DiscoveredInterfaceDTO;
 
 import java.time.Instant;
 import java.time.ZoneId;
