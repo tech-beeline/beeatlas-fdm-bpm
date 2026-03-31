@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1gvlfn2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
-  <bpmn:process id="Process_0ifmh49" name="User_product_all" isExecutable="true">
+  <bpmn:process id="Process_0ifmh49" name="User_product_all" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0jwnzym</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_19t9q45">
@@ -15,11 +15,11 @@
     <bpmn:sequenceFlow id="Flow_09m8h77" sourceRef="Activity_1qu1xs6" targetRef="Activity_0hz3w87" />
     <bpmn:callActivity id="Activity_0hz3w87" name="Получение приложений для пользователей" calledElement="Process_0nk3sid">
       <bpmn:extensionElements>
-        <camunda:in source="users" target="user" />
+        <camunda:in source="user" target="user" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_09m8h77</bpmn:incoming>
       <bpmn:outgoing>Flow_1uci03f</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true" />
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${users}" camunda:elementVariable="user" />
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_1uci03f" sourceRef="Activity_0hz3w87" targetRef="Event_01o9dl9" />
     <bpmn:endEvent id="Event_01o9dl9">
