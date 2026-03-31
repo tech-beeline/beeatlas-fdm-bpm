@@ -15,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
+import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
 import ru.beeline.fdmbpm.dto.product.PublishedApiDTO;
@@ -161,6 +162,24 @@ public class ProductClient {
         }
     }
 
+    public List<Integer> getPatternIdsByProductAlias(String alias) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<Integer> result = restTemplate.exchange(productServerUrl + "/api/v1/pattern/product?alias=" + alias,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<Integer>>() {
+                    }).getBody();
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
     public void updateInterfaceOperations(List<MethodDTO> methods, Integer id) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -205,6 +224,42 @@ public class ProductClient {
                     entity,
                     ProductDTO.class).getBody();
             return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void updateUserProducts(Integer userId, List<String> productCodes) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<List<String>> requestEntity = new HttpEntity<>(productCodes, headers);
+            restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products",
+                    HttpMethod.POST,
+                    requestEntity,
+                    Void.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void postPatternCheckResults(String cmdb, String sourceType, Integer docId, List<PatternCheckResultDTO> results) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<List<PatternCheckResultDTO>> requestEntity = new HttpEntity<>(results, headers);
+            String url = productServerUrl + "/api/v1/product/" + cmdb + "/patterns/" + sourceType;
+            if (docId != null) {
+                url = url + "?source-id=" + docId;
+            }
+            restTemplate.exchange(url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    Void.class);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
