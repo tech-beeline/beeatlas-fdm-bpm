@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserShortDTO;
 import ru.beeline.fdmbpm.service.RabbitService;
 
+import java.io.Serializable;
+
 @Slf4j
 @Component("DropUserCacheDelegate")
 public class DropUserCacheDelegate implements JavaDelegate {
@@ -26,19 +28,16 @@ public class DropUserCacheDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) {
         Object dropCacheObj = execution.getVariable("drop-cache");
         if (!(dropCacheObj instanceof Boolean) || !(Boolean) dropCacheObj) {
-            log.info("drop-cache is false or not set, skipping cache drop");
             return;
         }
 
         Object userObj = execution.getVariable("user");
         if (!(userObj instanceof UserShortDTO)) {
-            log.error("Variable 'user' is not instance of UserShortDTO: {}", userObj);
             return;
         }
 
         UserShortDTO user = (UserShortDTO) userObj;
         if (user.getLogin() == null) {
-            log.error("UserShortDTO.login is null");
             return;
         }
 
@@ -50,7 +49,7 @@ public class DropUserCacheDelegate implements JavaDelegate {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    private static class UserDropCacheMessage {
+    private static class UserDropCacheMessage implements Serializable {
         private String userLogin;
     }
 }
