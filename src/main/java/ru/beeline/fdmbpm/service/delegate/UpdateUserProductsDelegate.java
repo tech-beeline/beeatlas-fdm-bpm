@@ -47,7 +47,7 @@ public class UpdateUserProductsDelegate implements JavaDelegate {
         try {
             BeeworksUserProductsDTO beeworksResponse = userClient.getBeeworksUserProducts(login);
             if (beeworksResponse == null || beeworksResponse.getBwRoles() == null) {
-                log.error("beeworksResponse or .getBwRoles() is null: {}", userObj);
+                log.info("beeworksResponse or .getBwRoles() is null: {}", userObj);
                 execution.setVariable("drop-cache", false);
                 return;
             }
@@ -60,6 +60,7 @@ public class UpdateUserProductsDelegate implements JavaDelegate {
                     .collect(Collectors.toList());
 
             if (cmdbCodes.isEmpty()) {
+                log.info("cmdbCodes.isEmpty()");
                 execution.setVariable("drop-cache", false);
                 return;
             }
