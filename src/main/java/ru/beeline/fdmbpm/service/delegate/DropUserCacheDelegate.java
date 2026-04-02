@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.service.delegate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,9 @@ public class DropUserCacheDelegate implements JavaDelegate {
     @Value("${queue.user-drop-cache.name}")
     private String userDropCacheQueue;
 
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     public void execute(DelegateExecution execution) {
         log.info("DropUserCacheDelegate start");
@@ -44,8 +48,8 @@ public class DropUserCacheDelegate implements JavaDelegate {
             log.info("user.getLogin() == null: {}", user.getLogin());
             return;
         }
-
-        UserDropCacheMessage message = new UserDropCacheMessage(user.getLogin());
+        UserDropCacheMessage msg = new UserDropCacheMessage(user.getLogin());
+        String message = objectMapper.writeValueAsString(msg);
         rabbitService.sendMessage(userDropCacheQueue, message);
         log.info("Sent user drop cache message for login: {}", user.getLogin());
     }

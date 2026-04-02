@@ -25,7 +25,8 @@ public class TechRecalculationService {
     @Autowired
     RabbitService rabbitService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public void getTechRecalculation() {
         List<TechCapabilityShortDTO> techCapabilityShortDTOList = capabilityClient.getTechCapabilities().stream()

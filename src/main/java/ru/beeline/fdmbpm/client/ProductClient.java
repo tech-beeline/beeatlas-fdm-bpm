@@ -28,16 +28,19 @@ import java.util.List;
 @Service
 public class ProductClient {
 
-    RestTemplate restTemplate;
-    RestTemplate longTimeoutRestTemplate;
+    private final RestTemplate restTemplate;
+    private final RestTemplate longTimeoutRestTemplate;
     private final String productServerUrl;
+    private final ObjectMapper objectMapper;
 
     public ProductClient(@Value("${integration.products-server-url}") String productServerUrl,
                          RestTemplate restTemplate,
-                         @Qualifier("longTimeoutRestTemplate") RestTemplate longTimeoutRestTemplate) {
+                         @Qualifier("longTimeoutRestTemplate") RestTemplate longTimeoutRestTemplate,
+                         ObjectMapper objectMapper) {
         this.productServerUrl = productServerUrl;
         this.restTemplate = restTemplate;
         this.longTimeoutRestTemplate = longTimeoutRestTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public void deleteRelation(Integer techId, Integer productId) {
@@ -58,7 +61,7 @@ public class ProductClient {
 
     public void postProductCMDB(String product, PostProductRequest postProductRequest) {
         try {
-            String json = new ObjectMapper().writeValueAsString(postProductRequest);
+            String json = objectMapper.writeValueAsString(postProductRequest);
             log.info("Sending JSON to CMDB. Size: {} bytes", json.length());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

@@ -49,7 +49,9 @@ public class RelationsService {
     @Autowired
     GrafanaService grafanaService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationsService.class);
 
     public void createRelations() {

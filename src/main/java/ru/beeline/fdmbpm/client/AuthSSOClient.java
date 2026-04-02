@@ -17,14 +17,16 @@ import java.util.Map;
 @Service
 public class AuthSSOClient {
 
-    RestTemplate restTemplate;
-
+    private final RestTemplate restTemplate;
     private final String serverUrl;
+    private final ObjectMapper objectMapper;
 
     public AuthSSOClient(@Value("${integration.authsso-server-url}") String serverUrl,
-                         RestTemplate restTemplate) {
+                         RestTemplate restTemplate,
+                         ObjectMapper objectMapper) {
         this.serverUrl = serverUrl;
         this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     private static String accessToken;
@@ -47,7 +49,6 @@ public class AuthSSOClient {
         ResponseEntity<String> response = restTemplate.postForEntity(serverUrl, null, String.class);
 
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> responseMap = objectMapper.readValue(response.getBody(), Map.class);
             return responseMap.get("access_token").toString();
         } catch (Exception e) {
