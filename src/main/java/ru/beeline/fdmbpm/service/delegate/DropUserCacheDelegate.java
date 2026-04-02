@@ -29,6 +29,7 @@ public class DropUserCacheDelegate implements JavaDelegate {
         log.info("DropUserCacheDelegate start");
         Object dropCacheObj = execution.getVariable("drop-cache");
         if (!(dropCacheObj instanceof Boolean) || !(Boolean) dropCacheObj) {
+            log.info("drop-cache is: {}", execution.getVariable("drop-cache"));
             return;
         }
 
