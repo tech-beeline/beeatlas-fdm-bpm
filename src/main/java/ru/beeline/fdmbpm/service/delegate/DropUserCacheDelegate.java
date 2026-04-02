@@ -1,5 +1,6 @@
 package ru.beeline.fdmbpm.service.delegate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,28 +31,35 @@ public class DropUserCacheDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
-        log.info("DropUserCacheDelegate start");
-        Object dropCacheObj = execution.getVariable("drop-cache");
-        if (!(dropCacheObj instanceof Boolean) || !(Boolean) dropCacheObj) {
-            log.info("drop-cache is: {}", execution.getVariable("drop-cache"));
-            return;
-        }
+        try {
 
-        Object userObj = execution.getVariable("user");
-        if (!(userObj instanceof UserShortDTO)) {
-            log.info("userObj isn't instanceof UserShortDTO: {}", execution.getVariable("user"));
-            return;
-        }
+            log.info("DropUserCacheDelegate start");
+            Object dropCacheObj = execution.getVariable("drop-cache");
+            if (!(dropCacheObj instanceof Boolean) || !(Boolean) dropCacheObj) {
+                log.info("drop-cache is: {}", execution.getVariable("drop-cache"));
+                return;
+            }
 
-        UserShortDTO user = (UserShortDTO) userObj;
-        if (user.getLogin() == null) {
-            log.info("user.getLogin() == null: {}", user.getLogin());
-            return;
+            Object userObj = execution.getVariable("user");
+            if (!(userObj instanceof UserShortDTO)) {
+                log.info("userObj isn't instanceof UserShortDTO: {}", execution.getVariable("user"));
+                return;
+            }
+
+            UserShortDTO user = (UserShortDTO) userObj;
+            if (user.getLogin() == null) {
+                log.info("user.getLogin() == null: {}", user.getLogin());
+                return;
+            }
+            UserDropCacheMessage msg = new UserDropCacheMessage(user.getLogin());
+            String message = null;
+            message = objectMapper.writeValueAsString(msg);
+
+            rabbitService.sendMessage(userDropCacheQueue, message);
+            log.info("Sent user drop cache message for login: {}", user.getLogin());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-        UserDropCacheMessage msg = new UserDropCacheMessage(user.getLogin());
-        String message = objectMapper.writeValueAsString(msg);
-        rabbitService.sendMessage(userDropCacheQueue, message);
-        log.info("Sent user drop cache message for login: {}", user.getLogin());
     }
 
     @Data
