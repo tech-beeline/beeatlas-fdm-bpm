@@ -26,6 +26,7 @@ public class DropUserCacheDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
+        log.info("DropUserCacheDelegate start");
         Object dropCacheObj = execution.getVariable("drop-cache");
         if (!(dropCacheObj instanceof Boolean) || !(Boolean) dropCacheObj) {
             return;
@@ -33,11 +34,13 @@ public class DropUserCacheDelegate implements JavaDelegate {
 
         Object userObj = execution.getVariable("user");
         if (!(userObj instanceof UserShortDTO)) {
+            log.info("userObj isn't instanceof UserShortDTO: {}", execution.getVariable("user"));
             return;
         }
 
         UserShortDTO user = (UserShortDTO) userObj;
         if (user.getLogin() == null) {
+            log.info("user.getLogin() == null: {}", user.getLogin());
             return;
         }
 
