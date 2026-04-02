@@ -43,10 +43,11 @@ public class UpdateUserProductsDelegate implements JavaDelegate {
             execution.setVariable("drop-cache", false);
             return;
         }
-
+        log.info("user id = {}", user.getId());
         try {
             BeeworksUserProductsDTO beeworksResponse = userClient.getBeeworksUserProducts(login);
             if (beeworksResponse == null || beeworksResponse.getBwRoles() == null) {
+                log.error("beeworksResponse or .getBwRoles() is null: {}", userObj);
                 execution.setVariable("drop-cache", false);
                 return;
             }
