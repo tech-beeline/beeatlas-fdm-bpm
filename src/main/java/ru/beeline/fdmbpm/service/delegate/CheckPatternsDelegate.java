@@ -31,6 +31,8 @@ public class CheckPatternsDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) {
         String cmdb = (String) execution.getVariable("cmdb");
         Integer docId = (Integer) execution.getVariable("docId");
+        log.info("cmdb is" + cmdb);
+        log.info("docId is" + docId);
 
         if (cmdb == null) {
             log.error("cmdb is null in process context");
@@ -38,6 +40,7 @@ public class CheckPatternsDelegate implements JavaDelegate {
         }
 
         List<Integer> patternIds = productClient.getPatternIdsByProductAlias(cmdb);
+        log.info("patternIds is" + patternIds);
 
         if (patternIds == null || patternIds.isEmpty()) {
             log.info("No patterns for product alias {}", cmdb);
@@ -52,6 +55,8 @@ public class CheckPatternsDelegate implements JavaDelegate {
             }
 
             PatternDTO pattern = techradarClient.getPattern(patternId);
+            log.info("pattern is" + pattern.toString());
+
             if (pattern == null || pattern.getRule() == null || pattern.getCode() == null) {
                 continue;
             }
@@ -73,6 +78,7 @@ public class CheckPatternsDelegate implements JavaDelegate {
                     .isCheck(isCheck)
                     .resultDetails(null)
                     .build();
+            log.info("results is" + results.toString());
 
             results.add(result);
         }

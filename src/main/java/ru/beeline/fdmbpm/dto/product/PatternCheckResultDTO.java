@@ -1,14 +1,12 @@
 package ru.beeline.fdmbpm.dto.product;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class PatternCheckResultDTO {
 
     private String code;
