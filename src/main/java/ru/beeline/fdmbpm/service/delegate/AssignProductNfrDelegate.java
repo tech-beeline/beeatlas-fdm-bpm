@@ -53,14 +53,14 @@ public class AssignProductNfrDelegate implements JavaDelegate {
                 continue;
             }
 
-            String source = nfr.getSource();
-            if (source == null || source.isBlank()) {
-                log.info("source are empty ");
+            String rule = nfr.getRule();
+            if (rule == null || rule.isBlank()) {
+                log.info("rule are empty ");
                 idsToAssign.add(nfrId);
                 continue;
             }
 
-            if (!allSourceCodesPassFitness(source, fitnessFunctions)) {
+            if (!allRuleCodesPassFitness(rule, fitnessFunctions)) {
                 log.info("no allSourceCodesPassFitness");
                 continue;
             }
@@ -76,8 +76,8 @@ public class AssignProductNfrDelegate implements JavaDelegate {
         log.info("Posted {} NFR ids to product {}", idsToAssign.size(), cmdb);
     }
 
-    private static boolean allSourceCodesPassFitness(String source,
-            List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> fitnessFunctions) {
+    private static boolean allRuleCodesPassFitness(String source,
+                                                   List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> fitnessFunctions) {
         String normalized = source.replaceAll("\\s+", "");
         String[] parts = normalized.split(",", -1);
         boolean sawNonEmptyToken = false;
