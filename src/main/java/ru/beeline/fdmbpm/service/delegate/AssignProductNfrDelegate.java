@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Component("AssignProductNfrDelegate")
+@Component("" +
+        "AssignProductNfrDelegate")
 public class AssignProductNfrDelegate implements JavaDelegate {
 
     @Autowired
@@ -22,17 +23,19 @@ public class AssignProductNfrDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) {
         String cmdb = (String) execution.getVariable("cmdb");
+        log.info("cmdb is {}", cmdb);
         if (cmdb == null || cmdb.isBlank()) {
             log.warn("AssignProductNfrDelegate: cmdb is missing");
             return;
         }
 
         List<NfrCatalogItemDTO> nfrList = productClient.getAllNfr();
+
         if (nfrList == null || nfrList.isEmpty()) {
             log.info("NFR catalog is empty or unavailable, skip assignment for {}", cmdb);
             return;
         }
-
+        log.info("NFR catalog size is  {}", nfrList.size());
         AssessmentFitnessForNfrDTO assessment = productClient.getFitnessFunctionsForProduct(cmdb);
         List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> fitnessFunctions =
                 assessment != null && assessment.getFitnessFunctions() != null
@@ -42,6 +45,8 @@ public class AssignProductNfrDelegate implements JavaDelegate {
         List<Integer> idsToAssign = new ArrayList<>();
 
         for (NfrCatalogItemDTO nfr : nfrList) {
+            log.info("iterate nfr for {}", nfr.toString());
+
             Integer nfrId = nfr.getId();
             if (nfrId == null) {
                 log.warn("Skip NFR with missing id (code={})", nfr.getCode());
@@ -50,11 +55,13 @@ public class AssignProductNfrDelegate implements JavaDelegate {
 
             String source = nfr.getSource();
             if (source == null || source.isBlank()) {
+                log.info("source are empty ");
                 idsToAssign.add(nfrId);
                 continue;
             }
 
             if (!allSourceCodesPassFitness(source, fitnessFunctions)) {
+                log.info("no allSourceCodesPassFitness");
                 continue;
             }
             idsToAssign.add(nfrId);
@@ -69,10 +76,6 @@ public class AssignProductNfrDelegate implements JavaDelegate {
         log.info("Posted {} NFR ids to product {}", idsToAssign.size(), cmdb);
     }
 
-    /**
-     * Удаляет пробелы из source, делит по «,», для каждой непустой подстроки ищет FF по code без учёта регистра;
-     * требуется isCheck == true. Если подстрока не найдена или isCheck не true — false.
-     */
     private static boolean allSourceCodesPassFitness(String source,
             List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> fitnessFunctions) {
         String normalized = source.replaceAll("\\s+", "");
