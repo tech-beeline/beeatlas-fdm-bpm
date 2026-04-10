@@ -61,7 +61,7 @@ public class AssignProductNfrDelegate implements JavaDelegate {
             }
 
             if (!allRuleCodesPassFitness(rule, fitnessFunctions)) {
-                log.info("no allSourceCodesPassFitness");
+                log.info("no allRuleCodesPassFitness");
                 continue;
             }
             idsToAssign.add(nfrId);
