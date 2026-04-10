@@ -13,6 +13,9 @@ import ru.beeline.fdmbpm.dto.techradar.PatternDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("CheckPatternsDelegate")
@@ -47,6 +50,16 @@ public class CheckPatternsDelegate implements JavaDelegate {
             return;
         }
 
+        List<PatternDTO> patternsFromTechradar = techradarClient.getPatterns();
+        if (patternsFromTechradar == null || patternsFromTechradar.isEmpty()) {
+            log.warn("Techradar GET /api/v1/patterns returned no data, pattern checks skipped");
+            return;
+        }
+
+        Map<Integer, PatternDTO> patternById = patternsFromTechradar.stream()
+                .filter(p -> p.getId() != null)
+                .collect(Collectors.toMap(PatternDTO::getId, Function.identity(), (a, b) -> a));
+
         List<PatternCheckResultDTO> results = new ArrayList<>();
 
         for (Integer patternId : patternIds) {
@@ -54,24 +67,37 @@ public class CheckPatternsDelegate implements JavaDelegate {
                 continue;
             }
 
-            PatternDTO pattern = techradarClient.getPattern(patternId);
-            log.info("pattern is" + pattern.toString());
-
-            if (pattern == null || pattern.getRule() == null || pattern.getCode() == null) {
+            PatternDTO pattern = patternById.get(patternId);
+            if (pattern == null) {
+                log.debug("Pattern id {} not found in techradar list, skip", patternId);
                 continue;
             }
+
+            if (hasDeleteDate(pattern)) {
+                log.debug("Pattern {} has deleteDate set, skip", pattern.getCode());
+                continue;
+            }
+
+            if (pattern.getRule() == null || pattern.getRule().isBlank()) {
+                log.debug("Pattern {} has empty rule, skip", pattern.getCode());
+                continue;
+            }
+
+            if (pattern.getCode() == null) {
+                continue;
+            }
+
+            log.info("pattern is {}", pattern);
 
             String rule = pattern.getRule().replace("{cmdb}", cmdb);
 
-            List<Object> elements;
-            try {
-                elements = graphClient.executePatternQuery(rule);
-            } catch (RuntimeException e) {
-                log.error("Error executing graph query for pattern {}: {}", pattern.getCode(), e.getMessage());
+            List<Object> elements = graphClient.executePatternQuery(rule);
+            if (elements == null) {
+                log.error("Graph GET /api/v1/elements failed for pattern {}, skip", pattern.getCode());
                 continue;
             }
 
-            boolean isCheck = elements != null && !elements.isEmpty();
+            boolean isCheck = !elements.isEmpty();
 
             PatternCheckResultDTO result = PatternCheckResultDTO.builder()
                     .code(pattern.getCode())
@@ -89,6 +115,11 @@ public class CheckPatternsDelegate implements JavaDelegate {
         }
 
         productClient.postPatternCheckResults(cmdb, "pipeline", docId, results);
+    }
+
+    private static boolean hasDeleteDate(PatternDTO pattern) {
+        String deleteDate = pattern.getDeleteDate();
+        return deleteDate != null && !deleteDate.isBlank();
     }
 }
 

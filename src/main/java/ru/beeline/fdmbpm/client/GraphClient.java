@@ -73,10 +73,11 @@ public class GraphClient {
                             HttpMethod.GET,
                             requestEntity,
                             List.class);
-            return response.getBody();
+            List<Object> body = response.getBody();
+            return body != null ? body : List.of();
         } catch (Exception e) {
-            log.error("Error while executing pattern query: " + e.getMessage(), e);
-            throw new RuntimeException("Error during graph request", e);
+            log.error("Error while executing pattern query: {}", e.getMessage(), e);
+            return null;
         }
     }
 
