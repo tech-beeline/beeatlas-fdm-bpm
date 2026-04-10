@@ -76,9 +76,9 @@ public class AssignProductNfrDelegate implements JavaDelegate {
         log.info("Posted {} NFR ids to product {}", idsToAssign.size(), cmdb);
     }
 
-    private static boolean allRuleCodesPassFitness(String source,
+    private static boolean allRuleCodesPassFitness(String rule,
                                                    List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> fitnessFunctions) {
-        String normalized = source.replaceAll("\\s+", "");
+        String normalized = rule.replaceAll("\\s+", "");
         String[] parts = normalized.split(",", -1);
         boolean sawNonEmptyToken = false;
         for (String part : parts) {
