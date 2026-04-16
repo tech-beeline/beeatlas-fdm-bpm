@@ -33,4 +33,7 @@ public class StatusProcess {
 
     @Column(name = "is_error")
     private Boolean isError;
+
+    @Column(name = "sequence")
+    private Integer sequence;
 }
