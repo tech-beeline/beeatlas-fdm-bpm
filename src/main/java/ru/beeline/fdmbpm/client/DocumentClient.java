@@ -96,4 +96,24 @@ public class DocumentClient {
             throw new RuntimeException(e);
         }
     }
+
+    public void deleteOldDocuments() {
+        log.info("ℹ️ Запрос к сервису документов DELETE:" + documentServiceUrl + "/api/v1/documents");
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    documentServiceUrl + "/api/v1/documents",
+                    HttpMethod.DELETE,
+                    entity,
+                    Void.class
+            );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("✅ Удаление успешно");
+            }
+        } catch (Exception e) {
+            log.error("Exception: ", e);
+            throw e;
+        }
+    }
 }
