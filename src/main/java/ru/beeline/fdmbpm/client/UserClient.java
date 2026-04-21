@@ -10,10 +10,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.fdmbpm.dto.applicationDTO.ApplicationParticipantDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.AuthUserDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.BeeworksUserProductsDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.UserShortDTO;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,6 +51,23 @@ public class UserClient {
         }
     }
 
+    public BeeworksUserProductsDTO getBeeworksUserProducts(String login) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            return restTemplate.exchange(userServerUrl + "/api/bw/products/" + login,
+                    HttpMethod.GET,
+                    entity,
+                    BeeworksUserProductsDTO.class).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+        }
+    }
+
     public List<ApplicationParticipantDTO> getUsersInfo(List<Integer> ids) {
 
         try {
@@ -56,6 +78,35 @@ public class UserClient {
 
             return restTemplate.exchange(userServerUrl + "/api/v1/user/list",
                     HttpMethod.POST, entity, new ParameterizedTypeReference<List<ApplicationParticipantDTO>>() {}).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+        }
+    }
+
+    public List<UserShortDTO> getAllUsers() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            List<AuthUserDTO> users = restTemplate.exchange(userServerUrl + "/api/v1/users",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<AuthUserDTO>>() {
+                    }).getBody();
+
+            if (users == null || users.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return users.stream()
+                    .map(user -> UserShortDTO.builder()
+                            .id(user.getId())
+                            .login(user.getLogin())
+                            .build())
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());

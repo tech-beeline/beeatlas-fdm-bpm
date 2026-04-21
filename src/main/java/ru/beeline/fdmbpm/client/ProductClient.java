@@ -14,7 +14,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
+import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
+import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
+import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
 import ru.beeline.fdmbpm.dto.product.PublishedApiDTO;
@@ -27,16 +30,19 @@ import java.util.List;
 @Service
 public class ProductClient {
 
-    RestTemplate restTemplate;
-    RestTemplate longTimeoutRestTemplate;
+    private final RestTemplate restTemplate;
+    private final RestTemplate longTimeoutRestTemplate;
     private final String productServerUrl;
+    private final ObjectMapper objectMapper;
 
     public ProductClient(@Value("${integration.products-server-url}") String productServerUrl,
                          RestTemplate restTemplate,
-                         @Qualifier("longTimeoutRestTemplate") RestTemplate longTimeoutRestTemplate) {
+                         @Qualifier("longTimeoutRestTemplate") RestTemplate longTimeoutRestTemplate,
+                         ObjectMapper objectMapper) {
         this.productServerUrl = productServerUrl;
         this.restTemplate = restTemplate;
         this.longTimeoutRestTemplate = longTimeoutRestTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public void deleteRelation(Integer techId, Integer productId) {
@@ -57,7 +63,7 @@ public class ProductClient {
 
     public void postProductCMDB(String product, PostProductRequest postProductRequest) {
         try {
-            String json = new ObjectMapper().writeValueAsString(postProductRequest);
+            String json = objectMapper.writeValueAsString(postProductRequest);
             log.info("Sending JSON to CMDB. Size: {} bytes", json.length());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -161,6 +167,24 @@ public class ProductClient {
         }
     }
 
+    public List<Integer> getPatternIdsByProductAlias(String alias) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            List<Integer> result = restTemplate.exchange(productServerUrl + "/api/v1/pattern/product?alias=" + alias,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<Integer>>() {
+                    }).getBody();
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
     public void updateInterfaceOperations(List<MethodDTO> methods, Integer id) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -211,6 +235,42 @@ public class ProductClient {
         }
     }
 
+    public void updateUserProducts(Integer userId, List<String> productCodes) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<List<String>> requestEntity = new HttpEntity<>(productCodes, headers);
+            restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products",
+                    HttpMethod.POST,
+                    requestEntity,
+                    Void.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void postPatternCheckResults(String cmdb, String sourceType, Integer docId, List<PatternCheckResultDTO> results) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<List<PatternCheckResultDTO>> requestEntity = new HttpEntity<>(results, headers);
+            String url = productServerUrl + "/api/v1/product/" + cmdb + "/patterns/" + sourceType;
+            if (docId != null) {
+                url = url + "?source-id=" + docId;
+            }
+            restTemplate.exchange(url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    Void.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     public String getMapicSpec(Integer apiId) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -240,6 +300,56 @@ public class ProductClient {
         } catch (RestClientResponseException e) {
             log.error("❌ " + e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
+    public List<NfrCatalogItemDTO> getAllNfr() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(productServerUrl + "/api/v1/nfr",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<NfrCatalogItemDTO>>() {
+                    }).getBody();
+        } catch (Exception e) {
+            log.error("GET /api/v1/nfr failed: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public AssessmentFitnessForNfrDTO getFitnessFunctionsForProduct(String alias) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl)
+                    .path("/api/v1/product/{alias}/fitness-function")
+                    .buildAndExpand(alias)
+                    .toUriString();
+            return restTemplate.exchange(url,
+                    HttpMethod.GET,
+                    entity,
+                    AssessmentFitnessForNfrDTO.class).getBody();
+        } catch (Exception e) {
+            log.error("GET fitness-function for alias {} failed: {}", alias, e.getMessage());
+            return null;
+        }
+    }
+
+    public void postProductNfr(String alias, List<Integer> nfrIds) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<List<Integer>> requestEntity = new HttpEntity<>(nfrIds, headers);
+            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product")
+                    .queryParam("alias", alias)
+                    .toUriString();
+            restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
+        } catch (Exception e) {
+            log.error("POST /api/v1/nfr/product for alias {} failed: {}", alias, e.getMessage());
+            throw new RuntimeException("Failed to assign NFR to product", e);
         }
     }
 }

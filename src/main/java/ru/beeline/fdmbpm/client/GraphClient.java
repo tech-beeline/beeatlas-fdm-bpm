@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.graph.GraphDTO;
+import java.util.List;
 
 
 @Slf4j
@@ -58,6 +59,25 @@ public class GraphClient {
         } catch (Exception e) {
             log.error("Error while posting product to CMDB: " + e.getMessage(), e);
             throw new RuntimeException("Error during post request", e);
+        }
+    }
+
+    public List<Object> executePatternQuery(String cypherQuery) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("CYPHER-QUERY", cypherQuery);
+            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+            ResponseEntity<List> response =
+                    restTemplate.exchange(graphServerUrl + "/api/v1/elements",
+                            HttpMethod.GET,
+                            requestEntity,
+                            List.class);
+            List<Object> body = response.getBody();
+            return body != null ? body : List.of();
+        } catch (Exception e) {
+            log.error("Error while executing pattern query: {}", e.getMessage(), e);
+            return null;
         }
     }
 

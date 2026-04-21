@@ -40,6 +40,7 @@ public class CapabilityService {
     @Autowired
     RabbitService rabbitService;
 
+    @Autowired
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CapabilityService.class);

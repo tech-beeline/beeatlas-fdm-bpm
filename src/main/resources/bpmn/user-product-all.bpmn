@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1gvlfn2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
+  <bpmn:process id="Process_0ifmh49" name="User_product_all" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0jwnzym</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_19t9q45">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">R/P1D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0jwnzym" sourceRef="StartEvent_1" targetRef="Activity_1qu1xs6" />
+    <bpmn:serviceTask id="Activity_1qu1xs6" name="Получение списка пользователей" camunda:delegateExpression="${GetAllUsersDelegate}">
+      <bpmn:incoming>Flow_0jwnzym</bpmn:incoming>
+      <bpmn:outgoing>Flow_09m8h77</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_09m8h77" sourceRef="Activity_1qu1xs6" targetRef="Activity_0hz3w87" />
+    <bpmn:callActivity id="Activity_0hz3w87" name="Получение приложений для пользователей" calledElement="Process_0nk3sid">
+      <bpmn:extensionElements>
+        <camunda:in source="user" target="user" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_09m8h77</bpmn:incoming>
+      <bpmn:outgoing>Flow_1uci03f</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${users}" camunda:elementVariable="user" />
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_1uci03f" sourceRef="Activity_0hz3w87" targetRef="Event_01o9dl9" />
+    <bpmn:endEvent id="Event_01o9dl9">
+      <bpmn:incoming>Flow_1uci03f</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0ifmh49">
+      <bpmndi:BPMNShape id="Event_1q0oye3_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0jiv8od_di" bpmnElement="Activity_1qu1xs6">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ge1vh9_di" bpmnElement="Activity_0hz3w87">
+        <dc:Bounds x="430" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_01o9dl9_di" bpmnElement="Event_01o9dl9">
+        <dc:Bounds x="592" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0jwnzym_di" bpmnElement="Flow_0jwnzym">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09m8h77_di" bpmnElement="Flow_09m8h77">
+        <di:waypoint x="370" y="120" />
+        <di:waypoint x="430" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1uci03f_di" bpmnElement="Flow_1uci03f">
+        <di:waypoint x="530" y="120" />
+        <di:waypoint x="592" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

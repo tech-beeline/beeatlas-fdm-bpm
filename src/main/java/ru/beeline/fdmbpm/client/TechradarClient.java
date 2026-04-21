@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.dto.DocIdDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
 import ru.beeline.fdmbpm.dto.techradar.ProcessDTO;
+import ru.beeline.fdmbpm.dto.techradar.PatternDTO;
 
 import java.util.List;
 
@@ -67,6 +68,39 @@ public class TechradarClient {
 
             return restTemplate.exchange(techradarServerUrl + "/api/v1/tech/export/" + docId,
                     HttpMethod.POST, new HttpEntity<>(headers), DocIdDTO.class).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public List<PatternDTO> getPatterns() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            return restTemplate.exchange(techradarServerUrl + "/api/v1/patterns",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<PatternDTO>>() {
+                    }).getBody();
+        } catch (Exception e) {
+            log.error("Error calling GET /api/v1/patterns: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public PatternDTO getPattern(Integer id) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            return restTemplate.exchange(techradarServerUrl + "/api/v1/pattern/" + id,
+                    HttpMethod.GET,
+                    entity,
+                    PatternDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }

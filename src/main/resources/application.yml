@@ -40,6 +40,8 @@ queue:
     name: result_local_graph
   result-global-graph:
     name: result_global_graph
+  user-drop-cache:
+    name: user_drop_cache
 
 spring:
   datasource:

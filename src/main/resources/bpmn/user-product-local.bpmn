@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0q5ffkg" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
+  <bpmn:process id="Process_0nk3sid"
+                name="User_product_local"
+                isExecutable="true"
+                camunda:historyTimeToLive="90">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_02w52hx</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_02w52hx" sourceRef="StartEvent_1" targetRef="Activity_0o940sl" />
+    <bpmn:sequenceFlow id="Flow_1bj4l9g" sourceRef="Activity_0o940sl" targetRef="Event_1dkxgr9" />
+    <bpmn:intermediateCatchEvent id="Event_1dkxgr9">
+      <bpmn:incoming>Flow_1bj4l9g</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kasbmk</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1u8fer3">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_18v03nx">
+      <bpmn:incoming>Flow_1vi2psf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_0o940sl" name="Обновление приложений для пользователя" camunda:delegateExpression="${UpdateUserProductsDelegate}">
+      <bpmn:incoming>Flow_02w52hx</bpmn:incoming>
+      <bpmn:outgoing>Flow_1bj4l9g</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0kasbmk" sourceRef="Event_1dkxgr9" targetRef="Activity_0gei3rv" />
+    <bpmn:sequenceFlow id="Flow_1vi2psf" sourceRef="Activity_0gei3rv" targetRef="Event_18v03nx" />
+    <bpmn:serviceTask id="Activity_0gei3rv" name="Сброс кэша пользователя на GW" camunda:delegateExpression="${DropUserCacheDelegate}">
+      <bpmn:incoming>Flow_0kasbmk</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vi2psf</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0nk3sid">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0thvvp4_di" bpmnElement="Event_1dkxgr9">
+        <dc:Bounds x="422" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ytpavy_di" bpmnElement="Activity_0o940sl">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_18v03nx_di" bpmnElement="Event_18v03nx">
+        <dc:Bounds x="642" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0o197p7_di" bpmnElement="Activity_0gei3rv">
+        <dc:Bounds x="490" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_02w52hx_di" bpmnElement="Flow_02w52hx">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bj4l9g_di" bpmnElement="Flow_1bj4l9g">
+        <di:waypoint x="370" y="120" />
+        <di:waypoint x="422" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kasbmk_di" bpmnElement="Flow_0kasbmk">
+        <di:waypoint x="458" y="120" />
+        <di:waypoint x="490" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vi2psf_di" bpmnElement="Flow_1vi2psf">
+        <di:waypoint x="590" y="120" />
+        <di:waypoint x="642" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

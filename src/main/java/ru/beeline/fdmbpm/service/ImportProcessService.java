@@ -55,7 +55,8 @@ public class ImportProcessService {
     @Autowired
     ExcelTcMapper excelTcMapper;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public Integer uploadingDataFromExcel(String entityType, Boolean sync, Integer docId) {
         log.info("entityType: {} , sync: {} , docId: {} .", entityType, sync, docId);

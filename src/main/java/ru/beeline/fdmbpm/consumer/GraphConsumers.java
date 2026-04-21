@@ -20,7 +20,9 @@ public class GraphConsumers {
 
     @Autowired
     ApplicationService applicationService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @RabbitListener(queues = "${queue.result-local-graph.name}")
     public void resultLocalGraph(String message) {

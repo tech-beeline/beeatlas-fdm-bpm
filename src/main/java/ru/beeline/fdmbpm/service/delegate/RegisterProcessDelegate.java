@@ -47,6 +47,9 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Override
     public void execute(DelegateExecution delegateExecution) {
         log.info("Старт метода: Получение информации и регистрации процесса");
@@ -139,8 +142,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
     private String extractWorkspaceCmdb(ResponseEntity<byte[]> response) {
         try {
             byte[] body = response.getBody();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(body);
+            JsonNode root = objectMapper.readTree(body);
             return root.at("/model/properties/workspace_cmdb").asText();
         } catch (Exception e) {
             log.info("❌ Не найден workspace_cmdb из JSON");

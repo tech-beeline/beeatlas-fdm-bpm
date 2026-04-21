@@ -16,6 +16,7 @@ public class GrafanaService {
 
     @Autowired
     GrafanaClient grafanaClient;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -47,8 +48,7 @@ public class GrafanaService {
         Map<String, Map<String, String>> result = new HashMap<>();
         try {
             String response = grafanaClient.getProducts();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(response);
+            JsonNode root = objectMapper.readTree(response);
 
             JsonNode results = root.path("results");
             JsonNode resultObj = results.path("A");
@@ -106,8 +106,7 @@ public class GrafanaService {
         Set<Map<String, String>> result = new HashSet<>();
         try {
             String jsonString = grafanaClient.getMnemonics(processDTO).trim();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(jsonString);
+            JsonNode root = objectMapper.readTree(jsonString);
 
             JsonNode results = root.path("results");
             JsonNode resultObj = results.path("A-Instant");
