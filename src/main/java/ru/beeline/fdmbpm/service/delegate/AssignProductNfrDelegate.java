@@ -8,14 +8,9 @@ import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
-import ru.beeline.fdmbpm.dto.product.NfrProductItemDTO;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component("" +
@@ -47,7 +42,7 @@ public class AssignProductNfrDelegate implements JavaDelegate {
                         ? assessment.getFitnessFunctions()
                         : List.of();
 
-        List<Integer> desiredIds = new ArrayList<>();
+        List<Integer> idsToAssign = new ArrayList<>();
 
         for (NfrCatalogItemDTO nfr : nfrList) {
             log.info("iterate nfr for {}", nfr.toString());
@@ -61,7 +56,7 @@ public class AssignProductNfrDelegate implements JavaDelegate {
             String rule = nfr.getRule();
             if (rule == null || rule.isBlank()) {
                 log.info("rule are empty ");
-                desiredIds.add(nfrId);
+                idsToAssign.add(nfrId);
                 continue;
             }
 
@@ -69,50 +64,11 @@ public class AssignProductNfrDelegate implements JavaDelegate {
                 log.info("no allRuleCodesPassFitness");
                 continue;
             }
-            desiredIds.add(nfrId);
+            idsToAssign.add(nfrId);
         }
-
-        Set<Integer> desiredSet = desiredIds.stream().filter(Objects::nonNull).collect(Collectors.toSet());
-
-        List<NfrProductItemDTO> current = productClient.getProductNfr(cmdb);
-        List<NfrProductItemDTO> currentList = current != null ? current : List.of();
-
-        Set<Integer> alreadyAutoAssignedNfrIds = new HashSet<>();
-        List<Integer> relationIdsToDelete = new ArrayList<>();
-
-        for (NfrProductItemDTO item : currentList) {
-            if (item == null || item.getId() == null) {
-                continue;
-            }
-            String sourcePurpose = item.getSourcePurpose();
-            boolean isAuto = sourcePurpose != null && sourcePurpose.equalsIgnoreCase("Beeatlas");
-            if (!isAuto) {
-                continue;
-            }
-            alreadyAutoAssignedNfrIds.add(item.getId());
-            if (!desiredSet.contains(item.getId())) {
-                if (item.getRelationId() != null) {
-                    relationIdsToDelete.add(item.getRelationId());
-                } else {
-                    log.warn("Auto-assigned NFR {} has no relationId in response; can't delete", item.getId());
-                }
-            }
-        }
-
-        if (!relationIdsToDelete.isEmpty()) {
-            productClient.deleteBeeatlasProductNfrRelations(cmdb, relationIdsToDelete);
-            log.info("Deleted {} obsolete Beeatlas NFR relations for product {}", relationIdsToDelete.size(), cmdb);
-        }
-
-        List<Integer> idsToAssign = desiredIds.stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .filter(id -> !alreadyAutoAssignedNfrIds.contains(id))
-                .toList();
 
         if (idsToAssign.isEmpty()) {
-            log.info("No new NFR to assign for product {} (desired={}, alreadyAutoAssigned={})",
-                    cmdb, desiredSet.size(), alreadyAutoAssignedNfrIds.size());
+            log.info("No NFR to assign for product {}", cmdb);
             return;
         }
 
