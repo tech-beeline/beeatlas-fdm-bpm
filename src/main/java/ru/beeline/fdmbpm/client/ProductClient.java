@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
 import ru.beeline.fdmbpm.dto.product.PublishedApiDTO;
+import ru.beeline.fdmbpm.dto.product.NfrProductItemDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +53,9 @@ public class ProductClient {
             headers.add("SOURCE", "Sparx");
 
             restTemplate.exchange(productServerUrl + "/api/v1/product-tech-relation/" + techId + "/" + productId,
-                    HttpMethod.DELETE,
-                    new HttpEntity(headers),
-                    Object.class).getBody();
+                                  HttpMethod.DELETE,
+                                  new HttpEntity(headers),
+                                  Object.class).getBody();
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -72,7 +73,7 @@ public class ProductClient {
                     .queryParam("product", product).toUriString();
             log.info("POST: {}", url);
             ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
-                    Void.class);
+                                                                             Void.class);
             if (response.getStatusCode() != HttpStatus.CREATED) {
                 log.error("❌ Unexpected status code from CMDB: {}", response.getStatusCode());
                 throw new RuntimeException("Failed to post product. HTTP Status: " + response.getStatusCode());
@@ -80,7 +81,7 @@ public class ProductClient {
             log.info("Product posted successfully with status 201.");
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("❌ HTTP error while posting product '{}'. Status: {}, Body: {}", product, e.getStatusCode(),
-                    e.getResponseBodyAsString(), e);
+                      e.getResponseBodyAsString(), e);
             throw new RuntimeException("Error during post request to server " + productServerUrl, e);
         } catch (Exception e) {
             log.error("❌ General error while posting product '{}', Message: {}", product, e.getMessage(), e);
@@ -95,10 +96,10 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<String> result = restTemplate.exchange(productServerUrl + "/api/v1/products/mnemonic",
-                    HttpMethod.GET,
-                    entity,
-                    new ParameterizedTypeReference<List<String>>() {
-                    }).getBody();
+                                                        HttpMethod.GET,
+                                                        entity,
+                                                        new ParameterizedTypeReference<List<String>>() {
+                                                        }).getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("Mnemonics aren't received");
             }
@@ -116,10 +117,10 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<PublishedApiDTO> result = restTemplate.exchange(productServerUrl + "/api/v1/mapic/product/" + cmdb + "/published-api",
-                            HttpMethod.GET,
-                            entity,
-                            new ParameterizedTypeReference<List<PublishedApiDTO>>() {
-                            })
+                                                                 HttpMethod.GET,
+                                                                 entity,
+                                                                 new ParameterizedTypeReference<List<PublishedApiDTO>>() {
+                                                                 })
                     .getBody();
             if (result == null || result.size() == 0) {
                 throw new RuntimeException("Interfaces aren't received");
@@ -138,9 +139,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/product/" + product,
-                    HttpMethod.GET,
-                    entity,
-                    ProductDTO.class).getBody();
+                                         HttpMethod.GET,
+                                         entity,
+                                         ProductDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -154,9 +155,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface?external-id=" + apiId,
-                    HttpMethod.GET,
-                    entity,
-                    DiscoveredInterfaceDTO.class).getBody();
+                                         HttpMethod.GET,
+                                         entity,
+                                         DiscoveredInterfaceDTO.class).getBody();
 
         } catch (HttpClientErrorException.BadRequest e) {
             log.error("❌ Ошибка запроса к product-service: {}", e.getMessage());
@@ -174,10 +175,10 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             List<Integer> result = restTemplate.exchange(productServerUrl + "/api/v1/pattern/product?alias=" + alias,
-                    HttpMethod.GET,
-                    entity,
-                    new ParameterizedTypeReference<List<Integer>>() {
-                    }).getBody();
+                                                         HttpMethod.GET,
+                                                         entity,
+                                                         new ParameterizedTypeReference<List<Integer>>() {
+                                                         }).getBody();
             return result;
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -192,9 +193,9 @@ public class ProductClient {
 
             HttpEntity<List<MethodDTO>> requestEntity = new HttpEntity<>(methods, headers);
             log.info("response from product:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered-interface/" + id + "/operations",
-                    HttpMethod.PUT,
-                    requestEntity,
-                    String.class));
+                                                                      HttpMethod.PUT,
+                                                                      requestEntity,
+                                                                      String.class));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -209,9 +210,9 @@ public class ProductClient {
             discoveredInterfaceDTOS.add(body);
             HttpEntity<List<DiscoveredInterfaceDTO>> requestEntity = new HttpEntity<>(discoveredInterfaceDTOS, headers);
             log.info("response from productService:" + restTemplate.exchange(productServerUrl + "/api/v1/discovered-interfaces",
-                    HttpMethod.PUT,
-                    requestEntity,
-                    String.class));
+                                                                             HttpMethod.PUT,
+                                                                             requestEntity,
+                                                                             String.class));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -225,9 +226,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             ProductDTO result = restTemplate.exchange(productServerUrl + "/api/v1/product/" + cmdb,
-                    HttpMethod.GET,
-                    entity,
-                    ProductDTO.class).getBody();
+                                                      HttpMethod.GET,
+                                                      entity,
+                                                      ProductDTO.class).getBody();
             return result;
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -242,9 +243,9 @@ public class ProductClient {
 
             HttpEntity<List<String>> requestEntity = new HttpEntity<>(productCodes, headers);
             restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products",
-                    HttpMethod.POST,
-                    requestEntity,
-                    Void.class);
+                                  HttpMethod.POST,
+                                  requestEntity,
+                                  Void.class);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -262,9 +263,9 @@ public class ProductClient {
                 url = url + "?source-id=" + docId;
             }
             restTemplate.exchange(url,
-                    HttpMethod.POST,
-                    requestEntity,
-                    Void.class);
+                                  HttpMethod.POST,
+                                  requestEntity,
+                                  Void.class);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -278,9 +279,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/mapic/spec/" + apiId,
-                    HttpMethod.GET,
-                    entity,
-                    String.class).getBody();
+                                         HttpMethod.GET,
+                                         entity,
+                                         String.class).getBody();
         } catch (Exception e) {
             log.error("❌ Error get specification from mapic " + e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -294,9 +295,9 @@ public class ProductClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/product/" + cmdb + "/info",
-                    HttpMethod.GET,
-                    entity,
-                    ProductDTO.class);
+                                         HttpMethod.GET,
+                                         entity,
+                                         ProductDTO.class);
         } catch (RestClientResponseException e) {
             log.error("❌ " + e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).build();
@@ -309,10 +310,10 @@ public class ProductClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
             return restTemplate.exchange(productServerUrl + "/api/v1/nfr",
-                    HttpMethod.GET,
-                    entity,
-                    new ParameterizedTypeReference<List<NfrCatalogItemDTO>>() {
-                    }).getBody();
+                                         HttpMethod.GET,
+                                         entity,
+                                         new ParameterizedTypeReference<List<NfrCatalogItemDTO>>() {
+                                         }).getBody();
         } catch (Exception e) {
             log.error("GET /api/v1/nfr failed: {}", e.getMessage());
             return null;
@@ -329,9 +330,9 @@ public class ProductClient {
                     .buildAndExpand(alias)
                     .toUriString();
             return restTemplate.exchange(url,
-                    HttpMethod.GET,
-                    entity,
-                    AssessmentFitnessForNfrDTO.class).getBody();
+                                         HttpMethod.GET,
+                                         entity,
+                                         AssessmentFitnessForNfrDTO.class).getBody();
         } catch (Exception e) {
             log.error("GET fitness-function for alias {} failed: {}", alias, e.getMessage());
             return null;
@@ -350,6 +351,40 @@ public class ProductClient {
         } catch (Exception e) {
             log.error("POST /api/v1/nfr/product for alias {} failed: {}", alias, e.getMessage());
             throw new RuntimeException("Failed to assign NFR to product", e);
+        }
+    }
+
+    public List<NfrProductItemDTO> getProductNfr(String alias) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product")
+                    .queryParam("alias", alias)
+                    .toUriString();
+            return restTemplate.exchange(url,
+                                         HttpMethod.GET,
+                                         entity,
+                                         new ParameterizedTypeReference<List<NfrProductItemDTO>>() {
+                                         }).getBody();
+        } catch (Exception e) {
+            log.error("GET /api/v1/nfr/product for alias {} failed: {}", alias, e.getMessage());
+            return null;
+        }
+    }
+
+    public void deleteBeeatlasProductNfrRelations(String alias, List<Integer> relationIds) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<List<Integer>> requestEntity = new HttpEntity<>(relationIds, headers);
+            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product/relations")
+                    .queryParam("alias", alias)
+                    .toUriString();
+            restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
+        } catch (Exception e) {
+            log.error("DELETE /api/v1/nfr/product/relations for alias {} failed: {}", alias, e.getMessage());
+            throw new RuntimeException("Failed to delete Beeatlas NFR relations for product", e);
         }
     }
 }
