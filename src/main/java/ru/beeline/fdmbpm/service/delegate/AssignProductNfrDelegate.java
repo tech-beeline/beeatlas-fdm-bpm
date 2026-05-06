@@ -55,8 +55,7 @@ public class AssignProductNfrDelegate implements JavaDelegate {
 
             String rule = nfr.getRule();
             if (rule == null || rule.isBlank()) {
-                log.info("rule are empty ");
-                idsToAssign.add(nfrId);
+                log.info("rule is empty, skipping NFR with id={} code={}", nfr.getId(), nfr.getCode());
                 continue;
             }
 
