@@ -1,0 +1,135 @@
+app:
+  ambassador-auth: true
+  auth_view_platform: true
+server:
+  shutdown:
+    mode: graceful
+    graceful_timeout: 30s
+    force_timeout: 5s
+    delay: 10s
+    notifications: true
+fdm:
+  camunda:
+    timer:
+      cmdb-full-cycle: R/P1000Y
+      capability-upload-cycle: R/P1000Y
+      daily-s3-cleanup-cycle: R/P1000Y
+      relations-from-git-cycle: R/P1000Y
+      upload-product-for-mapic-cycle: R/P1000Y
+      user-product-all-cycle: R/P1000Y
+
+camunda:
+  bpm:
+    admin-user:
+      id: beeatlas
+      password: beeatlas
+    data-source: camundaDataSource
+    database:
+      schema-update: true
+    job-execution:
+        enabled: true
+        lock-time-in-millis: 900000
+    deployment-aware: true
+
+logging:
+  level:
+    io.opentelemetry.exporter.internal.http.HttpExporter: ERROR
+
+rabbitmq:
+  fanout-exchange: TECH_CAPABILITY
+queue:
+  package-queue:
+    name: package_queue
+  tc-queue:
+    name: tc_description_quality
+  result-local-graph:
+    name: result_local_graph
+  result-global-graph:
+    name: result_global_graph
+  user-drop-cache:
+    name: user_drop_cache
+
+spring:
+  datasource:
+    camundaDataSource:
+      hikari:
+        maximum-pool-size: 20
+        leak-detection-threshold: 20000
+    git:
+      hikari:
+        maximum-pool-size: 2
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        driver-class-name: org.postgresql.Driver
+      jpa:
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQL95Dialect
+    processes:
+      hikari:
+        maximum-pool-size: 25
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    processes:
+      hibernate:
+        ddl-auto: none
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQL95Dialect
+          format_sql: true
+          show_sql: true
+          default_schema: processes
+
+  flyway:
+    enabled: true
+    default-schema: processes
+    schemas: processes
+    baseline-on-migrate: true
+    clean-disabled: true
+    locations: classpath:db/migration
+
+otel:
+  exporter:
+    otlp:
+      protocol: http/protobuf
+  resource:
+    attributes:
+      host:
+        name: @project.name@
+      service:
+        namespace: @project.name@
+  service:
+    name: @project.name@
+  instrumentation:
+    log4j-appender:
+      enabled: true
+  logs:
+    exporter: none
+  sdk:
+    disabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+      client:
+        auto-time-requests: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+          client:
+            requests: true
+
+

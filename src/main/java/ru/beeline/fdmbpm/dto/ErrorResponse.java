@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
+package ru.beeline.fdmbpm.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class ErrorResponse {
+    private String errorMessage;
+}
+
