@@ -1,0 +1,143 @@
+services:
+  fdm-bpm-postgres:
+    image: postgres:15-alpine
+    container_name: fdm-bpm-postgres
+    environment:
+      POSTGRES_DB: ${FDM_BPM_POSTGRES_DB:-fdmbpm}
+      POSTGRES_USER: ${FDM_BPM_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${FDM_BPM_POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${FDM_BPM_POSTGRES_NODEPORT:-5432}:5432"
+    volumes:
+      - fdm-bpm-postgres:/var/lib/postgresql/data
+    configs:
+      - source: fdm-bpm-postgres-init
+        target: /docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${FDM_BPM_POSTGRES_USER:-postgres}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - beeatlas-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    user: "rabbitmq:rabbitmq"
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-secret-cookie-for-dev}
+    command: >
+      sh -c "
+        rabbitmq-server &
+        sleep 20;
+        rabbitmqadmin declare queue name=package_queue durable=true;
+        rabbitmqadmin declare queue name=tc_description_quality durable=true;
+        rabbitmqadmin declare queue name=result_local_graph durable=true;
+        rabbitmqadmin declare queue name=result_global_graph durable=true;
+        rabbitmqadmin declare queue name=user_drop_cache durable=true;
+        wait
+      "
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - beeatlas-network
+
+  fdm-bpm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fdm-bpm-backend-app
+    depends_on:
+      fdm-bpm-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      APP_AMBASSADOR_AUTH: "false"
+      SPRING_RABBITMQ_VIRTUAL_HOST: ${RABBITMQ_VHOST:-/}
+      SPRING_RABBITMQ_TEMPLATE_EXCHANGE: ${RABBITMQ_EXCHANGE:-fdm.bpm.exchange}
+      SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: ${RABBITMQ_ROUTING_KEY:-fdm.bpm}
+      SPRING_RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      SPRING_DATASOURCE_CAMUNDA_URL: jdbc:postgresql://${FDM_BPM_POSTGRES_HOST:-fdm-bpm-postgres}:5432/${FDM_BPM_POSTGRES_DB:-fdmbpm}
+      SPRING_DATASOURCE_CAMUNDA_USERNAME: ${FDM_BPM_POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_CAMUNDA_PASSWORD: ${FDM_BPM_POSTGRES_PASSWORD:-postgres}
+      SPRING_DATASOURCE_PROCESSES_URL: jdbc:postgresql://${FDM_BPM_POSTGRES_HOST:-fdm-bpm-postgres}:5432/${FDM_BPM_POSTGRES_DB:-fdmbpm}
+      SPRING_DATASOURCE_PROCESSES_USERNAME: ${FDM_BPM_POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PROCESSES_PASSWORD: ${FDM_BPM_POSTGRES_PASSWORD:-postgres}
+      SPRING_DATASOURCE_GIT_URL: jdbc:postgresql://${FDM_BPM_POSTGRES_HOST:-fdm-bpm-postgres}:5432/${FDM_BPM_POSTGRES_DB:-fdmbpm}
+      SPRING_DATASOURCE_GIT_USERNAME: ${FDM_BPM_POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_GIT_PASSWORD: ${FDM_BPM_POSTGRES_PASSWORD:-postgres}
+      SPRING_JPA_PROCESSES_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_PROCESSES_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: processes
+      SPRING_FLYWAY_DEFAULT_SCHEMA: processes
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_CLEAN_DISABLED: "true"
+      CAMUNDA_BPM_DATABASE_SCHEMA_UPDATE: "true"
+      GWURL: "http://beeworks-service"
+      AUTHBASIC: mock
+      TECHUSER: mock
+      TECHPASSWORD: mock
+      INTEGRATION_AUTH_SERVER_URL: "http://auth-service"
+      INTEGRATION_AUTHSSO_SERVER_URL: "http://auth-service"
+      INTEGRATION_PRODUCTS_SERVER_URL: "http://products-service"
+      INTEGRATION_CAPABILITY_SERVER_URL: "http://capability-service"
+      INTEGRATION_TECHRADAR_SERVER_URL: "http://techradar-service"
+      INTEGRATION_DOCUMENT_SERVER_URL: "http://document-service"
+      INTEGRATION_NOTIFICATION_SERVER_URL: "http://notification-service"
+      INTEGRATION_GRAPH_SERVER_URL: "http://graph-service"
+      INTEGRATION_DASHBOARD_SERVER_URL: "http://dashboard-service"
+      INTEGRATION_ARCH_SERVER_URL: "http://arch-service"
+      INTEGRATION_CMDB_SERVER_URL: "http://cmdb-service"
+      INTEGRATION_CMDB_BEARER: mock
+      INTEGRATION_GRAFANA_SERVER_URL: "http://grafana-service"
+      INTEGRATION_GRAFANA_BEARER: mock
+      INTEGRATION_PACK_LOADER_SERVER_URL: "http://pack-loader-service"
+      INTEGRATION_STAGE_MAPIC_SERVER_URL: "http://stage-mapic-service"
+      INTEGRATION_VIEW_PLATFORM_SERVER_URL: "http://view-platform-service"
+      INTEGRATION_OBSERVABILITY_LOGIN: mock
+      INTEGRATION_OBSERVABILITY_PASS: mock
+    ports:
+      - "${FDM_BPM_SERVICE_PORT:-8080}:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    networks:
+      - beeatlas-network
+    restart: unless-stopped
+
+configs:
+  fdm-bpm-postgres-init:
+    content: |
+      CREATE SCHEMA IF NOT EXISTS processes;
+      CREATE TABLE IF NOT EXISTS public.v_fdm_gitlab_languages (
+          cmdb_code VARCHAR(255) PRIMARY KEY,
+          proj_lang VARCHAR(255),
+          extraction_date DATE
+      );
+
+networks:
+  beeatlas-network:
+    driver: bridge
+
+volumes:
+  fdm-bpm-postgres:
+  rabbitmq_data:
