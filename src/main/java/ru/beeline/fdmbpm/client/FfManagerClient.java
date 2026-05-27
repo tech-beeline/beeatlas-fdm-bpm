@@ -27,7 +27,7 @@ public class FfManagerClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<PostFfManagerDTO> entity = new HttpEntity<>(body, headers);
-            String url = ffManagerUrl + "/api/v1/run/all?docId=" + docId;
+            String url = ffManagerUrl + "/api/v1/run-all?docId=" + docId;
             log.info("Отправка POST запроса в FF Manager: {}, app: {}", url, body.getApp());
             ResponseEntity<Object> response = longTimeoutRestTemplate.exchange(
                     url,
