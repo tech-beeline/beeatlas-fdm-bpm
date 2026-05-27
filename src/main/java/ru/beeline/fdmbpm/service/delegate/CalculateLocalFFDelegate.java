@@ -14,8 +14,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.client.ArchClient;
+import ru.beeline.fdmbpm.client.FfManagerClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.dto.ffmanager.PostFfManagerDTO;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
@@ -32,15 +34,19 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
     CamundaProcessRepository camundaProcessRepository;
     @Autowired
     private PlatformTransactionManager transactionManager;
+    @Autowired
+    private FfManagerClient ffManagerClient;
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
         log.info("Шаг: Расчет Фитнес функции");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-        log.info("process_id: {}, docId: {}", processId, docId);
+        String cmdb = (String) delegateExecution.getVariable("cmdb");
+        log.info("process_id: {}, docId: {}, cmdb: {}", processId, docId, cmdb);
         TypeProcess typeProcess = null;
         try {
+            ffManagerClient.postFfManager(PostFfManagerDTO.builder().app(cmdb).build(), docId);
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
             log.info("camundaProcess: processId={}, procId={}, businessKey={}, typeProcessId={}",
                     processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
