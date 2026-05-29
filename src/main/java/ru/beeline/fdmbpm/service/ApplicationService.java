@@ -4,8 +4,6 @@
 
 package ru.beeline.fdmbpm.service;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.MismatchingMessageCorrelationException;
 import org.camunda.bpm.engine.RuntimeService;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.UserClient;
-import ru.beeline.fdmbpm.controller.RequestContext;
 import ru.beeline.fdmbpm.domain.Application;
 import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
 import ru.beeline.fdmbpm.domain.Comment;
@@ -35,7 +32,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
 
 @Slf4j
 @Service
@@ -64,7 +60,7 @@ public class ApplicationService {
     @Autowired
     private CamundaProcessRepository camundaProcessRepository;
 
-    public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, HttpServletRequest request) {
+    public ResponseEntity patchExecutorProcess(String businessKey, String nextStatus, String userId) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
                 .orElseThrow(() -> new NotFoundException(String.format("Запись с данным business_key: %s не найдена",
                         businessKey)));
@@ -72,14 +68,11 @@ public class ApplicationService {
         if (executorRoles.isEmpty()) {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
         }
-        if (!hasAccessRole(executorRoles.stream().map(ExecutorRoles::getRole).toList(), RequestContext.getRoles())) {
-            throw new ForbiddenException("Forbidden");
-        }
         if (application.getExecutorId() != null) {
             throw new ValidationException("Исполнитель уже назначен");
         }
-        application.setExecutorId(Integer.valueOf(request.getHeader(USER_ID_HEADER)));
-        ResponseEntity responseEntity = patchChangeStatus(businessKey, nextStatus, request, null);
+        application.setExecutorId(Integer.valueOf(userId));
+        ResponseEntity responseEntity = patchChangeStatus(businessKey, nextStatus, userId, null);
         if (responseEntity.getStatusCode().is5xxServerError() || responseEntity.getStatusCode().is4xxClientError()) {
             return responseEntity;
         } else {
@@ -88,15 +81,13 @@ public class ApplicationService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private boolean hasAccessRole(List<String> executorRoles, List<String> roles) {
-        return roles.stream().anyMatch(executorRoles::contains);
-    }
-
-    public ResponseEntity patchChangeStatus(String businessKey, String statusAlias, HttpServletRequest request,
+    public ResponseEntity patchChangeStatus(String businessKey, String statusAlias, String userId,
                                             CommentDTO commentDTO) {
         log.info("start ChangeStatus process to statusAlias=" + statusAlias);
-        Application application = getAuthorizedApplication(businessKey, request);
-        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
+        Application application = applicationRepository.findByBusinessKey(businessKey)
+                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
+                        businessKey)));
+        Integer userIdInt = Integer.valueOf(userId);
         ApplicationTypeStatus targetStatus =
                 applicationTypeStatusRepository.findByTypeIdAndAlias(application.getTypeId(), statusAlias)
                         .orElseThrow(() -> new ValidationException("Данного статуса не существует"));
@@ -132,7 +123,7 @@ public class ApplicationService {
         sendStatusChangeMessageToProcess(application, targetStatus.getMessage(), appName);
         applicationRepository.save(application);
         log.info("save comment");
-        saveComment(application, commentDTO, userId);
+        saveComment(application, commentDTO, userIdInt);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -174,21 +165,6 @@ public class ApplicationService {
                 .map(Application::getEntityId)
                 .collect(Collectors.toList()));
         return buildApplicationDTO(application, participants, additional);
-    }
-
-    private Application getAuthorizedApplication(String businessKey, HttpServletRequest request) {
-        Application application = applicationRepository.findByBusinessKey(businessKey)
-                .orElseThrow(() -> new NotFoundException(String.format("Запись с данным businessKey: %s не найдена",
-                        businessKey)));
-        if (request.getHeader(USER_ID_HEADER) == null || request.getHeader(USER_ID_HEADER).isEmpty()) {
-            throw new ForbiddenException("Нет прав доступа");
-        }
-        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        if (!Objects.equals(application.getAuthorId(), userId) && !Objects.equals(application.getExecutorId(),
-                userId)) {
-            throw new ForbiddenException("Нет прав доступа");
-        }
-        return application;
     }
 
     private void saveComment(Application application, CommentDTO commentDTO, Integer userId) {
@@ -239,8 +215,8 @@ public class ApplicationService {
         }
     }
 
-    public List<ApplicationDTO> getAssignedApplications() {
-        List<String> roles = RequestContext.getRoles();
+    public List<ApplicationDTO> getAssignedApplications(String userRolesHeader) {
+        List<String> roles = parseRoles(userRolesHeader);
         List<ExecutorRoles> executorRoles;
         if (roles != null && !roles.isEmpty()) {
             executorRoles = executorRolesRepository.findByRoleIn(roles);
@@ -265,6 +241,14 @@ public class ApplicationService {
                 .map(Application::getEntityId)
                 .collect(Collectors.toList()));
         return buildApplicationDTO(applicationList, participants, additional);
+    }
+
+    private List<String> parseRoles(String userRolesHeader) {
+        if (userRolesHeader == null || userRolesHeader.isBlank()) return Collections.emptyList();
+        return Arrays.stream(userRolesHeader.split(","))
+                .map(s -> s.replaceAll("[\\[\\]\"]", "").trim())
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
     private List<ApplicationDTO> buildApplicationDTO(List<Application> applicationList,
@@ -409,9 +393,6 @@ public class ApplicationService {
     public void changeExecutor(String businessKey, Integer newExecutorId, Integer userId) {
         Application application = applicationRepository.findByBusinessKey(businessKey)
                 .orElseThrow(() -> new NotFoundException("Процесс по данному businessKey не найден"));
-        if (!userId.equals(application.getExecutorId())) {
-            throw new ForbiddenException("403 Forbidden");
-        }
         validateApplicationStatus(application);
         validateUser(newExecutorId);
         if (application.getExecutorId().equals(application.getResponsibleId())) {

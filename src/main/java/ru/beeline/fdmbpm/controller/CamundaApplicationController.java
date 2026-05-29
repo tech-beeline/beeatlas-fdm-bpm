@@ -5,7 +5,6 @@
 package ru.beeline.fdmbpm.controller;
 
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,7 @@ import ru.beeline.fdmbpm.service.ApplicationService;
 import java.util.List;
 
 import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
+import static ru.beeline.fdmbpm.utils.Constants.USER_ROLES_HEADER;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -29,30 +29,31 @@ public class CamundaApplicationController {
 
     @SwaggerCommonHeaders
     @GetMapping("/application/nobody")
-    public ResponseEntity<List<ApplicationDTO>> getAssignedApplications() {
-        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getAssignedApplications());
+    public ResponseEntity<List<ApplicationDTO>> getAssignedApplications(
+            @RequestHeader(value = USER_ROLES_HEADER) String userRolesHeader) {
+        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getAssignedApplications(userRolesHeader));
     }
 
     @SwaggerCommonHeaders
     @GetMapping("/application/author")
-    public ResponseEntity<List<ApplicationDTO>> getApplicationsByAuthor(HttpServletRequest request) {
-        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByAuthor(userId));
+    public ResponseEntity<List<ApplicationDTO>> getApplicationsByAuthor(
+            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByAuthor(Integer.valueOf(userId)));
     }
 
     @SwaggerCommonHeaders
     @GetMapping("/application/executor")
-    public ResponseEntity<List<ApplicationDTO>> getApplicationsByExecutor(HttpServletRequest request) {
-        Integer userId = Integer.valueOf(request.getHeader(USER_ID_HEADER));
-        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByExecutor(userId));
+    public ResponseEntity<List<ApplicationDTO>> getApplicationsByExecutor(
+            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getApplicationsByExecutor(Integer.valueOf(userId)));
     }
 
     @SwaggerCommonHeaders
     @PatchMapping("/application/{business_key}/executor")
     public ResponseEntity patchExecutorProcess(@PathVariable("business_key") String businessKey,
                                                @RequestParam(value = "next_status") String nextStatus,
-                                               HttpServletRequest request) {
-        return applicationService.patchExecutorProcess(businessKey, nextStatus, request);
+                                               @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return applicationService.patchExecutorProcess(businessKey, nextStatus, userId);
     }
 
     @GetMapping("/application/{business_key}")
@@ -71,8 +72,8 @@ public class CamundaApplicationController {
     public ResponseEntity patchChangeStatus(@PathVariable("business_key") String businessKey,
                                             @PathVariable("status_alias") String statusAlias,
                                             @RequestBody(required = false) CommentDTO commentDTO,
-                                            HttpServletRequest request) {
-        return applicationService.patchChangeStatus(businessKey, statusAlias, request, commentDTO);
+                                            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return applicationService.patchChangeStatus(businessKey, statusAlias, userId, commentDTO);
     }
 
     @SwaggerCommonHeaders
