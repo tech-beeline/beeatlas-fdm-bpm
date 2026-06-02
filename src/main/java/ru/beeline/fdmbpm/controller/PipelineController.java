@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.fdmbpm.dto.ErrorResponse;
 import ru.beeline.fdmbpm.dto.pipeline.ProcessStatusItemDTO;
@@ -58,8 +58,17 @@ public class PipelineController {
                             examples = @ExampleObject(name = "405 METHOD NOT ALLOWED",
                                     value = "{\"errorMessage\":\"Метод не разрешён для данного ресурса.\"}")))
     })
-    public List<ProcessStatusItemDTO> getProcessStatuses(@RequestParam("typeProcessId") Integer typeProcessId) {
-        return pipelineProcessStatusService.getPipelineStatuses(typeProcessId);
+    public List<ProcessStatusItemDTO> getProcessStatuses(HttpServletRequest request) {
+        String typeProcessIdStr = request.getParameter("typeProcessId");
+        if (typeProcessIdStr == null || typeProcessIdStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("typeProcessId");
+        }
+        try {
+            Integer typeProcessId = Integer.parseInt(typeProcessIdStr);
+            return pipelineProcessStatusService.getPipelineStatuses(typeProcessId);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("typeProcessId");
+        }
     }
 }
 

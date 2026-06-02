@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -21,9 +20,9 @@ public class PipelineExceptionHandler {
     static final String BAD_TYPE_PROCESS_ID_MESSAGE = "Параметр typeProcessId обязателен и должен быть целым числом.";
     static final String METHOD_NOT_ALLOWED_MESSAGE = "Метод не разрешён для данного ресурса.";
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponse> handleMissingParam(MissingServletRequestParameterException ex) {
-        if ("typeProcessId".equals(ex.getParameterName())) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleBadParam(IllegalArgumentException ex) {
+        if ("typeProcessId".equals(ex.getMessage())) {
             return error(HttpStatus.BAD_REQUEST, BAD_TYPE_PROCESS_ID_MESSAGE);
         }
         return error(HttpStatus.BAD_REQUEST, ex.getMessage());
