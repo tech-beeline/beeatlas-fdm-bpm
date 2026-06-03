@@ -21,13 +21,14 @@ public class FfManagerClient {
         this.longTimeoutRestTemplate = longTimeoutRestTemplate;
     }
 
-    public void postFfManager(PostFfManagerDTO body, Integer docId) {
+    public void postFfManager(PostFfManagerDTO body, Integer docId, Integer processId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<PostFfManagerDTO> entity = new HttpEntity<>(body, headers);
-            String url = ffManagerUrl + "/api/v1/run-all?docId=" + docId;
+            String url = ffManagerUrl + "/api/v1/run-all?docId=" + docId + "&source_type=pipeline&" +
+                    "source_id=" + processId;
             log.info("Отправка POST запроса в FF Manager: {}, app: {}", url, body.getApp());
             ResponseEntity<Object> response = longTimeoutRestTemplate.exchange(
                     url,

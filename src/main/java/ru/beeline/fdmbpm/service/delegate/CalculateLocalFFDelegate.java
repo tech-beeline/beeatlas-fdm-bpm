@@ -46,7 +46,7 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
         log.info("process_id: {}, docId: {}, cmdb: {}", processId, docId, cmdb);
         TypeProcess typeProcess = null;
         try {
-            ffManagerClient.postFfManager(PostFfManagerDTO.builder().app(cmdb).build(), docId);
+            ffManagerClient.postFfManager(PostFfManagerDTO.builder().app(cmdb).build(), docId, processId);
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
             log.info("camundaProcess: processId={}, procId={}, businessKey={}, typeProcessId={}",
                     processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
