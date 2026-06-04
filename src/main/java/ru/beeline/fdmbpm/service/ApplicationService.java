@@ -4,6 +4,7 @@
 
 package ru.beeline.fdmbpm.service;
 
+import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.MismatchingMessageCorrelationException;
 import org.camunda.bpm.engine.RuntimeService;
@@ -21,11 +22,11 @@ import ru.beeline.fdmbpm.dto.applicationDTO.*;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.RoleInfoDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.UserProfileDTO;
+import ru.beeline.fdmbpm.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 import ru.beeline.fdmbpm.exception.CustomCamundaException;
 import ru.beeline.fdmbpm.exception.NotFoundException;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.repository.camunda.*;
-import ru.beeline.fdmbpm.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -67,6 +68,14 @@ public class ApplicationService {
         List<ExecutorRoles> executorRoles = executorRolesRepository.findByTypeId(application.getTypeId());
         if (executorRoles.isEmpty()) {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
+        }
+        if (!hasAccessRole(executorRoles.stream().map(ExecutorRoles::getRole).toList(),
+                           userClient.getUserProfile(Integer.valueOf(userId))
+                                   .getRoles()
+                                   .stream()
+                                   .map(RoleInfoDTO::getName)
+                                   .toList())) {
+            throw new ForbiddenException("Forbidden");
         }
         if (application.getExecutorId() != null) {
             throw new ValidationException("Исполнитель уже назначен");
@@ -439,5 +448,8 @@ public class ApplicationService {
         return application.getName();
     }
 
+    private boolean hasAccessRole(List<String> executorRoles, List<String> roles) {
+        return roles.stream().anyMatch(executorRoles::contains);
+    }
 }
 
