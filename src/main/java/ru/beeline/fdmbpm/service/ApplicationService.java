@@ -73,7 +73,7 @@ public class ApplicationService {
                            userClient.getUserProfile(Integer.valueOf(userId))
                                    .getRoles()
                                    .stream()
-                                   .map(RoleInfoDTO::getName)
+                                   .map(RoleInfoDTO::getAlias)
                                    .toList())) {
             throw new ForbiddenException("Forbidden");
         }
