@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
-import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
@@ -319,25 +318,6 @@ public class ProductClient {
                     }).getBody();
         } catch (Exception e) {
             log.error("GET /api/v1/nfr failed: {}", e.getMessage());
-            return null;
-        }
-    }
-
-    public AssessmentFitnessForNfrDTO getFitnessFunctionsForProduct(String alias) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl)
-                    .path("/api/v1/product/{alias}/fitness-function")
-                    .buildAndExpand(alias)
-                    .toUriString();
-            return restTemplate.exchange(url,
-                    HttpMethod.GET,
-                    entity,
-                    AssessmentFitnessForNfrDTO.class).getBody();
-        } catch (Exception e) {
-            log.error("GET fitness-function for alias {} failed: {}", alias, e.getMessage());
             return null;
         }
     }
