@@ -23,37 +23,23 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: rabbitmq
-    user: "rabbitmq:rabbitmq"
+    container_name: fdm-rabbitmq
     restart: unless-stopped
     ports:
       - "5672:5672"
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
-      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-secret-cookie-for-dev}
-    command: >
-      sh -c "
-        rabbitmq-server &
-        sleep 20;
-        rabbitmqadmin declare queue name=package_queue durable=true;
-        rabbitmqadmin declare queue name=tc_description_quality durable=true;
-        rabbitmqadmin declare queue name=result_local_graph durable=true;
-        rabbitmqadmin declare queue name=result_global_graph durable=true;
-        rabbitmqadmin declare queue name=user_drop_cache durable=true;
-        wait
-      "
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - beeatlas-network
+
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   fdm-bpm-backend:
     build:
@@ -67,13 +53,13 @@ services:
         condition: service_healthy
     environment:
       APP_AMBASSADOR_AUTH: "false"
-      SPRING_RABBITMQ_VIRTUAL_HOST: ${RABBITMQ_VHOST:-/}
-      SPRING_RABBITMQ_TEMPLATE_EXCHANGE: ${RABBITMQ_EXCHANGE:-fdm.bpm.exchange}
-      SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: ${RABBITMQ_ROUTING_KEY:-fdm.bpm}
-      SPRING_RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
-      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
-      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      SPRING_RABBITMQ_VIRTUAL_HOST: /
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_TEMPLATE_EXCHANGE: ${FDM_BPM_RABBITMQ_EXCHANGE:-fdm.bpm.exchange}
+      SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: ${FDM_BPM_RABBITMQ_ROUTING_KEY:-fdm.bpm}
       SPRING_DATASOURCE_CAMUNDA_URL: jdbc:postgresql://${FDM_BPM_POSTGRES_HOST:-fdm-bpm-postgres}:5432/${FDM_BPM_POSTGRES_DB:-fdmbpm}
       SPRING_DATASOURCE_CAMUNDA_USERNAME: ${FDM_BPM_POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_CAMUNDA_PASSWORD: ${FDM_BPM_POSTGRES_PASSWORD:-postgres}
@@ -94,6 +80,7 @@ services:
       TECHUSER: mock
       TECHPASSWORD: mock
       INTEGRATION_AUTH_SERVER_URL: "http://auth-service"
+      INTEGRATION_FF_MANAGER_URL: "http://ff-manager:8080"
       INTEGRATION_AUTHSSO_SERVER_URL: "http://auth-service"
       INTEGRATION_PRODUCTS_SERVER_URL: "http://products-service"
       INTEGRATION_CAPABILITY_SERVER_URL: "http://capability-service"
