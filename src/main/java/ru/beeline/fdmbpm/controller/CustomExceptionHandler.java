@@ -13,6 +13,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
+import ru.beeline.fdmbpm.dto.ErrorMessageDTO;
 import ru.beeline.fdmbpm.exception.*;
 
 @ControllerAdvice
@@ -25,7 +26,7 @@ public class CustomExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 
     @ExceptionHandler(S3Exception.class)
@@ -34,7 +35,7 @@ public class CustomExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -43,7 +44,7 @@ public class CustomExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -52,35 +53,35 @@ public class CustomExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<String> handleMissingParams(MissingServletRequestParameterException e) {
+    public ResponseEntity<Object> handleMissingParams(MissingServletRequestParameterException e) {
         String paramName = e.getParameterName();
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body("Параметр '" + paramName + "' обязателен");
+                .body(new ErrorMessageDTO("Параметр '" + paramName + "' обязателен"));
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<String> headerException(ForbiddenException e) {
+    public ResponseEntity<Object> headerException(ForbiddenException e) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 
     @ExceptionHandler(CustomCamundaException.class)
-    public ResponseEntity<String> headerException(CustomCamundaException e) {
+    public ResponseEntity<Object> headerException(CustomCamundaException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 
     @ExceptionHandler(ProcessException.class)
-    public ResponseEntity<String> headerException(ProcessException e) {
+    public ResponseEntity<Object> headerException(ProcessException e) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.getMessage());
+                .body(new ErrorMessageDTO(e.getMessage()));
     }
 }
