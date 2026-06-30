@@ -240,16 +240,17 @@ public class ProductClient {
 
     public void updateUserProducts(Integer userId, List<String> productCodes) {
         try {
+            log.info("Вызываем метод обновления продуктов для пользователя с ID: {}. Список продуктов: {}", userId, productCodes);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<List<String>> requestEntity = new HttpEntity<>(productCodes, headers);
-            restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products",
+            restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products/replacement",
                     HttpMethod.POST,
                     requestEntity,
                     Void.class);
+            log.info("Продукты для пользователя {} успешно обновлены", userId);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Ошибка при обновлении продуктов для пользователя {}: {}", userId, e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
