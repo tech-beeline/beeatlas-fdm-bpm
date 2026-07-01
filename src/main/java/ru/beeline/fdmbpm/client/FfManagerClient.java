@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ru.beeline.fdmbpm.dto.ffmanager.PassedFfRequestDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.PostFfManagerDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.ProductActualResultsDTO;
 import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.core.ParameterizedTypeReference;
 
 @Slf4j
 @Service
@@ -51,6 +53,28 @@ public class FfManagerClient {
         } catch (Exception e) {
             log.error("Ошибка при отправке запроса в FF Manager. docId: {}, app: {}",
                     docId, body.getApp(), e);
+        }
+    }
+
+    public List<String> getProductsPassedFf(List<String> rules) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<PassedFfRequestDTO> entity = new HttpEntity<>(new PassedFfRequestDTO(rules), headers);
+            String url = ffManagerUrl + "/api/v1/products/passed-ff";
+            log.info("POST FF Manager passed-ff: url={}, rules={}", url, rules);
+            ResponseEntity<List<String>> response = longTimeoutRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    new ParameterizedTypeReference<List<String>>() {}
+            );
+            List<String> result = response.getBody();
+            log.info("FF Manager passed-ff: получено {} продуктов", result != null ? result.size() : 0);
+            return result != null ? result : List.of();
+        } catch (Exception e) {
+            log.error("Ошибка при вызове FF Manager passed-ff: {}", e.getMessage(), e);
+            return List.of();
         }
     }
 
