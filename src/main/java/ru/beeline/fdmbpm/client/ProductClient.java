@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
+import ru.beeline.fdmbpm.dto.product.NfrDetailsV2BpmDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
@@ -319,6 +320,19 @@ public class ProductClient {
                     }).getBody();
         } catch (Exception e) {
             log.error("GET /api/v1/nfr failed: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public NfrDetailsV2BpmDTO getNfrDetailsById(Integer nfrId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            return restTemplate.exchange(productServerUrl + "/api/v2/nfr/" + nfrId,
+                    HttpMethod.GET, entity, NfrDetailsV2BpmDTO.class).getBody();
+        } catch (Exception e) {
+            log.error("GET /api/v2/nfr/{} failed: {}", nfrId, e.getMessage());
             return null;
         }
     }
