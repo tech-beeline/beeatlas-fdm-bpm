@@ -17,7 +17,6 @@ import ru.beeline.fdmbpm.service.ApplicationService;
 import java.util.List;
 
 import static ru.beeline.fdmbpm.utils.Constants.USER_ID_HEADER;
-import static ru.beeline.fdmbpm.utils.Constants.USER_ROLES_HEADER;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -30,8 +29,8 @@ public class CamundaApplicationController {
     @SwaggerCommonHeaders
     @GetMapping("/application/nobody")
     public ResponseEntity<List<ApplicationDTO>> getAssignedApplications(
-            @RequestHeader(value = USER_ROLES_HEADER) String userRolesHeader) {
-        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getAssignedApplications(userRolesHeader));
+            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(applicationService.getAssignedApplications(userId));
     }
 
     @SwaggerCommonHeaders

@@ -224,8 +224,12 @@ public class ApplicationService {
         }
     }
 
-    public List<ApplicationDTO> getAssignedApplications(String userRolesHeader) {
-        List<String> roles = parseRoles(userRolesHeader);
+    public List<ApplicationDTO> getAssignedApplications(String userId) {
+        List<String> roles = userClient.getUserProfile(Integer.valueOf(userId))
+                .getRoles()
+                .stream()
+                .map(RoleInfoDTO::getAlias)
+                .toList();
         List<ExecutorRoles> executorRoles;
         if (roles != null && !roles.isEmpty()) {
             executorRoles = executorRolesRepository.findByRoleIn(roles);
@@ -250,14 +254,6 @@ public class ApplicationService {
                 .map(Application::getEntityId)
                 .collect(Collectors.toList()));
         return buildApplicationDTO(applicationList, participants, additional);
-    }
-
-    private List<String> parseRoles(String userRolesHeader) {
-        if (userRolesHeader == null || userRolesHeader.isBlank()) return Collections.emptyList();
-        return Arrays.stream(userRolesHeader.split(","))
-                .map(s -> s.replaceAll("[\\[\\]\"]", "").trim())
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
     }
 
     private List<ApplicationDTO> buildApplicationDTO(List<Application> applicationList,
