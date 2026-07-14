@@ -35,7 +35,6 @@ public class AssetDTO {
     private String vimSelResponsobilityIsPerso;
     private String vimSelResponsibilityIsAdvM;
     private AssetAdditionalDataDTO assetAdditionalData;
-    private Object ttList;
     private String classTitle;
 }
 
