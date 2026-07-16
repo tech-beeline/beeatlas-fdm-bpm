@@ -250,6 +250,9 @@ public class ProductClient {
                     requestEntity,
                     Void.class);
             log.info("Продукты для пользователя {} успешно обновлены", userId);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("❌ Ошибка replace-products для пользователя {}. Статус: {}, тело: {}", userId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Ошибка обновления продуктов пользователя " + userId + ": " + e.getStatusCode() + " " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             log.error("Ошибка при обновлении продуктов для пользователя {}: {}", userId, e.getMessage());
             throw new RuntimeException(e.getMessage());
