@@ -4,7 +4,7 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0spxqgs</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1x00lot">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">${camundaTimerSchedules.cmdbFullCycle}</bpmn:timeCycle>
+        <bpmn:timeCycle  xsi:type="bpmn:tFormalExpression">${camundaTimerSchedules.cmdbFullCycle}</bpmn:timeCycle>
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:serviceTask id="Activity_17zjctx" name="Получения списка приложений" camunda:delegateExpression="${GettingAllApplications}">
