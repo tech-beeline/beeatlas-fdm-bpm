@@ -33,46 +33,38 @@ public class UpdateUserProductsDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) {
         Object userObj = execution.getVariable("user");
         if (!(userObj instanceof UserShortDTO)) {
-            log.error("Variable 'user' is not instance of UserShortDTO: {}", userObj);
+            log.error("Переменная 'user' не является экземпляром UserShortDTO: {}", userObj);
             execution.setVariable("drop-cache", false);
             return;
         }
-
         UserShortDTO user = (UserShortDTO) userObj;
         String login = user.getLogin();
         Integer id = user.getId();
-
         if (login == null || id == null) {
-            log.error("UserShortDTO has null login or id: {}", user);
+            log.error("UserShortDTO содержит null в поле login или id: {}", user);
             execution.setVariable("drop-cache", false);
             return;
         }
-        log.info("user id = {}", user.getId());
+        log.info("ID пользователя: {}", user.getId());
         try {
             BeeworksUserProductsDTO beeworksResponse = userClient.getBeeworksUserProducts(login);
             if (beeworksResponse == null || beeworksResponse.getBwRoles() == null) {
-                log.info("beeworksResponse or .getBwRoles() is null: {}", userObj);
+                log.info("beeworksResponse или getBwRoles() равен null: {}", userObj);
                 execution.setVariable("drop-cache", false);
                 return;
             }
-
             List<String> cmdbCodes = beeworksResponse.getBwRoles()
                     .stream()
                     .map(BeeworksUserRoleDTO::getCmdbCode)
                     .filter(Objects::nonNull)
                     .filter(code -> !code.isEmpty())
                     .collect(Collectors.toList());
-
-            if (cmdbCodes.isEmpty()) {
-                log.info("cmdbCodes.isEmpty()");
-                execution.setVariable("drop-cache", false);
-                return;
-            }
-
+            log.info("Получено {} кодов продуктов для пользователя {}", cmdbCodes.size(), id);
             productClient.updateUserProducts(id, cmdbCodes);
             execution.setVariable("drop-cache", true);
+            log.info("Продукты для пользователя {} успешно обновлены, кэш будет сброшен", id);
         } catch (Exception e) {
-            log.error("Error in UpdateUserProductsDelegate: ", e);
+            log.error("Ошибка при обновлении продуктов пользователя {}: ", id, e);
             execution.setVariable("drop-cache", false);
         }
     }

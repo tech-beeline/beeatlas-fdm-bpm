@@ -18,8 +18,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.beeline.fdmbpm.dto.cmdb.PostProductRequest;
 import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
-import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
+import ru.beeline.fdmbpm.dto.product.NfrDetailsV2BpmDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
@@ -241,16 +241,20 @@ public class ProductClient {
 
     public void updateUserProducts(Integer userId, List<String> productCodes) {
         try {
+            log.info("Вызываем метод обновления продуктов для пользователя с ID: {}. Список продуктов: {}", userId, productCodes);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<List<String>> requestEntity = new HttpEntity<>(productCodes, headers);
-            restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products",
+            restTemplate.exchange(productServerUrl + "/api/v1/user/" + userId + "/products/replacement",
                     HttpMethod.POST,
                     requestEntity,
                     Void.class);
+            log.info("Продукты для пользователя {} успешно обновлены", userId);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("❌ Ошибка replace-products для пользователя {}. Статус: {}, тело: {}", userId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Ошибка обновления продуктов пользователя " + userId + ": " + e.getStatusCode() + " " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Ошибка при обновлении продуктов для пользователя {}: {}", userId, e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -323,21 +327,15 @@ public class ProductClient {
         }
     }
 
-    public AssessmentFitnessForNfrDTO getFitnessFunctionsForProduct(String alias) {
+    public NfrDetailsV2BpmDTO getNfrDetailsById(Integer nfrId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl)
-                    .path("/api/v1/product/{alias}/fitness-function")
-                    .buildAndExpand(alias)
-                    .toUriString();
-            return restTemplate.exchange(url,
-                    HttpMethod.GET,
-                    entity,
-                    AssessmentFitnessForNfrDTO.class).getBody();
+            return restTemplate.exchange(productServerUrl + "/api/v2/nfr/" + nfrId,
+                    HttpMethod.GET, entity, NfrDetailsV2BpmDTO.class).getBody();
         } catch (Exception e) {
-            log.error("GET fitness-function for alias {} failed: {}", alias, e.getMessage());
+            log.error("GET /api/v2/nfr/{} failed: {}", nfrId, e.getMessage());
             return null;
         }
     }

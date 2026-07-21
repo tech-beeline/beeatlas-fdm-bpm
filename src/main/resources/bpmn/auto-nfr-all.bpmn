@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0pqvq8q" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
+  <bpmn:process id="Process_1t2rjem" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1n820xq</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_1qu1xr8" name="Получение списка продуктов, попадающих под условие требования" camunda:delegateExpression="${GetProductsForNfrDelegate}">
+      <bpmn:incoming>Flow_1n820xq</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sbwg9e</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1n820xq" sourceRef="StartEvent_1" targetRef="Activity_1qu1xr8" />
+    <bpmn:callActivity id="Activity_0hz3w34" name="Назначение требования для каждого продукта" calledElement="Process_053fkyf">
+      <bpmn:extensionElements>
+        <camunda:in source="product" target="product" />
+        <camunda:in source="nfrId" target="nfrId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0sbwg9e</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cj8upv</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${products}" camunda:elementVariable="product" />
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_0sbwg9e" sourceRef="Activity_1qu1xr8" targetRef="Activity_0hz3w34" />
+    <bpmn:endEvent id="Event_1w3n4rp">
+      <bpmn:incoming>Flow_0cj8upv</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0cj8upv" sourceRef="Activity_0hz3w34" targetRef="Event_1w3n4rp" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1t2rjem">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0jiv8od_di" bpmnElement="Activity_1qu1xr8">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ge1vh9_di" bpmnElement="Activity_0hz3w34">
+        <dc:Bounds x="450" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1w3n4rp_di" bpmnElement="Event_1w3n4rp">
+        <dc:Bounds x="632" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1n820xq_di" bpmnElement="Flow_1n820xq">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sbwg9e_di" bpmnElement="Flow_0sbwg9e">
+        <di:waypoint x="370" y="120" />
+        <di:waypoint x="450" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cj8upv_di" bpmnElement="Flow_0cj8upv">
+        <di:waypoint x="550" y="120" />
+        <di:waypoint x="632" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
