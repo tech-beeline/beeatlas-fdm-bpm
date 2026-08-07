@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_014j6vp" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
+  <bpmn:process id="Process_1akt99u" name="Выгрузка информации о возможностях" isExecutable="true" camunda:versionTag="1" camunda:historyTimeToLive="180">
+    <bpmn:documentation>Процесс, собирающий данные о возможностях в sparx, и выгружающий их в ФДМ</bpmn:documentation>
+    <bpmn:serviceTask id="Activity_0n2bx88" name="Отправка данных о BC" camunda:delegateExpression="${CapabilityUploadSendBusinessCapability}">
+      <bpmn:incoming>Flow_0k0ek1m</bpmn:incoming>
+      <bpmn:outgoing>Flow_0v93703</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0v93703" sourceRef="Activity_0n2bx88" targetRef="Event_0khj7tc" />
+    <bpmn:intermediateCatchEvent id="Event_0khj7tc">
+      <bpmn:incoming>Flow_0v93703</bpmn:incoming>
+      <bpmn:outgoing>Flow_11to9te</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_14ehjd1">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_11to9te" sourceRef="Event_0khj7tc" targetRef="Activity_089hfym" />
+    <bpmn:serviceTask id="Activity_089hfym" name="Отправка данных о TC" camunda:delegateExpression="${CapabilityUploadSendTechCapability}">
+      <bpmn:incoming>Flow_11to9te</bpmn:incoming>
+      <bpmn:outgoing>Flow_11to9tm</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_11to9tm" sourceRef="Activity_089hfym" targetRef="Event_0khj7td" />
+    <bpmn:intermediateCatchEvent id="Event_0khj7td">
+      <bpmn:incoming>Flow_11to9tm</bpmn:incoming>
+      <bpmn:outgoing>Flow_11to9tk</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_14ehjd2">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_11to9tk" sourceRef="Event_0khj7td" targetRef="Activity_089hfyk" />
+    <bpmn:serviceTask id="Activity_089hfyk" name="Отправка данных о Продуктах" camunda:delegateExpression="${CapabilityUploadSendProduct}">
+      <bpmn:incoming>Flow_11to9tk</bpmn:incoming>
+      <bpmn:outgoing>Flow_0lgufda</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0lgufda" sourceRef="Activity_089hfyk" targetRef="Event_1xk4x3a" />
+    <bpmn:endEvent id="Event_1xk4x3a">
+      <bpmn:incoming>Flow_0lgufda</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0k0ek1m" sourceRef="Event_0t6xdd7" targetRef="Activity_0n2bx88" />
+    <bpmn:startEvent id="Event_0t6xdd7">
+      <bpmn:outgoing>Flow_0k0ek1m</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1voeasf">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">${camundaTimerSchedules.capabilityUploadCycle}</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1akt99u">
+      <bpmndi:BPMNShape id="Activity_0o3c78z_di" bpmnElement="Activity_0n2bx88">
+        <dc:Bounds x="240" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1rk8fel_di" bpmnElement="Event_0khj7tc">
+        <dc:Bounds x="392" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zqkp9p_di" bpmnElement="Activity_089hfym">
+        <dc:Bounds x="480" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1rd8fel_di" bpmnElement="Event_0khj7td">
+        <dc:Bounds x="630" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zqkp9p_db" bpmnElement="Activity_089hfyk">
+        <dc:Bounds x="716" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1xk4x3a_di" bpmnElement="Event_1xk4x3a">
+        <dc:Bounds x="866" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1hd0q0f_di" bpmnElement="Event_0t6xdd7">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0v93703_di" bpmnElement="Flow_0v93703">
+        <di:waypoint x="340" y="120" />
+        <di:waypoint x="392" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11to9te_di" bpmnElement="Flow_11to9te">
+        <di:waypoint x="428" y="120" />
+        <di:waypoint x="480" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11to9tm_di" bpmnElement="Flow_11to9tm">
+        <di:waypoint x="580" y="120" />
+        <di:waypoint x="630" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11to9tk_di" bpmnElement="Flow_11to9tk">
+        <di:waypoint x="666" y="120" />
+        <di:waypoint x="716" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0lgufda_di" bpmnElement="Flow_0lgufda">
+        <di:waypoint x="816" y="120" />
+        <di:waypoint x="866" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k0ek1m_di" bpmnElement="Flow_0k0ek1m">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="240" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

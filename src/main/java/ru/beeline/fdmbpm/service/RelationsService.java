@@ -1,0 +1,138 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
+package ru.beeline.fdmbpm.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.misc.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import ru.beeline.fdmbpm.client.PackageClient;
+import ru.beeline.fdmbpm.client.ProductClient;
+import ru.beeline.fdmbpm.client.TechradarClient;
+import ru.beeline.fdmbpm.dto.AliasLabelDTO;
+import ru.beeline.fdmbpm.dto.PackageRegistrationResponseDTO;
+import ru.beeline.fdmbpm.dto.techradar.ProductDTO;
+import ru.beeline.fdmbpm.gitdomain.FdmGitlabLanguages;
+import ru.beeline.fdmbpm.repository.git.FdmGitlabLanguagesRepository;
+import ru.beeline.fdmbpm.dto.techradar.ProcessDTO;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Component
+public class RelationsService {
+    private static final String OPERATION = "ADD_TECH_PRODUCT_RELATION";
+
+    @Value("${queue.package-queue.name}")
+    private String packageQueueName;
+
+    @Autowired
+    FdmGitlabLanguagesRepository fdmGitlabLanguagesRepository;
+
+    @Autowired
+    TechradarClient techradarClient;
+
+    @Autowired
+    ProductClient productClient;
+
+    @Autowired
+    PackageClient packageClient;
+
+    @Autowired
+    RabbitService rabbitService;
+
+    @Autowired
+    GrafanaService grafanaService;
+
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationsService.class);
+
+    public void createRelations() {
+        List<String> processList = grafanaService.getProcessList();
+        List<ProcessDTO> processTechDTOs = techradarClient.getProcesses().stream()
+                .filter(processDTO -> processList.contains(processDTO.getProcess()))
+                .collect(Collectors.toUnmodifiableList());
+        Map<String, Map<String, String>> products = grafanaService.getProducts();
+        List<FdmGitlabLanguages> dashboardList = new ArrayList<>();
+        processTechDTOs.forEach(processDTO -> {
+            dashboardList.addAll(
+                    grafanaService.getMnemonics(processDTO, products).stream()
+                            .map(element -> FdmGitlabLanguages.builder()
+                                    .cmdb_code(element.get("cmdb_code"))
+                                    .proj_lang(element.get("proj_lang"))
+                                    .build())
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        });
+        List<FdmGitlabLanguages> fdmGitlabLanguages = fdmGitlabLanguagesRepository.findUniqueCmdbCodeAndProjLangModify();
+        fdmGitlabLanguages.addAll(dashboardList);
+        fdmGitlabLanguages = distinctList(fdmGitlabLanguages);
+        List<ProductDTO> productDTOS = techradarClient.getTech();
+        List<AliasLabelDTO> aliasLabelDTOS = productDTOS.stream()
+                .flatMap(productDTO -> productDTO.getTech().stream()
+                        .map(productTechDTO -> new AliasLabelDTO(
+                                productDTO.getProductId(),
+                                productDTO.getAlias(),
+                                productTechDTO.getId(),
+                                productTechDTO.getLabel())))
+                .collect(Collectors.toList());
+        removeMatchingObjects(aliasLabelDTOS, fdmGitlabLanguages);
+        aliasLabelDTOS.forEach(aliasLabelDTO ->
+                productClient.deleteRelation(aliasLabelDTO.getTechId(), aliasLabelDTO.getProductId()));
+        try {
+            LOGGER.info("Register package, operation: {} , fdmGitlabLanguages size: {}", OPERATION, fdmGitlabLanguages.size());
+            PackageRegistrationResponseDTO responseDTO = packageClient.registerPackage(
+                    OPERATION, fdmGitlabLanguages.size());
+            LOGGER.info("the package has been registered, package id: " + responseDTO.getPackageId());
+            ObjectNode messagePayload = objectMapper.createObjectNode();
+            messagePayload.put("packageId", responseDTO.getPackageId());
+
+            ArrayNode payloadArray = messagePayload.putArray("payload");
+            fdmGitlabLanguages.forEach(obj -> {
+                ObjectNode item = objectMapper.createObjectNode();
+                item.put("proj_lang", obj.getProj_lang());
+                item.put("cmdb_code", obj.getCmdb_code());
+                payloadArray.add(item);
+            });
+            LOGGER.info("Send to package-queue");
+            rabbitService.sendMessage(packageQueueName, objectMapper.writeValueAsString(messagePayload));
+            LOGGER.info("createRelations method completed");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<FdmGitlabLanguages> distinctList(List<FdmGitlabLanguages> languages) {
+        Set<String> uniqueKeys = new HashSet<>();
+        return languages.stream()
+                .filter(language -> uniqueKeys.add(language.getCmdb_code() + "_" + language.getProj_lang()))
+                .collect(Collectors.toList());
+    }
+
+    private static void removeMatchingObjects(List<AliasLabelDTO> aliasLabelDTOS, List<FdmGitlabLanguages> fdmGitlabLanguages) {
+        Set<Pair<String, String>> fdmGitlabSet = fdmGitlabLanguages.stream()
+                .map(fdmGitlabLanguage -> new Pair<>(fdmGitlabLanguage.getProj_lang(), fdmGitlabLanguage.getCmdb_code()))
+                .collect(Collectors.toSet());
+
+        aliasLabelDTOS.removeIf(aliasLabelDTO ->
+                fdmGitlabSet.contains(new Pair<>(aliasLabelDTO.getLabel(), aliasLabelDTO.getAlias())));
+
+        Set<Pair<String, String>> aliasLabelSet = aliasLabelDTOS.stream()
+                .map(aliasLabelDTO -> new Pair<>(aliasLabelDTO.getLabel(), aliasLabelDTO.getAlias()))
+                .collect(Collectors.toSet());
+
+        fdmGitlabLanguages.removeIf(fdmGitlabLanguage ->
+                aliasLabelSet.contains(new Pair<>(fdmGitlabLanguage.getProj_lang(), fdmGitlabLanguage.getCmdb_code())));
+    }
+}
