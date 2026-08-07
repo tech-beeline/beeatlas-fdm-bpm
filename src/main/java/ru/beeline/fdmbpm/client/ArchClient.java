@@ -35,7 +35,7 @@ public class ArchClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<PostProductRequest> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<Void> response = restTemplate.exchange(
+            ResponseEntity<Void> response = longTimeoutRestTemplate.exchange(
                     archServerUrl + "/api/v1/fitness-function/local/" + docId + "?pipelineId=" + processId,
                     HttpMethod.POST,
                     requestEntity,
