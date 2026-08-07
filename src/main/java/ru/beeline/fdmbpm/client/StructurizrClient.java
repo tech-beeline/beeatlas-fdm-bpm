@@ -17,11 +17,11 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class StructurizrClient {
 
-    RestTemplate restTemplate;
+    RestTemplate longTimeoutRestTemplate;
 
-    public StructurizrClient(RestTemplate restTemplate) {
+    public StructurizrClient(RestTemplate longTimeoutRestTemplate) {
 
-        this.restTemplate = restTemplate;
+        this.longTimeoutRestTemplate = longTimeoutRestTemplate;
     }
 
     public String getDocs(String url) {
@@ -31,7 +31,7 @@ public class StructurizrClient {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             log.error("Structurizr url:" + url + "/json");
-            String result = restTemplate.exchange(url + "/json",
+            String result = longTimeoutRestTemplate.exchange(url + "/json",
                     HttpMethod.GET, entity,
                     String.class).getBody();
             return result;
