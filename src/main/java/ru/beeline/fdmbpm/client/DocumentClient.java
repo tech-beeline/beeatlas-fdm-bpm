@@ -74,7 +74,7 @@ public class DocumentClient {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            headers.set(HttpHeaders.CONTENT_DISPOSITION, "data from structurizr");
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "workspace.json");
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             log.info("url: {}", url);
