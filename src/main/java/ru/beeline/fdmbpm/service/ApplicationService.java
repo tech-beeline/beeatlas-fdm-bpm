@@ -14,10 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.beeline.fdmbpm.client.CapabilityClient;
 import ru.beeline.fdmbpm.client.UserClient;
-import ru.beeline.fdmbpm.domain.Application;
-import ru.beeline.fdmbpm.domain.ApplicationTypeStatus;
-import ru.beeline.fdmbpm.domain.Comment;
-import ru.beeline.fdmbpm.domain.ExecutorRoles;
+import ru.beeline.fdmbpm.domain.*;
 import ru.beeline.fdmbpm.dto.applicationDTO.*;
 import ru.beeline.fdmbpm.dto.camundaProcess.CommentDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.RoleInfoDTO;
@@ -70,11 +67,11 @@ public class ApplicationService {
             throw new NotFoundException(String.format("Роль с данным Type Id: %s не найдена", application.getTypeId()));
         }
         if (!hasAccessRole(executorRoles.stream().map(ExecutorRoles::getRole).toList(),
-                           userClient.getUserProfile(Integer.valueOf(userId))
-                                   .getRoles()
-                                   .stream()
-                                   .map(RoleInfoDTO::getAlias)
-                                   .toList())) {
+                userClient.getUserProfile(Integer.valueOf(userId))
+                        .getRoles()
+                        .stream()
+                        .map(RoleInfoDTO::getAlias)
+                        .toList())) {
             throw new ForbiddenException("Forbidden");
         }
         if (application.getExecutorId() != null) {
@@ -202,7 +199,7 @@ public class ApplicationService {
                     .correlate();
             log.info("Переданы данные в процесс Camunda: {message, " + message + "}");
         } catch (MismatchingMessageCorrelationException e) {
-            log.error("Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
+            log.error("⚠️ Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
             throw new CustomCamundaException("Процесс в Camunda с ID " + application.getProcessId() + " не найден или уже завершён");
         } catch (Exception e) {
             log.error("Ошибка при отправке сообщения в Camunda", e);
@@ -212,12 +209,29 @@ public class ApplicationService {
 
     public void sendMessageToProcess(String taskKey, Map<String, Object> variables, String messageName) {
         try {
-            String processId = camundaProcessRepository.findById(Integer.valueOf(taskKey)).get().getProcId();
-            runtimeService.createMessageCorrelation(messageName)
-                    .processInstanceId(processId)
-                    .setVariables(variables)
-                    .correlate();
-            log.info("Переданы данные в процесс Camunda: {taskKey, " + taskKey + "}");
+            String processId;
+            Integer intTaskKey;
+            if (taskKey.matches("\\d+")) {
+                log.info("✅ taskKey приведен к Integer. Коррелируем по processId");
+                intTaskKey = Integer.valueOf(taskKey);
+                Optional<CamundaProcess> processOptional = camundaProcessRepository.findById(intTaskKey);
+                if (processOptional.isPresent()) {
+                    processId = processOptional.get().getProcId();
+                    runtimeService.createMessageCorrelation(messageName)
+                            .processInstanceId(processId)
+                            .setVariables(variables)
+                            .correlate();
+                    log.info("✅ Переданы данные в процесс Camunda: {processId, " + processId + "}");
+                } else {
+                    log.warn("⚠️ Корреляция не возможна, запись в таблице camundaProcess с id= {} не найдена.", intTaskKey);
+                }
+            } else {
+                log.info("✅ taskKey не приведен к Integer. Коррелируем по taskKey: {}", taskKey);
+                runtimeService.createMessageCorrelation(messageName)
+                        .processInstanceId(taskKey)
+                        .setVariables(variables)
+                        .correlate();
+            }
         } catch (Exception e) {
             log.error("Ошибка при отправке сообщения в Camunda", e);
             throw new CustomCamundaException("Ошибка при отправке сообщения в Camunda");
