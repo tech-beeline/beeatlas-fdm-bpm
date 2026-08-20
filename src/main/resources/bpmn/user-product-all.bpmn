@@ -4,7 +4,7 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0jwnzym</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_19t9q45">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">${camundaTimerSchedules.userProductAllCycle}</bpmn:timeDuration>
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">${camundaTimerSchedules.userProductAllCycle}</bpmn:timeCycle>
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_0jwnzym" sourceRef="StartEvent_1" targetRef="Activity_1qu1xs6" />
