@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import ru.beeline.fdmbpm.client.ArchClient;
 import ru.beeline.fdmbpm.client.FfManagerClient;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
@@ -26,8 +25,6 @@ import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 @Component("CalculateLocalFFDelegate")
 public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegate {
 
-    @Autowired
-    ArchClient archClient;
     @Autowired
     TypeProcessRepository typeProcessRepository;
     @Autowired
@@ -51,7 +48,6 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
             log.info("camundaProcess: processId={}, procId={}, businessKey={}, typeProcessId={}",
                     processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
             typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-            archClient.postFitnessFunction(docId, processId);
             saveAlias(processId, "ffdn", typeProcess);
             log.info("Шаг: Расчет Фитнес функции, успешно завершен. typeProcess: {} ", typeProcess);
         } catch (Exception e) {
