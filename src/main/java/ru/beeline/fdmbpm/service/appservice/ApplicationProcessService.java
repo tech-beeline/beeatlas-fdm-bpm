@@ -8,6 +8,7 @@ package ru.beeline.fdmbpm.service.appservice;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.fdmbpm.client.NotifyServiceClient;
@@ -51,6 +52,9 @@ public class ApplicationProcessService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Value("${integration.capability-server-url}")
+    private String capabilityServerUrl;
 
     public void applicationProcess(String processInstanceId, String businessKey, Integer authorId, String type,
                                    String comment, Integer entityId, String name) {
@@ -120,10 +124,23 @@ public class ApplicationProcessService {
         String targetCall = applicationTypeEnum.getTargetCall();
         log.info("targetCall: {}", targetCall);
         if (targetCall != null && !targetCall.isEmpty() && entityId != null) {
-            String url = targetCall.replace("{id}", entityId.toString());
+            String url = resolveTargetUrl(targetCall, entityId);
             log.info("url: {}", url);
             sendPostRequest(url);
         }
+    }
+
+
+    private String resolveTargetUrl(String targetCall, Integer entityId) {
+        String pathOrUrl = targetCall.replace("{id}", entityId.toString());
+        if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
+            return pathOrUrl;
+        }
+        String base = capabilityServerUrl.endsWith("/")
+                ? capabilityServerUrl.substring(0, capabilityServerUrl.length() - 1)
+                : capabilityServerUrl;
+        String path = pathOrUrl.startsWith("/") ? pathOrUrl : "/" + pathOrUrl;
+        return base + path;
     }
 
     private void sendPostRequest(String url) {
