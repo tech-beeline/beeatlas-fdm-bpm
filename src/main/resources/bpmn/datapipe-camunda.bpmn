@@ -62,6 +62,7 @@
       <bpmn:incoming>Flow_0jy6kkl</bpmn:incoming>
       <bpmn:incoming>Flow_1dbfhbh</bpmn:incoming>
       <bpmn:incoming>Flow_11lektp</bpmn:incoming>
+      <bpmn:incoming>Flow_1ktserr</bpmn:incoming>
       <bpmn:outgoing>Flow_0grs3i1</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0grs3i1" sourceRef="Gateway_1fpwxbd" targetRef="Event_13e48ot" />
@@ -204,10 +205,24 @@
       <bpmn:incoming>Flow_0f300lm</bpmn:incoming>
       <bpmn:outgoing>Flow_1caom53</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0mllwle" sourceRef="Activity_0bt8s50" targetRef="Activity_1viu36t" />
+    <bpmn:sequenceFlow id="Flow_0mllwle" sourceRef="Activity_0bt8s50" targetRef="Activity_1kts0gen" />
+    <bpmn:serviceTask id="Activity_1kts0gen" name="Генерация паспорта КТС в SmartKTS" camunda:asyncBefore="true" camunda:delegateExpression="${GenerateKtsPassportDelegate}">
+      <bpmn:incoming>Flow_0mllwle</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kts2gw</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0kts2gw" sourceRef="Activity_1kts0gen" targetRef="Gateway_0ktserr" />
+    <bpmn:exclusiveGateway id="Gateway_0ktserr" name="Нет ошибки генерации паспорта КТС?" default="Flow_1ktsok">
+      <bpmn:incoming>Flow_0kts2gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ktsok</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1ktserr</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1ktsok" sourceRef="Gateway_0ktserr" targetRef="Activity_1viu36t" />
+    <bpmn:sequenceFlow id="Flow_1ktserr" sourceRef="Gateway_0ktserr" targetRef="Gateway_1fpwxbd">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.hasVariable('error')}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0f300lm" sourceRef="Activity_1viu36t" targetRef="Activity_0qj1hi7" />
     <bpmn:serviceTask id="Activity_1viu36t" name="Назначение требований на продукт" camunda:asyncBefore="true" camunda:delegateExpression="${AssignProductNfrDelegate}">
-      <bpmn:incoming>Flow_0mllwle</bpmn:incoming>
+      <bpmn:incoming>Flow_1ktsok</bpmn:incoming>
       <bpmn:outgoing>Flow_0f300lm</bpmn:outgoing>
     </bpmn:serviceTask>
   </bpmn:process>
@@ -324,22 +339,32 @@
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_13e48ot_di" bpmnElement="Event_13e48ot">
-        <dc:Bounds x="4402" y="159" width="36" height="36" />
+        <dc:Bounds x="4682" y="159" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1fpwxbd_di" bpmnElement="Gateway_1fpwxbd" isMarkerVisible="true">
-        <dc:Bounds x="4265" y="152" width="50" height="50" />
+        <dc:Bounds x="4545" y="152" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1g2liue_di" bpmnElement="Activity_1m50rwf">
-        <dc:Bounds x="4090" y="137" width="100" height="80" />
+        <dc:Bounds x="4370" y="137" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_09y5tzq_di" bpmnElement="Activity_0qj1hi7">
-        <dc:Bounds x="3870" y="137" width="100" height="80" />
+        <dc:Bounds x="4150" y="137" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_03k9786_di" bpmnElement="Activity_1viu36t">
+        <dc:Bounds x="3960" y="137" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1kts0gen_di" bpmnElement="Activity_1kts0gen">
         <dc:Bounds x="3680" y="137" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0ktserr_di" bpmnElement="Gateway_0ktserr" isMarkerVisible="true">
+        <dc:Bounds x="3830" y="152" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3812" y="96" width="86" height="40" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0075dwi_di" bpmnElement="Flow_0075dwi">
         <di:waypoint x="188" y="177" />
@@ -376,8 +401,8 @@
       <bpmndi:BPMNEdge id="Flow_0jy6kkl_di" bpmnElement="Flow_0jy6kkl">
         <di:waypoint x="1910" y="202" />
         <di:waypoint x="1910" y="670" />
-        <di:waypoint x="4290" y="670" />
-        <di:waypoint x="4290" y="202" />
+        <di:waypoint x="4570" y="670" />
+        <di:waypoint x="4570" y="202" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1mz259t_di" bpmnElement="Flow_1mz259t">
         <di:waypoint x="330" y="177" />
@@ -402,8 +427,8 @@
       <bpmndi:BPMNEdge id="Flow_1dbfhbh_di" bpmnElement="Flow_1dbfhbh">
         <di:waypoint x="3250" y="202" />
         <di:waypoint x="3250" y="340" />
-        <di:waypoint x="4290" y="340" />
-        <di:waypoint x="4290" y="202" />
+        <di:waypoint x="4570" y="340" />
+        <di:waypoint x="4570" y="202" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1lwwicq_di" bpmnElement="Flow_1lwwicq">
         <di:waypoint x="790" y="177" />
@@ -502,24 +527,38 @@
         <di:waypoint x="2905" y="177" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0grs3i1_di" bpmnElement="Flow_0grs3i1">
-        <di:waypoint x="4315" y="177" />
-        <di:waypoint x="4402" y="177" />
+        <di:waypoint x="4595" y="177" />
+        <di:waypoint x="4682" y="177" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_11lektp_di" bpmnElement="Flow_11lektp">
-        <di:waypoint x="4190" y="177" />
-        <di:waypoint x="4265" y="177" />
+        <di:waypoint x="4470" y="177" />
+        <di:waypoint x="4545" y="177" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1caom53_di" bpmnElement="Flow_1caom53">
-        <di:waypoint x="3970" y="177" />
-        <di:waypoint x="4090" y="177" />
+        <di:waypoint x="4250" y="177" />
+        <di:waypoint x="4370" y="177" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0mllwle_di" bpmnElement="Flow_0mllwle">
         <di:waypoint x="3590" y="177" />
         <di:waypoint x="3680" y="177" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0f300lm_di" bpmnElement="Flow_0f300lm">
+        <di:waypoint x="4060" y="177" />
+        <di:waypoint x="4150" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kts2gw_di" bpmnElement="Flow_0kts2gw">
         <di:waypoint x="3780" y="177" />
-        <di:waypoint x="3870" y="177" />
+        <di:waypoint x="3830" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ktsok_di" bpmnElement="Flow_1ktsok">
+        <di:waypoint x="3880" y="177" />
+        <di:waypoint x="3960" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ktserr_di" bpmnElement="Flow_1ktserr">
+        <di:waypoint x="3855" y="202" />
+        <di:waypoint x="3855" y="500" />
+        <di:waypoint x="4570" y="500" />
+        <di:waypoint x="4570" y="202" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

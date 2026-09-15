@@ -35,6 +35,12 @@ logging:
   level:
     io.opentelemetry.exporter.internal.http.HttpExporter: ERROR
 
+integration:
+  smartkts:
+    enabled: false
+    connect-timeout-ms: 5000
+    read-timeout-ms: 300000
+
 rabbitmq:
   fanout-exchange: TECH_CAPABILITY
 queue:
