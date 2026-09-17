@@ -22,7 +22,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 class SmartKtsClientTest {
 
-    private static final String BASE_URL = "https://bwikidocbuilder-dev-smartkts.apps.yd-m6-kt50.vimpelcom.ru";
+    private static final String BASE_URL = "https://smartkts.example.com";
     private static final String ENDPOINT = BASE_URL + "/generate_by_structirizr_id_with_link";
 
     private RestTemplate restTemplate;

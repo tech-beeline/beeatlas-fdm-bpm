@@ -38,7 +38,7 @@ class GenerateKtsPassportDelegateTest {
 
     private static final int PROCESS_ID = 42;
     private static final String CMDB = "BC-012345";
-    private static final String STRUCTURIZR_URL = "https://structurizr.vimpelcom.ru/share/98765";
+    private static final String STRUCTURIZR_URL = "https://structurizr.example.com/share/98765";
 
     private GenerateKtsPassportDelegate delegate;
     private DelegateExecution execution;
@@ -88,10 +88,10 @@ class GenerateKtsPassportDelegateTest {
     @Test
     @DisplayName("Успешная генерация — structurizr_id из URL продукта, bwiki_kts_link из переменной, ktsGenerated=true, статус ktscrt")
     void generatesPassport() {
-        when(execution.getVariable("bwiki_kts_link")).thenReturn("https://bwiki.vimpelcom.ru/pages/kts-1");
+        when(execution.getVariable("bwiki_kts_link")).thenReturn("https://bwiki.example.com/pages/kts-1");
         givenProduct(STRUCTURIZR_URL);
-        when(smartKtsClient.generateKtsPassport("98765", "https://bwiki.vimpelcom.ru/pages/kts-1"))
-                .thenReturn(new StructurizrObjectDTO("98765", "https://bwiki.vimpelcom.ru/pages/kts-1"));
+        when(smartKtsClient.generateKtsPassport("98765", "https://bwiki.example.com/pages/kts-1"))
+                .thenReturn(new StructurizrObjectDTO("98765", "https://bwiki.example.com/pages/kts-1"));
 
         delegate.execute(execution);
 
@@ -156,11 +156,11 @@ class GenerateKtsPassportDelegateTest {
 
     @ParameterizedTest
     @CsvSource({
-            "https://structurizr.vimpelcom.ru/share/98765, 98765",
-            "https://structurizr.vimpelcom.ru/share/98765/, 98765",
-            "https://structurizr.vimpelcom.ru/share/98765?version=2, 98765",
-            "' https://structurizr.vimpelcom.ru/share/abc-1#diagrams ', abc-1",
-            "https://structurizr.vimpelcom.ru/share/98765/diagrams, 98765",
+            "https://structurizr.example.com/share/98765, 98765",
+            "https://structurizr.example.com/share/98765/, 98765",
+            "https://structurizr.example.com/share/98765?version=2, 98765",
+            "' https://structurizr.example.com/share/abc-1#diagrams ', abc-1",
+            "https://structurizr.example.com/share/98765/diagrams, 98765",
             "98765, 98765"
     })
     @DisplayName("structurizr_id — последний сегмент пути structurizr_api_url")
@@ -170,8 +170,8 @@ class GenerateKtsPassportDelegateTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {"   ", "https://structurizr.vimpelcom.ru/share/", "https://structurizr.vimpelcom.ru",
-            "https://structurizr.vimpelcom.ru/", "https://structurizr vimpelcom/share/1"})
+    @ValueSource(strings = {"   ", "https://structurizr.example.com/share/", "https://structurizr.example.com",
+            "https://structurizr.example.com/", "https://structurizr vimpelcom/share/1"})
     @DisplayName("Из пустого или некорректного structurizr_api_url structurizr_id не выделяется")
     void rejectsBadStructurizrUrl(String url) {
         assertThatThrownBy(() -> GenerateKtsPassportDelegate.extractStructurizrId(url))
