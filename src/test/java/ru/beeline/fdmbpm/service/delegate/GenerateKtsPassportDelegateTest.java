@@ -171,7 +171,7 @@ class GenerateKtsPassportDelegateTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"   ", "https://structurizr.example.com/share/", "https://structurizr.example.com",
-            "https://structurizr.example.com/", "https://structurizr vimpelcom/share/1"})
+            "https://structurizr.example.com/", "https://structurizr example/share/1"})
     @DisplayName("Из пустого или некорректного structurizr_api_url structurizr_id не выделяется")
     void rejectsBadStructurizrUrl(String url) {
         assertThatThrownBy(() -> GenerateKtsPassportDelegate.extractStructurizrId(url))
