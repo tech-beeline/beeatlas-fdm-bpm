@@ -259,16 +259,21 @@ public class ProductClient {
         }
     }
 
-    public void postPatternCheckResults(String cmdb, String sourceType, Integer docId, List<PatternCheckResultDTO> results) {
+    public void postPatternCheckResults(String cmdb, String sourceType, Integer docId, String branch,
+                                        List<PatternCheckResultDTO> results) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<List<PatternCheckResultDTO>> requestEntity = new HttpEntity<>(results, headers);
-            String url = productServerUrl + "/api/v1/product/" + cmdb + "/patterns/" + sourceType;
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder
+                    .fromHttpUrl(productServerUrl + "/api/v2/product/" + cmdb + "/patterns/" + sourceType)
+                    .queryParam("branch", normalizeBranch(branch));
             if (docId != null) {
-                url = url + "?source-id=" + docId;
+                uriBuilder.queryParam("source-id", docId);
             }
+            String url = uriBuilder.toUriString();
+            log.info("POST patterns v2: {}", url);
             restTemplate.exchange(url,
                     HttpMethod.POST,
                     requestEntity,
@@ -277,6 +282,13 @@ public class ProductClient {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    static String normalizeBranch(String branch) {
+        if (branch == null || branch.isBlank()) {
+            return "main";
+        }
+        return branch.trim();
     }
 
     public String getMapicSpec(Integer apiId) {

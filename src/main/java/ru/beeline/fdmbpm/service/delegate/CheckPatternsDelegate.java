@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Component("CheckPatternsDelegate")
 public class CheckPatternsDelegate implements JavaDelegate {
 
+    private static final String BRANCH = "main";
+
     @Autowired
     private ProductClient productClient;
 
@@ -118,7 +120,7 @@ public class CheckPatternsDelegate implements JavaDelegate {
             return;
         }
 
-        productClient.postPatternCheckResults(cmdb, "pipeline", docId, results);
+        productClient.postPatternCheckResults(cmdb, "pipeline", docId, BRANCH, results);
     }
 
     private static boolean hasDeleteDate(PatternDTO pattern) {
