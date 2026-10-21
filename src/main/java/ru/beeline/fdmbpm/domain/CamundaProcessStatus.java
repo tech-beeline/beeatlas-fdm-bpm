@@ -31,4 +31,7 @@ public class CamundaProcessStatus {
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
+
+    @Column(name = "message")
+    private String message;
 }

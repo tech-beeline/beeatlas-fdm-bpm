@@ -25,5 +25,6 @@ public class StatusDTO {
     private LocalDateTime createdDate;
     private Boolean isDone;
     private Boolean isError;
+    private String message;
 }
 

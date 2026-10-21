@@ -36,6 +36,7 @@ public class ContextDtoMapper {
                         .isDone(statusProcess.getIsDone())
                         .isError(statusProcess.getIsError())
                         .createdDate(camundaProcessStatus.getCreatedDate())
+                        .message(camundaProcessStatus.getMessage())
                         .build())
                 .build();
     }

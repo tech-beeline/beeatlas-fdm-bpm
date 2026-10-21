@@ -19,6 +19,7 @@ import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("PublicToFdmDelegate")
@@ -53,11 +54,12 @@ public class PublicToFdmDelegate extends StatusLogic implements JavaDelegate {
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;
+            String message = StepErrorMessage.of("Публикация в ФДМ", e);
             tt.execute(status -> {
-                saveAlias(processId, "btlserr", finalTypeProcess);
+                saveAlias(processId, "btlserr", finalTypeProcess, message);
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Публикация в ФДМ");
+            throw new ProcessException("Ошибка процесса на шаге: Публикация в ФДМ", e);
         }
     }
 }
