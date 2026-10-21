@@ -22,6 +22,8 @@ import java.util.List;
 @Component("AssignNfrAndCalcPatternDelegate")
 public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
 
+    private static final String BRANCH = "main";
+
     @Autowired
     private ProductClient productClient;
 
@@ -85,6 +87,6 @@ public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
         }
 
         log.info("Saving {} pattern check results for product {} (NFR {})", results.size(), product, nfrId);
-        productClient.postPatternCheckResults(product, "nfr", null, results);
+        productClient.postPatternCheckResults(product, "nfr", null, BRANCH, results);
     }
 }
