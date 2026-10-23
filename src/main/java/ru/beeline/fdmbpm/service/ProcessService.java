@@ -155,6 +155,7 @@ public class ProcessService {
                             .createdDate(camundaProcessStatus.getCreatedDate())
                             .isDone(statusProcess.getIsDone())
                             .isError(statusProcess.getIsError())
+                            .message(camundaProcessStatus.getMessage())
                             .build();
                 }).toList();
         List<ShortContextDTO> shortContextDTOList = contextRepository.findByCamundaProcessId(camundaProcess.getId())

@@ -23,6 +23,7 @@ import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -91,16 +92,17 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
             log.error("Ошибка при Публикация в платформу наблюдаемости. Создание записи с ошибкой", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            String message = StepErrorMessage.of("Публикация в платформу наблюдаемости", e);
             tt.execute(status -> {
                 StatusProcess statusProcess =
                         statusProcessRepository.findByAliasAndTypeProcessId("vperr", typeProcess.getId());
                 if (camundaProcessStatusRepository.findByCamundaProcessIdAndStatusProcessId(processId,
                         statusProcess.getId()).isEmpty()) {
-                    saveAlias(processId, "vperr", typeProcess);
+                    saveAlias(processId, "vperr", typeProcess, message);
                 }
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Публикация в платформу наблюдаемости");
+            throw new ProcessException("Ошибка процесса на шаге: Публикация в платформу наблюдаемости", e);
         }
     }
 

@@ -38,7 +38,7 @@ public class ViewPlatformClient {
                     }).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -62,7 +62,7 @@ public class ViewPlatformClient {
             log.info("Body: {}", response.getBody());
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 }

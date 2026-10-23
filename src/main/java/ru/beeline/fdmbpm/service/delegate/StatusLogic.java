@@ -29,6 +29,11 @@ public class StatusLogic {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected void saveAlias(Integer processId, String alias, TypeProcess typeProcess) {
+        saveAlias(processId, alias, typeProcess, null);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void saveAlias(Integer processId, String alias, TypeProcess typeProcess, String message) {
         log.info("saveAlias: processId= {}", processId);
         log.info("saveAlias: alias= {}", alias);
         StatusProcess statusProcess = statusProcessRepository.findByAliasAndTypeProcessId(alias, typeProcess.getId());
@@ -36,6 +41,7 @@ public class StatusLogic {
                 .statusProcessId(statusProcess.getId())
                 .camundaProcessId(processId)
                 .createdDate(LocalDateTime.now())
+                .message(message)
                 .build());
     }
 }
