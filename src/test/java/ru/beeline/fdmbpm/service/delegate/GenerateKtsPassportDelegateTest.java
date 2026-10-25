@@ -13,14 +13,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.SmartKtsClient;
+import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.CamundaProcessStatus;
 import ru.beeline.fdmbpm.domain.StatusProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.dto.smartkts.StructurizrObjectDTO;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessStatusRepository;
 import ru.beeline.fdmbpm.repository.camunda.StatusProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,7 +58,11 @@ class GenerateKtsPassportDelegateTest {
         TypeProcessRepository typeProcessRepository = mock(TypeProcessRepository.class);
         StatusProcessRepository statusProcessRepository = mock(StatusProcessRepository.class);
 
-        when(typeProcessRepository.findByAlias("Datapipe")).thenReturn(new TypeProcess(1, "Datapipe", null, "Datapipe"));
+        CamundaProcessRepository camundaProcessRepository = mock(CamundaProcessRepository.class);
+
+        when(camundaProcessRepository.findById(PROCESS_ID)).thenReturn(Optional.of(
+                CamundaProcess.builder().id(PROCESS_ID).typeProcessId(1).build()));
+        when(typeProcessRepository.findById(1)).thenReturn(Optional.of(new TypeProcess(1, "Datapipe", null, "Datapipe")));
         when(statusProcessRepository.findByAliasAndTypeProcessId(GenerateKtsPassportDelegate.STATUS_DONE, 1))
                 .thenReturn(new StatusProcess(101, 1, "done", GenerateKtsPassportDelegate.STATUS_DONE, false, false, 13));
         when(statusProcessRepository.findByAliasAndTypeProcessId(GenerateKtsPassportDelegate.STATUS_ERROR, 1))
@@ -65,6 +73,7 @@ class GenerateKtsPassportDelegateTest {
         delegate.productClient = productClient;
         delegate.smartKtsClient = smartKtsClient;
         delegate.typeProcessRepository = typeProcessRepository;
+        delegate.camundaProcessRepository = camundaProcessRepository;
         delegate.statusProcessRepository = statusProcessRepository;
         delegate.camundaProcessStatusRepository = camundaProcessStatusRepository;
 

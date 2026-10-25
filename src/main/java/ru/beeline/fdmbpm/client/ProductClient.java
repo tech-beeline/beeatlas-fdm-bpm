@@ -189,6 +189,27 @@ public class ProductClient {
         }
     }
 
+    public List<Integer> getPatternIdsByProductAlias(String alias, String branch) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/pattern/product")
+                    .queryParam("alias", alias)
+                    .queryParam("branch", branch)
+                    .toUriString();
+            return restTemplate.exchange(url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<Integer>>() {
+                    }).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
     public void updateInterfaceOperations(List<MethodDTO> methods, Integer id) {
         try {
             HttpHeaders headers = new HttpHeaders();

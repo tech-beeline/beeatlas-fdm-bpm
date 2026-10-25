@@ -38,6 +38,10 @@ public class CheckPatternsDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
+        if (DatapipeBranchProcess.isBranchProcess(execution)) {
+            checkPatternsForBranch(execution);
+            return;
+        }
         String cmdb = (String) execution.getVariable("cmdb");
         Integer docId = (Integer) execution.getVariable("docId");
         log.info("cmdb is" + cmdb);
@@ -56,10 +60,54 @@ public class CheckPatternsDelegate implements JavaDelegate {
             return;
         }
 
+        List<PatternCheckResultDTO> results = checkPatterns(cmdb, patternIds);
+
+        if (results.isEmpty()) {
+            log.info("Pattern checks results are empty, nothing to send");
+            return;
+        }
+
+        productClient.postPatternCheckResults(cmdb, "pipeline", docId, BRANCH, results);
+    }
+
+    /**
+     * Проверка паттернов Process_datapipeline_branch: кандидаты по НФТ ветки процесса,
+     * результат пишется в ту же ветку.
+     */
+    private void checkPatternsForBranch(DelegateExecution execution) {
+        String cmdb = (String) execution.getVariable("cmdb");
+        Integer docId = (Integer) execution.getVariable("docId");
+        String branch = DatapipeBranchProcess.branch(execution);
+        log.info("Pattern checks for branch: cmdb={}, docId={}, branch={}", cmdb, docId, branch);
+
+        if (cmdb == null) {
+            log.error("cmdb is null in process context");
+            return;
+        }
+
+        List<Integer> patternIds = productClient.getPatternIdsByProductAlias(cmdb, branch);
+        log.info("patternIds is" + patternIds);
+
+        if (patternIds == null || patternIds.isEmpty()) {
+            log.info("No patterns for product alias {} in branch {}", cmdb, branch);
+            return;
+        }
+
+        List<PatternCheckResultDTO> results = checkPatterns(cmdb, patternIds);
+
+        if (results.isEmpty()) {
+            log.info("Pattern checks results are empty, nothing to send");
+            return;
+        }
+
+        productClient.postPatternCheckResults(cmdb, "pipeline", docId, branch, results);
+    }
+
+    private List<PatternCheckResultDTO> checkPatterns(String cmdb, List<Integer> patternIds) {
         List<PatternDTO> patternsFromTechradar = techradarClient.getPatterns();
         if (patternsFromTechradar == null || patternsFromTechradar.isEmpty()) {
             log.warn("Techradar GET /api/v1/patterns returned no data, pattern checks skipped");
-            return;
+            return List.of();
         }
 
         Map<Integer, PatternDTO> patternById = patternsFromTechradar.stream()
@@ -114,13 +162,7 @@ public class CheckPatternsDelegate implements JavaDelegate {
 
             results.add(result);
         }
-
-        if (results.isEmpty()) {
-            log.info("Pattern checks results are empty, nothing to send");
-            return;
-        }
-
-        productClient.postPatternCheckResults(cmdb, "pipeline", docId, BRANCH, results);
+        return results;
     }
 
     private static boolean hasDeleteDate(PatternDTO pattern) {
