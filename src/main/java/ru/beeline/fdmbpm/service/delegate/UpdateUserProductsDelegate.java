@@ -60,6 +60,11 @@ public class UpdateUserProductsDelegate implements JavaDelegate {
                     .filter(code -> !code.isEmpty())
                     .collect(Collectors.toList());
             log.info("Получено {} кодов продуктов для пользователя {}", cmdbCodes.size(), id);
+            if (cmdbCodes.isEmpty()) {
+                log.info("ℹ️ Список продуктов пуст для пользователя {}, запрос в product пропущен", id);
+                execution.setVariable("drop-cache", false);
+                return;
+            }
             productClient.updateUserProducts(id, cmdbCodes);
             execution.setVariable("drop-cache", true);
             log.info("Продукты для пользователя {} успешно обновлены, кэш будет сброшен", id);
