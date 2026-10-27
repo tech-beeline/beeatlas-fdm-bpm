@@ -17,6 +17,7 @@ import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("AssignNfrAndCalcPatternDelegate")
@@ -35,58 +36,77 @@ public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
         Integer nfrId = (Integer) execution.getVariable("nfrId");
         String product = (String) execution.getVariable("product");
         String cmdb = (String) execution.getVariable("cmdb");
-        log.info("AssignNfrAndCalcPatternDelegate: nfrId={}, product={}, cmdb={}", nfrId, product, cmdb);
+        log.info("ℹ️ [auto-nfr] Шаг: Назначение НФТ + расчёт паттернов | nfrId={}, product={}, cmdb={}",
+                nfrId, product, cmdb);
 
-        // 1. Назначить НФТ на продукт
         productClient.postProductNfr(product, List.of(nfrId));
-        log.info("NFR {} assigned to product {}", nfrId, product);
+        log.info("ℹ️ [auto-nfr] НФТ {} назначен на продукт {}", nfrId, product);
 
-        // 2. Получить детали НФТ с паттернами
         NfrDetailsV2BpmDTO nfrDetails = productClient.getNfrDetailsById(nfrId);
         if (nfrDetails == null || nfrDetails.getPatterns() == null || nfrDetails.getPatterns().isEmpty()) {
-            log.info("NFR {} has no patterns, pattern check skipped", nfrId);
+            log.warn("ℹ️ [auto-nfr] STOP: у НФТ {} нет связанных паттернов (GET /api/v2/nfr/{}) — запись паттернов пропущена",
+                    nfrId, nfrId);
             return;
         }
+        log.info("ℹ️ [auto-nfr] Паттерны НФТ {}: {}",
+                nfrId,
+                nfrDetails.getPatterns().stream()
+                        .map(NfrPatternBpmDTO::getCode)
+                        .collect(Collectors.toList()));
 
-        // cmdb для подстановки в правило: берём из контекста, при отсутствии — alias продукта
         String effectiveCmdb = (cmdb != null && !cmdb.isBlank()) ? cmdb : product;
-
         List<PatternCheckResultDTO> results = new ArrayList<>();
+        int skipped = 0;
 
         for (NfrPatternBpmDTO pattern : nfrDetails.getPatterns()) {
             if (pattern.getDeleteDate() != null && !pattern.getDeleteDate().isBlank()) {
-                log.debug("Pattern {} has deleteDate, skip", pattern.getCode());
+                log.info("ℹ️ [auto-nfr] skip code={}: deleteDate={}", pattern.getCode(), pattern.getDeleteDate());
+                skipped++;
                 continue;
             }
             if (pattern.getRule() == null || pattern.getRule().isBlank()) {
-                log.debug("Pattern {} has empty rule, skip", pattern.getCode());
+                log.info("ℹ️ [auto-nfr] skip code={}: rule пуст", pattern.getCode());
+                skipped++;
                 continue;
             }
             if (pattern.getCode() == null) {
+                skipped++;
                 continue;
             }
 
             String rule = pattern.getRule().replace("{cmdb}", effectiveCmdb);
+            log.info("ℹ️ [auto-nfr] graph query code={} rule={}", pattern.getCode(), rule);
 
             List<Object> elements = graphClient.executePatternQuery(rule);
             if (elements == null) {
-                log.error("Graph query failed for pattern {}, skip", pattern.getCode());
+                log.error("ℹ️ [auto-nfr] skip code={}: Graph вернул ошибку (null)", pattern.getCode());
+                skipped++;
                 continue;
             }
 
+            boolean isCheck = !elements.isEmpty();
+            log.info("ℹ️ [auto-nfr] result code={} elements={} isCheck={}",
+                    pattern.getCode(), elements.size(), isCheck);
             results.add(PatternCheckResultDTO.builder()
                     .code(pattern.getCode())
-                    .isCheck(!elements.isEmpty())
+                    .isCheck(isCheck)
                     .resultDetails(null)
                     .build());
         }
 
+        log.info("ℹ️ [auto-nfr] Итого: к записи={}, skip={}", results.size(), skipped);
+
         if (results.isEmpty()) {
-            log.info("Pattern check results empty for NFR {}, nothing to save", nfrId);
+            log.warn("ℹ️ [auto-nfr] STOP: нечего сохранять для НФТ {}", nfrId);
             return;
         }
 
-        log.info("Saving {} pattern check results for product {} (NFR {})", results.size(), product, nfrId);
+        log.info("ℹ️ [auto-nfr] POST /api/v2/product/{}/patterns/nfr?branch={} source-id=null body={}",
+                product, BRANCH,
+                results.stream()
+                        .map(r -> r.getCode() + "=" + r.getIsCheck())
+                        .collect(Collectors.joining(", ")));
         productClient.postPatternCheckResults(product, "nfr", null, BRANCH, results);
+        log.info("ℹ️ [auto-nfr] Шаг завершён | product={}, nfrId={}, записано={}", product, nfrId, results.size());
     }
 }

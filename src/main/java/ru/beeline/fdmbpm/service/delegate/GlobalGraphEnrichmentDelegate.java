@@ -39,26 +39,23 @@ public class GlobalGraphEnrichmentDelegate extends StatusLogic implements JavaDe
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Таск : Обогащение глобального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
+        log.info("ℹ️ [pipeline] Шаг: Обогащение глобального графа | process_id={}, docId={}", processId, docId);
         TypeProcess typeProcess = null;
         try {
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-            log.info("camundaProcess : {}", camundaProcess);
             typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-            log.info("typeProcess : {}", typeProcess);
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);
-            log.info("Send to create_global_graph");
             rabbitService.sendMessage("create_global_graph", objectMapper.writeValueAsString(item));
-            log.info("Send to create_global_graph completed");
-
             saveAlias(processId, "glbltskcrt", typeProcess);
-            log.info("Таск : Обогащение глобального графа, зевершен");
+            log.info("ℹ️ [pipeline] Шаг завершён: Обогащение глобального графа | process_id={}, queue=create_global_graph",
+                    processId);
         } catch (Exception e) {
-            log.error("Ошибка при Обагащение глобального графа. Создание записи с ошибкой", e);
+            log.error("ℹ️ [pipeline] Ошибка на шаге Обогащение глобального графа | process_id={}, docId={}",
+                    processId, docId, e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;

@@ -26,13 +26,18 @@ public class GlobalGraphCheckResultDelegate extends StatusLogic implements JavaD
 
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
-        log.info("Проверка результата глобального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
+        Object doneGlobalGraph = delegateExecution.getVariable("doneGlobalGraph");
+        log.info("ℹ️ [pipeline] Шаг: Проверка результата глобального графа | process_id={}, doneGlobalGraph={}",
+                processId, doneGlobalGraph);
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-        if (!Boolean.parseBoolean(delegateExecution.getVariable("doneGlobalGraph").toString())) {
+        if (!Boolean.parseBoolean(String.valueOf(doneGlobalGraph))) {
             saveAlias(processId, "errglblgrph", typeProcess);
-            throw new Exception("doneGlobalGraph is" + delegateExecution.getVariable("doneGlobalGraph").toString());
+            log.error("ℹ️ [pipeline] Глобальный граф НЕ готов | process_id={}, doneGlobalGraph={}",
+                    processId, doneGlobalGraph);
+            throw new Exception("doneGlobalGraph is" + doneGlobalGraph);
         }
+        log.info("ℹ️ [pipeline] Шаг завершён: Проверка результата глобального графа | process_id={}", processId);
     }
 }

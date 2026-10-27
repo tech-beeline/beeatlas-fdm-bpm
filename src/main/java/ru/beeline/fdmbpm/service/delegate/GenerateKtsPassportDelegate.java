@@ -49,10 +49,10 @@ public class GenerateKtsPassportDelegate extends StatusLogic implements JavaDele
         Integer processId = (Integer) execution.getVariable("process_id");
         String cmdb = (String) execution.getVariable("cmdb");
         Object docId = execution.getVariable("docId");
-        log.info("Шаг: Генерация паспорта КТС в SmartKTS: cmdb={}, process_id={}, docId={}", cmdb, processId, docId);
+        log.info("ℹ️ [pipeline] Шаг: Генерация паспорта КТС | cmdb={}, process_id={}, docId={}, smartkts.enabled={}",
+                cmdb, processId, docId, smartKtsEnabled);
         if (!smartKtsEnabled) {
-            log.info("Шаг пропущен: integration.smartkts.enabled=false (cmdb={}, process_id={}, docId={})",
-                    cmdb, processId, docId);
+            log.info("ℹ️ [pipeline] Шаг пропущен: SmartKTS выключен | cmdb={}, process_id={}", cmdb, processId);
             return;
         }
         TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
@@ -67,10 +67,12 @@ public class GenerateKtsPassportDelegate extends StatusLogic implements JavaDele
                     + "ответ={}", cmdb, processId, docId, structurizrId, response);
             execution.setVariable(KTS_GENERATED_VARIABLE, true);
             saveAlias(processId, STATUS_DONE, typeProcess);
+            log.info("ℹ️ [pipeline] Шаг завершён: Генерация паспорта КТС | cmdb={}, process_id={}, status={}",
+                    cmdb, processId, STATUS_DONE);
         } catch (Exception e) {
             String error = "Ошибка генерации паспорта КТС в SmartKTS: " + e.getMessage();
-            log.error("{} (cmdb={}, process_id={}, docId={}, structurizr_id={})",
-                    error, cmdb, processId, docId, structurizrId, e);
+            log.error("ℹ️ [pipeline] Ошибка генерации паспорта КТС | cmdb={}, process_id={}, docId={}, structurizr_id={}, error={}",
+                    cmdb, processId, docId, structurizrId, error, e);
             execution.setVariable(ERROR_VARIABLE, error);
             saveAlias(processId, STATUS_ERROR, typeProcess);
         }

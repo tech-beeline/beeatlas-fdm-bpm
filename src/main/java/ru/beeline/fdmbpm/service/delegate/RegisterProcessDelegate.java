@@ -56,15 +56,12 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Старт метода: Получение информации и регистрации процесса");
         String cmdb = (String) delegateExecution.getVariable("cmdb");
-        log.info("RegisterProcessDelegate: cmdb={}", cmdb);
         String processId = delegateExecution.getProcessInstanceId();
-        log.info("RegisterProcessDelegate: processId={}", processId);
         String businessKey = delegateExecution.getBusinessKey();
-        log.info("RegisterProcessDelegate: businessKey={}", businessKey);
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-        log.info("RegisterProcessDelegate: docId={}", docId);
+        log.info("ℹ️ [pipeline] Шаг: Регистрация процесса | cmdb={}, docId={}, camundaProcessInstanceId={}, businessKey={}",
+                cmdb, docId, processId, businessKey);
         TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
         log.info("RegisterProcessDelegate: typeProcess={}", typeProcess.toString());
         ResponseEntity<ProductDTO> productDTOResponseEntity = productClient.getProductByCmdb(cmdb);
@@ -114,7 +111,8 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
         } catch (Exception e) {
             saveErrStatus("errcrt", processId, businessKey, typeProcess, cmdb, docId);
         }
-        log.info("ℹ️Завершение метода: Получение информации и регистрации процесса");
+        log.info("ℹ️ [pipeline] Шаг завершён: Регистрация процесса | cmdb={}, process_id={}, docId={}",
+                cmdb, delegateExecution.getVariable("process_id"), delegateExecution.getVariable("docId"));
     }
 
     private void saveErrStatus(String statusAlias, String processId, String businessKey, TypeProcess typeProcess
