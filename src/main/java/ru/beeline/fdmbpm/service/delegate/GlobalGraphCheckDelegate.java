@@ -40,11 +40,11 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("ℹ️ Проверка готовности глобального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer globalGraphCount = (Integer) delegateExecution.getVariable("globalGraphCount");
+        log.info("ℹ️ [pipeline] Шаг: Проверка готовности глобального графа | process_id={}, globalGraphCount={}",
+                processId, globalGraphCount);
         if (globalGraphCount != null) {
-            log.info("ℹ️ globalGraphCount: {}", globalGraphCount);
             if (globalGraphCount > 3) {
                 camundaProcessRepository.markAsyncTrueIfFalse(processId);
             }
@@ -52,15 +52,19 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
             TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
             try {
                 GraphDTO localGraphDTO = graphClient.getGlobalGraph(processId);
-                if (localGraphDTO.getStatus().equals("PROCESS") || localGraphDTO.getStatus().equals("QUEUE")) {
+                String status = localGraphDTO.getStatus();
+                log.info("ℹ️ [pipeline/graph] global graph status={} process_id={} attempt={}",
+                        status, processId, globalGraphCount);
+                if (status.equals("PROCESS") || status.equals("QUEUE")) {
                     delegateExecution.setVariable("globalGraphCount", globalGraphCount + 1);
                 }
-                if (localGraphDTO.getStatus().equals("DONE")) {
+                if (status.equals("DONE")) {
                     delegateExecution.setVariable("doneGlobalGraph", true);
                     saveAlias(processId, "glblgrph", typeProcess);
+                    log.info("ℹ️ [pipeline] Глобальный граф READY | process_id={}", processId);
                 }
             } catch (Exception e) {
-                log.info("❌ Ошибка при проверке готовности глобального графа. Создание записи с ошибкой");
+                log.error("ℹ️ [pipeline] Ошибка проверки глобального графа | process_id={}", processId, e);
                 TransactionTemplate tt = new TransactionTemplate(transactionManager);
                 tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
                 tt.execute(status -> {
@@ -75,7 +79,7 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                 throw new ProcessException("❌ Ошибка процесса на шаге: Проверка готовности глобального графа");
             }
         } else {
-            log.info("ℹ️ globalGraphCount = null , устанавливаем globalGraphCount = 1");
+            log.info("ℹ️ [pipeline/graph] globalGraphCount=null → ставим 1 (первый опрос)");
             delegateExecution.setVariable("globalGraphCount", 1);
         }
     }

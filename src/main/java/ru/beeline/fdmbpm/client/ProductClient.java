@@ -172,19 +172,22 @@ public class ProductClient {
     }
 
     public List<Integer> getPatternIdsByProductAlias(String alias) {
+        String url = productServerUrl + "/api/v1/pattern/product?alias=" + alias;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            List<Integer> result = restTemplate.exchange(productServerUrl + "/api/v1/pattern/product?alias=" + alias,
+            log.info("ℹ️ [product] GET pattern/product: {}", url);
+            List<Integer> result = restTemplate.exchange(url,
                     HttpMethod.GET,
                     entity,
                     new ParameterizedTypeReference<List<Integer>>() {
                     }).getBody();
+            log.info("ℹ️ [product] GET pattern/product alias={}: ids={}", alias, result);
             return result;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ℹ️ [product] GET pattern/product alias={} failed: {}", alias, e.getMessage(), e);
             return null;
         }
     }
@@ -273,13 +276,19 @@ public class ProductClient {
                 uriBuilder.queryParam("source-id", docId);
             }
             String url = uriBuilder.toUriString();
-            log.info("POST patterns v2: {}", url);
+            log.info("ℹ️ [product] POST patterns v2: url={}, size={}, body={}",
+                    url,
+                    results == null ? 0 : results.size(),
+                    results);
             restTemplate.exchange(url,
                     HttpMethod.POST,
                     requestEntity,
                     Void.class);
+            log.info("ℹ️ [product] POST patterns v2 OK: cmdb={}, sourceType={}, source-id={}",
+                    cmdb, sourceType, docId);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ℹ️ [product] POST patterns v2 FAILED cmdb={} sourceType={} source-id={}: {}",
+                    cmdb, sourceType, docId, e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -324,30 +333,39 @@ public class ProductClient {
     }
 
     public List<NfrCatalogItemDTO> getAllNfr() {
+        String url = productServerUrl + "/api/v1/nfr";
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(productServerUrl + "/api/v1/nfr",
+            log.info("ℹ️ [product] GET /api/v1/nfr: {}", url);
+            List<NfrCatalogItemDTO> body = restTemplate.exchange(url,
                     HttpMethod.GET,
                     entity,
                     new ParameterizedTypeReference<List<NfrCatalogItemDTO>>() {
                     }).getBody();
+            log.info("ℹ️ [product] GET /api/v1/nfr: size={}", body == null ? 0 : body.size());
+            return body;
         } catch (Exception e) {
-            log.error("GET /api/v1/nfr failed: {}", e.getMessage());
+            log.error("ℹ️ [product] GET /api/v1/nfr failed: {}", e.getMessage(), e);
             return null;
         }
     }
 
     public NfrDetailsV2BpmDTO getNfrDetailsById(Integer nfrId) {
+        String url = productServerUrl + "/api/v2/nfr/" + nfrId;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            return restTemplate.exchange(productServerUrl + "/api/v2/nfr/" + nfrId,
+            log.info("ℹ️ [product] GET /api/v2/nfr/{}", nfrId);
+            NfrDetailsV2BpmDTO body = restTemplate.exchange(url,
                     HttpMethod.GET, entity, NfrDetailsV2BpmDTO.class).getBody();
+            int patternCount = body != null && body.getPatterns() != null ? body.getPatterns().size() : 0;
+            log.info("ℹ️ [product] GET /api/v2/nfr/{}: patterns={}", nfrId, patternCount);
+            return body;
         } catch (Exception e) {
-            log.error("GET /api/v2/nfr/{} failed: {}", nfrId, e.getMessage());
+            log.error("ℹ️ [product] GET /api/v2/nfr/{} failed: {}", nfrId, e.getMessage(), e);
             return null;
         }
     }
@@ -360,9 +378,13 @@ public class ProductClient {
             String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product")
                     .queryParam("alias", alias)
                     .toUriString();
+            log.info("ℹ️ [product] POST /api/v1/nfr/product: url={}, nfrIds={}", url, nfrIds);
             restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
+            log.info("ℹ️ [product] POST /api/v1/nfr/product OK: alias={}, count={}",
+                    alias, nfrIds == null ? 0 : nfrIds.size());
         } catch (Exception e) {
-            log.error("POST /api/v1/nfr/product for alias {} failed: {}", alias, e.getMessage());
+            log.error("ℹ️ [product] POST /api/v1/nfr/product FAILED alias={} ids={}: {}",
+                    alias, nfrIds, e.getMessage(), e);
             throw new RuntimeException("Failed to assign NFR to product", e);
         }
     }
