@@ -392,20 +392,25 @@ public class ProductClient {
     }
 
     public void postProductNfr(String alias, List<Integer> nfrIds) {
+        postProductNfr(alias, null, nfrIds);
+    }
+
+    public void postProductNfr(String alias, String branch, List<Integer> nfrIds) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<List<Integer>> requestEntity = new HttpEntity<>(nfrIds, headers);
             String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product")
                     .queryParam("alias", alias)
+                    .queryParam("branch", normalizeBranch(branch))
                     .toUriString();
             log.info("ℹ️ [product] POST /api/v1/nfr/product: url={}, nfrIds={}", url, nfrIds);
             restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
             log.info("ℹ️ [product] POST /api/v1/nfr/product OK: alias={}, count={}",
                     alias, nfrIds == null ? 0 : nfrIds.size());
         } catch (Exception e) {
-            log.error("ℹ️ [product] POST /api/v1/nfr/product FAILED alias={} ids={}: {}",
-                    alias, nfrIds, e.getMessage(), e);
+            log.error("ℹ️ [product] POST /api/v1/nfr/product FAILED alias={} branch={} ids={}: {}",
+                    alias, branch, nfrIds, e.getMessage(), e);
             throw new RuntimeException("Failed to assign NFR to product", e);
         }
     }
