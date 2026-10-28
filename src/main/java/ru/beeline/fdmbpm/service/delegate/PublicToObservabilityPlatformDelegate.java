@@ -23,7 +23,6 @@ import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
-import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -58,14 +57,12 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Шаг: Публикация в платформу наблюдаемости");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
-        log.info("process_id: {}", processId);
         String cmdb = (String) delegateExecution.getVariable("cmdb");
+        log.info("ℹ️ [pipeline] Шаг: Публикация в платформу наблюдаемости | cmdb={}, process_id={}",
+                cmdb, processId);
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-        log.info("camundaProcess : {}", camundaProcess);
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-        log.info("typeProcess : {}", typeProcess);
         try {
             ProductDTO productDTO = productClient.getProductByCmdb(cmdb).getBody();
             Long modelId;
@@ -87,22 +84,23 @@ public class PublicToObservabilityPlatformDelegate extends StatusLogic implement
                 viewPlatformClient.postStructurizrModel(null, modelId);
             }
             saveAlias(processId, "vpcrt", typeProcess);
-            log.info("Шаг: Публикация в платформу наблюдаемости: завершен! ");
+            log.info("ℹ️ [pipeline] Шаг завершён: Публикация в платформу наблюдаемости | cmdb={}, process_id={}",
+                    cmdb, processId);
         } catch (Exception e) {
-            log.error("Ошибка при Публикация в платформу наблюдаемости. Создание записи с ошибкой", e);
+            log.error("ℹ️ [pipeline] Ошибка на шаге Публикация в платформу наблюдаемости | cmdb={}, process_id={}",
+                    cmdb, processId, e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            String message = StepErrorMessage.of("Публикация в платформу наблюдаемости", e);
             tt.execute(status -> {
                 StatusProcess statusProcess =
                         statusProcessRepository.findByAliasAndTypeProcessId("vperr", typeProcess.getId());
                 if (camundaProcessStatusRepository.findByCamundaProcessIdAndStatusProcessId(processId,
                         statusProcess.getId()).isEmpty()) {
-                    saveAlias(processId, "vperr", typeProcess, message);
+                    saveAlias(processId, "vperr", typeProcess);
                 }
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Публикация в платформу наблюдаемости", e);
+            throw new ProcessException("Ошибка процесса на шаге: Публикация в платформу наблюдаемости");
         }
     }
 

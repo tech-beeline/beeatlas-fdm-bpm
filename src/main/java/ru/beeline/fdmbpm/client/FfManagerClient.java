@@ -44,15 +44,15 @@ public class FfManagerClient {
                     Object.class
             );
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Успешная отправка в FF Manager. Статус: {}, docId: {}, app: {}",
-                        response.getStatusCode(), docId, body.getApp());
+                log.info("ℹ️ [ff-manager] run-all OK | status={}, docId={}, app={}, source_id={}",
+                        response.getStatusCode(), docId, body.getApp(), processId);
             } else {
-                log.warn("FF Manager вернул ошибку. Статус: {}, docId: {}, app: {}",
+                log.warn("ℹ️ [ff-manager] run-all non-2xx (не пробрасывается в Camunda) | status={}, docId={}, app={}",
                         response.getStatusCode(), docId, body.getApp());
             }
         } catch (Exception e) {
-            log.error("Ошибка при отправке запроса в FF Manager. docId: {}, app: {}",
-                    docId, body.getApp(), e);
+            log.error("ℹ️ [ff-manager] run-all FAILED (исключение глотается) | docId={}, app={}, source_id={}: {}",
+                    docId, body.getApp(), processId, e.getMessage(), e);
         }
     }
 
@@ -80,8 +80,14 @@ public class FfManagerClient {
 
     public List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> getMergedActualResultsForNfr(String productCode) {
         List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> merged = new ArrayList<>();
-        merged.addAll(mapActualResults(getProductActualResults(productCode, false)));
-        merged.addAll(mapActualResults(getProductActualResults(productCode, true)));
+        List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> main =
+                mapActualResults(getProductActualResults(productCode, false));
+        List<AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO> auxiliary =
+                mapActualResults(getProductActualResults(productCode, true));
+        merged.addAll(main);
+        merged.addAll(auxiliary);
+        log.info("ℹ️ [ff-manager] merged actual-results for {}: main={}, auxiliary={}, total={}",
+                productCode, main.size(), auxiliary.size(), merged.size());
         return merged;
     }
 

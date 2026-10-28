@@ -40,11 +40,11 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("ℹ️ Проверка готовности локального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer localGraphCount = (Integer) delegateExecution.getVariable("localGraphCount");
+        log.info("ℹ️ [pipeline] Шаг: Проверка готовности локального графа | process_id={}, localGraphCount={}",
+                processId, localGraphCount);
         if (localGraphCount != null) {
-            log.info("ℹ️ localGraphCount: {}", localGraphCount);
             if (localGraphCount > 3) {
                 camundaProcessRepository.markAsyncTrueIfFalse(processId);
             }
@@ -52,15 +52,19 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
             TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
             try {
                 GraphDTO localGraphDTO = graphClient.getLocalGraph(processId);
-                if (localGraphDTO.getStatus().equals("PROCESS") || localGraphDTO.getStatus().equals("QUEUE")) {
+                String status = localGraphDTO.getStatus();
+                log.info("ℹ️ [pipeline/graph] local graph status={} process_id={} attempt={}",
+                        status, processId, localGraphCount);
+                if (status.equals("PROCESS") || status.equals("QUEUE")) {
                     delegateExecution.setVariable("localGraphCount", localGraphCount + 1);
                 }
-                if (localGraphDTO.getStatus().equals("DONE")) {
+                if (status.equals("DONE")) {
                     delegateExecution.setVariable("doneLocalGraph", true);
                     saveAlias(processId, "lclgrph", typeProcess);
+                    log.info("ℹ️ [pipeline] Локальный граф READY | process_id={}", processId);
                 }
             } catch (Exception e) {
-                log.info("❌ Ошибка при проверке готовности локального графа. Создание записи с ошибкой");
+                log.error("ℹ️ [pipeline] Ошибка проверки локального графа | process_id={}", processId, e);
                 TransactionTemplate tt = new TransactionTemplate(transactionManager);
                 tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
                 tt.execute(status -> {
@@ -75,7 +79,7 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
                 throw new ProcessException("❌ Ошибка процесса на шаге: Проверка готовности локального графа");
             }
         } else {
-            log.info("ℹ️ localGraphCount = null , устанавливаем localGraphCount = 1");
+            log.info("ℹ️ [pipeline/graph] localGraphCount=null → ставим 1 (первый опрос)");
             delegateExecution.setVariable("localGraphCount", 1);
         }
     }

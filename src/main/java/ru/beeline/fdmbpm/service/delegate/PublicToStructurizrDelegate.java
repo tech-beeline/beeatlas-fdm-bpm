@@ -19,7 +19,6 @@ import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
-import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("PublicToStructurizrDelegate")
@@ -36,30 +35,28 @@ public class PublicToStructurizrDelegate extends StatusLogic implements JavaDele
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Шаг: Публикация в structurizr");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-        log.info("process_id: {}, docId: {}", processId, docId);
+        log.info("ℹ️ [pipeline] Шаг: Публикация в Structurizr | process_id={}, docId={}", processId, docId);
         TypeProcess typeProcess = null;
         try {
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-            log.info("camundaProcess : {}", camundaProcess);
             typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-            log.info("typeProcess : {}", typeProcess);
             archClient.publicToStructurizr(docId);
             saveAlias(processId, "strct", typeProcess);
-            log.info("Шаг: Публикация в structurizr, успешно завершен.");
+            log.info("ℹ️ [pipeline] Шаг завершён: Публикация в Structurizr | process_id={}, docId={}",
+                    processId, docId);
         } catch (Exception e) {
-            log.error("Ошибка при Публикация в structurizr. Создание записи с ошибкой", e);
+            log.error("ℹ️ [pipeline] Ошибка на шаге Публикация в Structurizr | process_id={}, docId={}",
+                    processId, docId, e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;
-            String message = StepErrorMessage.of("Публикация в Structurizr", e);
             tt.execute(status -> {
-                saveAlias(processId, "strcterr", finalTypeProcess, message);
+                saveAlias(processId, "strcterr", finalTypeProcess);
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Публикация в structurizr", e);
+            throw new ProcessException("Ошибка процесса на шаге: Публикация в structurizr");
         }
     }
 }

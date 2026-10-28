@@ -27,7 +27,11 @@ public class CalculateGlobalFFDelegate extends StatusLogic implements JavaDelega
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Шаг: Расчет Глобальной Фитнес функции");
-        //TODO: to be continue
+        Integer processId = (Integer) delegateExecution.getVariable("process_id");
+        Integer docId = (Integer) delegateExecution.getVariable("docId");
+        String cmdb = (String) delegateExecution.getVariable("cmdb");
+        log.info("ℹ️ [pipeline] Шаг: Расчёт глобальных FF | cmdb={}, process_id={}, docId={} — TODO: заглушка, расчёт не выполняется",
+                cmdb, processId, docId);
+        log.info("ℹ️ [pipeline] Шаг завершён: Расчёт глобальных FF (no-op)");
     }
 }

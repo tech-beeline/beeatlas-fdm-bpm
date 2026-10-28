@@ -39,10 +39,9 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Шаг: Обагащение локального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-        log.info("Обработка с processId: {}, docId: {}", processId, docId);
+        log.info("ℹ️ [pipeline] Шаг: Обогащение локального графа | process_id={}, docId={}", processId, docId);
         TypeProcess typeProcess = null;
         try {
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
@@ -59,9 +58,11 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
             rabbitService.sendMessage("create_local_graph", objectMapper.writeValueAsString(item));
             log.info("Send to create_local_graph completed");
             saveAlias(processId, "lcltskcrt", typeProcess);
-            log.info("Обогащение графа успешно. processId={}, docId={}", processId, docId);
+            log.info("ℹ️ [pipeline] Шаг завершён: Обогащение локального графа | process_id={}, docId={}, queue=create_local_graph",
+                    processId, docId);
         } catch (Exception e) {
-            log.error("Ошибка при обагащении локального графа. Создание записи с ошибкой", e);
+            log.error("ℹ️ [pipeline] Ошибка на шаге Обогащение локального графа | process_id={}, docId={}",
+                    processId, docId, e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;

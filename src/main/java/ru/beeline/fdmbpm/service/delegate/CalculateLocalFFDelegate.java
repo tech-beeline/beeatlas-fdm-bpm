@@ -36,22 +36,25 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Шаг: Расчет Фитнес функции");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
         Integer docId = (Integer) delegateExecution.getVariable("docId");
         String cmdb = (String) delegateExecution.getVariable("cmdb");
-        log.info("process_id: {}, docId: {}, cmdb: {}", processId, docId, cmdb);
+        log.info("ℹ️ [pipeline] Шаг: Расчёт локальных FF | cmdb={}, process_id={}, docId={} "
+                + "(результаты FF нужны для назначения НФТ)", cmdb, processId, docId);
         TypeProcess typeProcess = null;
         try {
+            log.info("ℹ️ [pipeline/ff] POST FF Manager run-all | app={}, docId={}, source_id={}",
+                    cmdb, docId, processId);
             ffManagerClient.postFfManager(PostFfManagerDTO.builder().app(cmdb).build(), docId, processId);
             CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
-            log.info("camundaProcess: processId={}, procId={}, businessKey={}, typeProcessId={}",
-                    processId, camundaProcess.getProcId(), camundaProcess.getBusinessKey(), camundaProcess.getTypeProcessId());
             typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
             saveAlias(processId, "ffdn", typeProcess);
-            log.info("Шаг: Расчет Фитнес функции, успешно завершен. typeProcess: {} ", typeProcess);
+            log.info("ℹ️ [pipeline] Шаг завершён: Расчёт локальных FF | cmdb={}, process_id={}, statusAlias=ffdn. "
+                            + "Внимание: FfManagerClient глотает HTTP-ошибки — смотри логи [ff-manager]",
+                    cmdb, processId);
         } catch (Exception e) {
-            log.error("Ошибка при Расчете Фитнес функции. Создание записи с ошибкой", e);
+            log.error("ℹ️ [pipeline] Ошибка на шаге Расчёт локальных FF | cmdb={}, process_id={}",
+                    cmdb, processId, e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;

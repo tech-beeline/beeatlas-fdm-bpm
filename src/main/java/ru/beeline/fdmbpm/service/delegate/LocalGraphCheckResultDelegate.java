@@ -26,15 +26,18 @@ public class LocalGraphCheckResultDelegate extends StatusLogic implements JavaDe
 
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
-        log.info("Проверка результата локального графа");
         Integer processId = (Integer) delegateExecution.getVariable("process_id");
+        Object doneLocalGraph = delegateExecution.getVariable("doneLocalGraph");
+        log.info("ℹ️ [pipeline] Шаг: Проверка результата локального графа | process_id={}, doneLocalGraph={}",
+                processId, doneLocalGraph);
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
-        log.info("delegateExecution.getVariable(\"doneLocalGraph\") =" + delegateExecution.getVariable("doneLocalGraph"));
-        log.info("parse bool=" + Boolean.parseBoolean(delegateExecution.getVariable("doneLocalGraph").toString()));
-        if (!Boolean.parseBoolean(delegateExecution.getVariable("doneLocalGraph").toString())) {
+        if (!Boolean.parseBoolean(String.valueOf(doneLocalGraph))) {
             saveAlias(processId, "errlclgrph", typeProcess);
-            throw new Exception("doneLocalGraph is" + delegateExecution.getVariable("doneLocalGraph").toString());
+            log.error("ℹ️ [pipeline] Локальный граф НЕ готов | process_id={}, doneLocalGraph={}",
+                    processId, doneLocalGraph);
+            throw new Exception("doneLocalGraph is" + doneLocalGraph);
         }
+        log.info("ℹ️ [pipeline] Шаг завершён: Проверка результата локального графа | process_id={}", processId);
     }
 }

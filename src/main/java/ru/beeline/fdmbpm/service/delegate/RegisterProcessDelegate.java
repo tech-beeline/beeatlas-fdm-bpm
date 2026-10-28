@@ -56,41 +56,23 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
 
     @Override
     public void execute(DelegateExecution delegateExecution) {
-        log.info("Старт метода: Получение информации и регистрации процесса");
         String cmdb = (String) delegateExecution.getVariable("cmdb");
-        log.info("RegisterProcessDelegate: cmdb={}", cmdb);
         String processId = delegateExecution.getProcessInstanceId();
-        log.info("RegisterProcessDelegate: processId={}", processId);
         String businessKey = delegateExecution.getBusinessKey();
-        log.info("RegisterProcessDelegate: businessKey={}", businessKey);
         Integer docId = (Integer) delegateExecution.getVariable("docId");
-        log.info("RegisterProcessDelegate: docId={}", docId);
-        boolean branchProcess = DatapipeBranchProcess.isBranchProcess(delegateExecution);
-        String branch = branchProcess ? DatapipeBranchProcess.branch(delegateExecution) : null;
-        log.info("RegisterProcessDelegate: processDefinitionId={}, branch={}",
-                delegateExecution.getProcessDefinitionId(), branch);
-        TypeProcess typeProcess = typeProcessRepository.findByAlias(branchProcess
-                ? DatapipeBranchProcess.TYPE_ALIAS : DatapipeBranchProcess.DATAPIPE_TYPE_ALIAS);
+        log.info("ℹ️ [pipeline] Шаг: Регистрация процесса | cmdb={}, docId={}, camundaProcessInstanceId={}, businessKey={}",
+                cmdb, docId, processId, businessKey);
+        TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
         log.info("RegisterProcessDelegate: typeProcess={}", typeProcess.toString());
         ResponseEntity<ProductDTO> productDTOResponseEntity = productClient.getProductByCmdb(cmdb);
         CamundaProcess camundaProcess = null;
         try {
             camundaProcess = saveProcess(typeProcess.getId(), processId, businessKey);
-            if (branchProcess) {
-                if (docId == null) {
-                    log.info("ℹ️ docId is null, для процесса ветки docId обязателен");
-                    throw new VldterrException("vldterr");
-                }
-                validateBranch(branch);
-            }
             if (productDTOResponseEntity.getStatusCode().is2xxSuccessful()) {
                 log.info("RegisterProcessDelegate: camundaProcess={}", camundaProcess.getId());
                 delegateExecution.setVariable("process_id", camundaProcess.getId());
                 log.info("ℹ️ saveAlias: has been saved");
                 saveToContextRepository("cmdb", cmdb, camundaProcess);
-                if (branchProcess) {
-                    saveBranchContext(cmdb, branch, camundaProcess);
-                }
                 log.info("context: has been saved");
                 if (docId != null) {
                     saveToContextRepository("docId", docId.toString(), camundaProcess);
@@ -123,17 +105,18 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                 throw new ProcessException(productDTOResponseEntity.getStatusCode().toString());
             }
         } catch (VldterrException e) {
-            saveErrStatus("vldterr", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch);
+            saveErrStatus("vldterr", processId, businessKey, typeProcess, cmdb, docId);
         } catch (CmdberrException e) {
-            saveErrStatus("cmdberr", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch);
+            saveErrStatus("cmdberr", processId, businessKey, typeProcess, cmdb, docId);
         } catch (Exception e) {
-            saveErrStatus("errcrt", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch);
+            saveErrStatus("errcrt", processId, businessKey, typeProcess, cmdb, docId);
         }
-        log.info("ℹ️Завершение метода: Получение информации и регистрации процесса");
+        log.info("ℹ️ [pipeline] Шаг завершён: Регистрация процесса | cmdb={}, process_id={}, docId={}",
+                cmdb, delegateExecution.getVariable("process_id"), delegateExecution.getVariable("docId"));
     }
 
     private void saveErrStatus(String statusAlias, String processId, String businessKey, TypeProcess typeProcess
-            , String cmdb, Integer docId, boolean branchProcess, String branch) {
+            , String cmdb, Integer docId) {
         log.error("❌ Ошибка при регистрации процесса. Создание записи с ошибкой");
         TransactionTemplate tt = new TransactionTemplate(transactionManager);
         tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -145,37 +128,10 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                 if (docId != null) {
                     saveToContextRepository("docId", docId.toString(), failedProcess);
                 }
-                if (branchProcess) {
-                    saveBranchContext(cmdb, branch, failedProcess);
-                }
             }
             return null;
         });
         throw new ProcessException("❌ Ошибка процесса на шаге: Получение информации и регистрации процесса");
-    }
-
-    private static void validateBranch(String branch) {
-        if (branch == null || branch.isEmpty()) {
-            throw new ProcessException("Не задана ветка branch");
-        }
-        if (branch.length() > DatapipeBranchProcess.MAX_BRANCH_LENGTH) {
-            throw new ProcessException("Длина ветки branch больше " + DatapipeBranchProcess.MAX_BRANCH_LENGTH);
-        }
-    }
-
-    /**
-     * Контекст процесса ветки: branch и artifactUid пайпов staging, которые процесс запустит.
-     * Значения, которые ещё неизвестны, не пишутся.
-     */
-    private void saveBranchContext(String cmdb, String branch, CamundaProcess camundaProcess) {
-        if (branch != null && !branch.isEmpty()) {
-            saveToContextRepository(DatapipeBranchProcess.BRANCH_VARIABLE, branch, camundaProcess);
-        }
-        if (cmdb != null) {
-            for (StagingArtifact artifact : StagingArtifact.values()) {
-                saveToContextRepository(artifact.artifactUidContextName(), cmdb, camundaProcess);
-            }
-        }
     }
 
     private boolean isJson(String contentDisposition) {
