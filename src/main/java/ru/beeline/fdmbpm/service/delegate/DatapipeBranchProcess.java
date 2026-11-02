@@ -5,6 +5,7 @@
 package ru.beeline.fdmbpm.service.delegate;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
 
 /**
  * Процесс Process_datapipeline_branch: сохранение архитектуры продукта в ветке через staging.
@@ -27,18 +28,26 @@ public final class DatapipeBranchProcess {
     }
 
     public static boolean isBranchProcess(DelegateExecution execution) {
-        return PROCESS_KEY.equals(processDefinitionKey(execution.getProcessDefinitionId()));
+        return PROCESS_KEY.equals(processDefinitionKey(execution));
     }
 
     /**
-     * Ключ definition из processDefinitionId вида {@code key:version:id}.
+     * Ключ definition процесса. Camunda пишет processDefinitionId как {@code key:version:id}, только пока
+     * он не длиннее 64 символов, иначе id — голый UUID. У Process_datapipeline_branch id всегда UUID,
+     * поэтому ключ без двоеточия берётся из определения процесса.
      */
-    static String processDefinitionKey(String processDefinitionId) {
+    static String processDefinitionKey(DelegateExecution execution) {
+        String processDefinitionId = execution.getProcessDefinitionId();
         if (processDefinitionId == null) {
             return null;
         }
         int colon = processDefinitionId.indexOf(':');
-        return colon < 0 ? processDefinitionId : processDefinitionId.substring(0, colon);
+        if (colon > 0) {
+            return processDefinitionId.substring(0, colon);
+        }
+        ProcessDefinition definition = execution.getProcessEngineServices().getRepositoryService()
+                .getProcessDefinition(processDefinitionId);
+        return definition == null ? null : definition.getKey();
     }
 
     /**
