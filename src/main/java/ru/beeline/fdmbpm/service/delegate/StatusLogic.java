@@ -37,6 +37,10 @@ public class StatusLogic {
         log.info("saveAlias: processId= {}", processId);
         log.info("saveAlias: alias= {}", alias);
         StatusProcess statusProcess = statusProcessRepository.findByAliasAndTypeProcessId(alias, typeProcess.getId());
+        if (statusProcess == null) {
+            throw new IllegalStateException("Статус " + alias + " не найден для типа процесса "
+                    + typeProcess.getAlias() + " (id=" + typeProcess.getId() + ")");
+        }
         camundaProcessStatusRepository.saveAndFlush(CamundaProcessStatus.builder()
                 .statusProcessId(statusProcess.getId())
                 .camundaProcessId(processId)
