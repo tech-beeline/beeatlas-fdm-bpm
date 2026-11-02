@@ -49,6 +49,12 @@ public class GlobalGraphEnrichmentDelegate extends StatusLogic implements JavaDe
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);
+            if (DatapipeBranchProcess.isBranchProcess(delegateExecution)) {
+                String branch = DatapipeBranchProcess.branch(delegateExecution);
+                if (branch != null && !branch.isEmpty()) {
+                    item.put(DatapipeBranchProcess.BRANCH_VARIABLE, branch);
+                }
+            }
             rabbitService.sendMessage("create_global_graph", objectMapper.writeValueAsString(item));
             saveAlias(processId, "glbltskcrt", typeProcess);
             log.info("ℹ️ [pipeline] Шаг завершён: Обогащение глобального графа | process_id={}, queue=create_global_graph",
