@@ -97,13 +97,10 @@ public class AssignProductNfrDelegate implements JavaDelegate {
                     cmdb);
             return;
         }
+
         log.info("ℹ️ [pipeline/nfr] POST /api/v1/nfr/product alias={} ids={}", cmdb, idsToAssign);
-        String branch = DatapipeBranchProcess.isBranchProcess(execution) ? DatapipeBranchProcess.branch(execution) : null;
-        productClient.postProductNfr(cmdb, branch, idsToAssign);
-        log.info("ℹ️ [pipeline] Шаг завершён: Назначение НФТ | cmdb={}, назначено={}, ветка={}", cmdb,
-                 idsToAssign.size(),
-                 branch == null ? "main" : branch);
-        log.info("Назначено {} НФТ на продукт {} (ветка {})", idsToAssign.size(), cmdb);
+        productClient.postProductNfr(cmdb, idsToAssign);
+        log.info("ℹ️ [pipeline] Шаг завершён: Назначение НФТ | cmdb={}, назначено={}", cmdb, idsToAssign.size());
     }
 
     private static boolean allRuleCodesPassFitness(String rule,
