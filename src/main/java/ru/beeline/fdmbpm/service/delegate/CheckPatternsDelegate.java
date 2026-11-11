@@ -9,11 +9,18 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.client.GraphClient;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.TechradarClient;
+import ru.beeline.fdmbpm.domain.CamundaProcess;
+import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.dto.techradar.PatternDTO;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +30,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component("CheckPatternsDelegate")
-public class CheckPatternsDelegate implements JavaDelegate {
+public class CheckPatternsDelegate extends StatusLogic implements JavaDelegate {
+
+    static final String STATUS_DONE = "ptrncrt";
+    static final String STATUS_ERROR = "ptrnerr";
 
     private static final String BRANCH = "main";
 
@@ -36,12 +46,31 @@ public class CheckPatternsDelegate implements JavaDelegate {
     @Autowired
     private GraphClient graphClient;
 
+    @Autowired
+    TypeProcessRepository typeProcessRepository;
+
+    @Autowired
+    CamundaProcessRepository camundaProcessRepository;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
+
     @Override
     public void execute(DelegateExecution execution) {
         if (DatapipeBranchProcess.isBranchProcess(execution)) {
             checkPatternsForBranch(execution);
             return;
         }
+        try {
+            checkPatternsForDatapipe(execution);
+            saveDatapipeStatus(execution, STATUS_DONE);
+        } catch (RuntimeException e) {
+            saveErrorStatus(execution, STATUS_ERROR);
+            throw e;
+        }
+    }
+
+    private void checkPatternsForDatapipe(DelegateExecution execution) {
         String cmdb = (String) execution.getVariable("cmdb");
         Integer docId = (Integer) execution.getVariable("docId");
         log.info("cmdb is" + cmdb);
@@ -68,6 +97,22 @@ public class CheckPatternsDelegate implements JavaDelegate {
         }
 
         productClient.postPatternCheckResults(cmdb, "pipeline", docId, BRANCH, results);
+    }
+
+    private void saveDatapipeStatus(DelegateExecution execution, String alias) {
+        Integer processId = (Integer) execution.getVariable("process_id");
+        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+        saveAlias(processId, alias, typeProcess);
+    }
+
+    private void saveErrorStatus(DelegateExecution execution, String alias) {
+        TransactionTemplate tt = new TransactionTemplate(transactionManager);
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        tt.execute(status -> {
+            saveDatapipeStatus(execution, alias);
+            return null;
+        });
     }
 
     /**

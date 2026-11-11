@@ -58,6 +58,11 @@ public class GenerateKtsPassportDelegate extends StatusLogic implements JavaDele
                 cmdb, processId, docId, smartKtsEnabled);
         if (!smartKtsEnabled) {
             log.info("ℹ️ [pipeline] Шаг пропущен: SmartKTS выключен | cmdb={}, process_id={}", cmdb, processId);
+            if (!DatapipeBranchProcess.isBranchProcess(execution)) {
+                CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+                TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+                saveAlias(processId, STATUS_DONE, typeProcess);
+            }
             return;
         }
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();

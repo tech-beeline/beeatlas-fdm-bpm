@@ -84,9 +84,22 @@ class GenerateKtsPassportDelegateTest {
     }
 
     @Test
-    @DisplayName("Признак integration.smartkts.enabled выключен — шаг пропускается без вызовов и без error")
+    @DisplayName("SmartKTS выключен — генерация не вызывается, пишется ktscrt, error не ставится")
     void skipsWhenDisabled() {
         delegate.smartKtsEnabled = false;
+
+        delegate.execute(execution);
+
+        verifyNoInteractions(productClient, smartKtsClient);
+        verify(execution, never()).setVariable(anyString(), any());
+        assertThat(savedStatusId()).isEqualTo(101);
+    }
+
+    @Test
+    @DisplayName("SmartKTS выключен в Process_datapipeline_branch — статус не пишется и error не ставится")
+    void skipsWhenDisabledOnBranchProcess() {
+        delegate.smartKtsEnabled = false;
+        when(execution.getProcessDefinitionId()).thenReturn("Process_datapipeline_branch:1:c0ffee");
 
         delegate.execute(execution);
 

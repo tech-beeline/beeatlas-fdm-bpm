@@ -9,10 +9,17 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.beeline.fdmbpm.client.FfManagerClient;
 import ru.beeline.fdmbpm.client.ProductClient;
+import ru.beeline.fdmbpm.domain.CamundaProcess;
+import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
+import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +27,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component("AssignProductNfrDelegate")
-public class AssignProductNfrDelegate implements JavaDelegate {
+public class AssignProductNfrDelegate extends StatusLogic implements JavaDelegate {
+
+    static final String STATUS_DONE = "nfrcrt";
+    static final String STATUS_ERROR = "nfrerr";
 
     @Autowired
     private ProductClient productClient;
@@ -28,8 +38,31 @@ public class AssignProductNfrDelegate implements JavaDelegate {
     @Autowired
     private FfManagerClient ffManagerClient;
 
+    @Autowired
+    TypeProcessRepository typeProcessRepository;
+
+    @Autowired
+    CamundaProcessRepository camundaProcessRepository;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
+
     @Override
     public void execute(DelegateExecution execution) {
+        if (DatapipeBranchProcess.isBranchProcess(execution)) {
+            assign(execution);
+            return;
+        }
+        try {
+            assign(execution);
+            saveDatapipeStatus(execution, STATUS_DONE);
+        } catch (RuntimeException e) {
+            saveErrorStatus(execution, STATUS_ERROR);
+            throw e;
+        }
+    }
+
+    private void assign(DelegateExecution execution) {
         String cmdb = (String) execution.getVariable("cmdb");
         Integer docId = (Integer) execution.getVariable("docId");
         Integer processId = (Integer) execution.getVariable("process_id");
@@ -101,6 +134,22 @@ public class AssignProductNfrDelegate implements JavaDelegate {
         log.info("ℹ️ [pipeline/nfr] POST /api/v1/nfr/product alias={} ids={}", cmdb, idsToAssign);
         productClient.postProductNfr(cmdb, idsToAssign);
         log.info("ℹ️ [pipeline] Шаг завершён: Назначение НФТ | cmdb={}, назначено={}", cmdb, idsToAssign.size());
+    }
+
+    private void saveDatapipeStatus(DelegateExecution execution, String alias) {
+        Integer processId = (Integer) execution.getVariable("process_id");
+        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+        saveAlias(processId, alias, typeProcess);
+    }
+
+    private void saveErrorStatus(DelegateExecution execution, String alias) {
+        TransactionTemplate tt = new TransactionTemplate(transactionManager);
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        tt.execute(status -> {
+            saveDatapipeStatus(execution, alias);
+            return null;
+        });
     }
 
     private static boolean allRuleCodesPassFitness(String rule,
