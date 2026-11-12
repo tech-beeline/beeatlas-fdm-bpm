@@ -13,9 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.client.ProductClient;
 import ru.beeline.fdmbpm.client.SmartKtsClient;
+import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
 import ru.beeline.fdmbpm.dto.smartkts.StructurizrObjectDTO;
+import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 
 import java.net.URI;
@@ -44,6 +46,9 @@ public class GenerateKtsPassportDelegate extends StatusLogic implements JavaDele
     @Autowired
     TypeProcessRepository typeProcessRepository;
 
+    @Autowired
+    CamundaProcessRepository camundaProcessRepository;
+
     @Override
     public void execute(DelegateExecution execution) {
         Integer processId = (Integer) execution.getVariable("process_id");
@@ -53,9 +58,15 @@ public class GenerateKtsPassportDelegate extends StatusLogic implements JavaDele
                 cmdb, processId, docId, smartKtsEnabled);
         if (!smartKtsEnabled) {
             log.info("ℹ️ [pipeline] Шаг пропущен: SmartKTS выключен | cmdb={}, process_id={}", cmdb, processId);
+            if (!DatapipeBranchProcess.isBranchProcess(execution)) {
+                CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+                TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
+                saveAlias(processId, STATUS_DONE, typeProcess);
+            }
             return;
         }
-        TypeProcess typeProcess = typeProcessRepository.findByAlias("Datapipe");
+        CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
+        TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         String bwikiKtsLink = bwikiKtsLink(execution);
         String structurizrId = null;
         try {

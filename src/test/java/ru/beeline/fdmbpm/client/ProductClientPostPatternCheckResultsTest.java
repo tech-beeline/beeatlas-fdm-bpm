@@ -72,4 +72,16 @@ class ProductClientPostPatternCheckResultsTest {
         server.verify();
         assertThat(ProductClient.normalizeBranch(null)).isEqualTo("main");
     }
+
+    @Test
+    void cmdbWithSpace_isEncodedOnceInPath() {
+        server.expect(requestTo(BASE_URL + "/api/v2/product/td%20pm/patterns/pipeline?branch=main&source-id=5"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED));
+
+        productClient.postPatternCheckResults("td pm", "pipeline", 5, null, List.of(
+                PatternCheckResultDTO.builder().code("P-4").isCheck(true).build()));
+
+        server.verify();
+    }
 }

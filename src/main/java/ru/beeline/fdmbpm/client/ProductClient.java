@@ -26,6 +26,7 @@ import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
 import ru.beeline.fdmbpm.dto.product.PublishedApiDTO;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -172,14 +173,15 @@ public class ProductClient {
     }
 
     public List<Integer> getPatternIdsByProductAlias(String alias) {
-        String url = productServerUrl + "/api/v1/pattern/product?alias=" + alias;
+        URI uri = encodedUri(UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/pattern/product")
+                .queryParam("alias", alias));
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            log.info("ℹ️ [product] GET pattern/product: {}", url);
-            List<Integer> result = restTemplate.exchange(url,
+            log.info("ℹ️ [product] GET pattern/product: {}", uri);
+            List<Integer> result = restTemplate.exchange(uri,
                     HttpMethod.GET,
                     entity,
                     new ParameterizedTypeReference<List<Integer>>() {
@@ -188,6 +190,26 @@ public class ProductClient {
             return result;
         } catch (Exception e) {
             log.error("ℹ️ [product] GET pattern/product alias={} failed: {}", alias, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public List<Integer> getPatternIdsByProductAlias(String alias, String branch) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            URI uri = encodedUri(UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/pattern/product")
+                    .queryParam("alias", alias)
+                    .queryParam("branch", branch));
+            return restTemplate.exchange(uri,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<Integer>>() {
+                    }).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -270,17 +292,18 @@ public class ProductClient {
 
             HttpEntity<List<PatternCheckResultDTO>> requestEntity = new HttpEntity<>(results, headers);
             UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                    .fromHttpUrl(productServerUrl + "/api/v2/product/" + cmdb + "/patterns/" + sourceType)
+                    .fromHttpUrl(productServerUrl)
+                    .path("/api/v2/product/{cmdb}/patterns/{sourceType}")
                     .queryParam("branch", normalizeBranch(branch));
             if (docId != null) {
                 uriBuilder.queryParam("source-id", docId);
             }
-            String url = uriBuilder.toUriString();
+            URI uri = uriBuilder.buildAndExpand(cmdb, sourceType).encode().toUri();
             log.info("ℹ️ [product] POST patterns v2: url={}, size={}, body={}",
-                    url,
+                    uri,
                     results == null ? 0 : results.size(),
                     results);
-            restTemplate.exchange(url,
+            restTemplate.exchange(uri,
                     HttpMethod.POST,
                     requestEntity,
                     Void.class);
@@ -298,6 +321,14 @@ public class ProductClient {
             return "main";
         }
         return branch.trim();
+    }
+
+    /**
+     * Готовый URI для {@code RestTemplate.exchange(URI)}. Строка из {@code toUriString()} уже
+     * закодирована, и exchange(String) кодирует её второй раз: пробел в alias становится {@code %2520}.
+     */
+    private static URI encodedUri(UriComponentsBuilder builder) {
+        return builder.build().encode().toUri();
     }
 
     public String getMapicSpec(Integer apiId) {
@@ -375,11 +406,10 @@ public class ProductClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<List<Integer>> requestEntity = new HttpEntity<>(nfrIds, headers);
-            String url = UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product")
-                    .queryParam("alias", alias)
-                    .toUriString();
-            log.info("ℹ️ [product] POST /api/v1/nfr/product: url={}, nfrIds={}", url, nfrIds);
-            restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
+            URI uri = encodedUri(UriComponentsBuilder.fromHttpUrl(productServerUrl + "/api/v1/nfr/product")
+                    .queryParam("alias", alias));
+            log.info("ℹ️ [product] POST /api/v1/nfr/product: url={}, nfrIds={}", uri, nfrIds);
+            restTemplate.exchange(uri, HttpMethod.POST, requestEntity, Void.class);
             log.info("ℹ️ [product] POST /api/v1/nfr/product OK: alias={}, count={}",
                     alias, nfrIds == null ? 0 : nfrIds.size());
         } catch (Exception e) {
