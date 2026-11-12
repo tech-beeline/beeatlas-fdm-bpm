@@ -91,7 +91,7 @@
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_seq_timer_back" sourceRef="Event_stg_seq_timer" targetRef="Gateway_seq_join" />
     <bpmn:serviceTask id="Activity_1de4p94" name="Обогащение глобального графа" camunda:asyncBefore="true" camunda:delegateExpression="${GlobalGraphEnrichmentDelegate}">
-      <bpmn:documentation>Публикация сообщения в RabbitMQ create_global_graph (taskKey, docId).</bpmn:documentation>
+      <bpmn:documentation>Публикация сообщения в RabbitMQ create_global_graph (taskKey, docId, branch). branch — переменная процесса после trim, регистр без изменений.</bpmn:documentation>
       <bpmn:incoming>Flow_seq_ok</bpmn:incoming>
       <bpmn:outgoing>Flow_1x9gju1</bpmn:outgoing>
     </bpmn:serviceTask>

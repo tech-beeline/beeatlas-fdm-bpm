@@ -18,13 +18,14 @@ import static ru.beeline.fdmbpm.service.delegate.StagingDelegatesTestSupport.PRO
 class GlobalGraphEnrichmentDelegateTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private StagingDelegatesTestSupport support;
     private RabbitService rabbitService;
     private GlobalGraphEnrichmentDelegate delegate;
     private DelegateExecution execution;
 
     @BeforeEach
     void setUp() {
-        StagingDelegatesTestSupport support = new StagingDelegatesTestSupport();
+        support = new StagingDelegatesTestSupport();
         rabbitService = mock(RabbitService.class);
         delegate = new GlobalGraphEnrichmentDelegate();
         support.wire(delegate);
@@ -54,6 +55,33 @@ class GlobalGraphEnrichmentDelegateTest {
 
         assertThat(objectMapper.readTree(sentMessage()))
                 .isEqualTo(objectMapper.readTree("{\"taskKey\":42,\"docId\":1042,\"branch\":\"design\"}"));
+        assertThat(support.savedAliases()).containsExactly("glbltskcrt");
+    }
+
+    @Test
+    @DisplayName("Process_datapipeline_branch — branch=main без смены регистра")
+    void sendsMainBranchAsIs() throws Exception {
+        when(execution.getProcessDefinitionId()).thenReturn("Process_datapipeline_branch:3:abc");
+        when(execution.getVariable("branch")).thenReturn("main");
+
+        delegate.execute(execution);
+
+        assertThat(objectMapper.readTree(sentMessage()))
+                .isEqualTo(objectMapper.readTree("{\"taskKey\":42,\"docId\":1042,\"branch\":\"main\"}"));
+        assertThat(support.savedAliases()).containsExactly("glbltskcrt");
+    }
+
+    @Test
+    @DisplayName("Process_datapipeline_branch — branch=develop")
+    void sendsDevelopBranch() throws Exception {
+        when(execution.getProcessDefinitionId()).thenReturn("Process_datapipeline_branch:3:abc");
+        when(execution.getVariable("branch")).thenReturn("develop");
+
+        delegate.execute(execution);
+
+        assertThat(objectMapper.readTree(sentMessage()))
+                .isEqualTo(objectMapper.readTree("{\"taskKey\":42,\"docId\":1042,\"branch\":\"develop\"}"));
+        assertThat(support.savedAliases()).containsExactly("glbltskcrt");
     }
 
     @Test
@@ -66,5 +94,6 @@ class GlobalGraphEnrichmentDelegateTest {
 
         assertThat(objectMapper.readTree(sentMessage()))
                 .isEqualTo(objectMapper.readTree("{\"taskKey\":42,\"docId\":1042}"));
+        assertThat(support.savedAliases()).containsExactly("glbltskcrt");
     }
 }
