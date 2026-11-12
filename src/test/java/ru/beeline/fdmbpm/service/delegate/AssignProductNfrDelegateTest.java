@@ -24,7 +24,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -90,7 +94,7 @@ class AssignProductNfrDelegateTest {
         delegate.execute(execution);
 
         verify(productClient).getAllNfr();
-        verify(productClient, never()).postProductNfr(anyString(), org.mockito.ArgumentMatchers.any());
+        verify(productClient, never()).postProductNfr(anyString(), anyList(), any());
         verifyNoInteractions(ffManagerClient);
         assertThat(savedStatusId()).isEqualTo(301);
     }
@@ -104,8 +108,23 @@ class AssignProductNfrDelegateTest {
 
         delegate.execute(execution);
 
-        verify(productClient).postProductNfr("BC-1", List.of(5));
+        verify(productClient).postProductNfr(eq("BC-1"), eq(List.of(5)), isNull());
         assertThat(savedStatusId()).isEqualTo(301);
+    }
+
+    @Test
+    void branchProcessPostsNfrToProcessBranch() {
+        when(execution.getProcessDefinitionId()).thenReturn("Process_datapipeline_branch:1:c0ffee");
+        when(execution.getVariable("branch")).thenReturn("develop");
+        when(productClient.getAllNfr()).thenReturn(List.of(
+                NfrCatalogItemDTO.builder().id(5).code("NFR-1").rule("FF-1").build()));
+        when(ffManagerClient.getMergedActualResultsForNfr("BC-1")).thenReturn(List.of(
+                AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO.builder().code("FF-1").isCheck(true).build()));
+
+        delegate.execute(execution);
+
+        verify(productClient).postProductNfr(eq("BC-1"), eq(List.of(5)), eq("develop"));
+        verifyNoInteractions(camundaProcessStatusRepository);
     }
 
     @Test
@@ -115,7 +134,7 @@ class AssignProductNfrDelegateTest {
         when(ffManagerClient.getMergedActualResultsForNfr("BC-1")).thenReturn(List.of(
                 AssessmentFitnessForNfrDTO.FitnessFunctionNfrCheckDTO.builder().code("FF-1").isCheck(true).build()));
         doThrow(new RuntimeException("Failed to assign NFR to product"))
-                .when(productClient).postProductNfr("BC-1", List.of(5));
+                .when(productClient).postProductNfr(eq("BC-1"), eq(List.of(5)), isNull());
 
         assertThatThrownBy(() -> delegate.execute(execution))
                 .isInstanceOf(RuntimeException.class)

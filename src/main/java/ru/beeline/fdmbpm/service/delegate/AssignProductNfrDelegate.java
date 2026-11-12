@@ -66,8 +66,9 @@ public class AssignProductNfrDelegate extends StatusLogic implements JavaDelegat
         String cmdb = (String) execution.getVariable("cmdb");
         Integer docId = (Integer) execution.getVariable("docId");
         Integer processId = (Integer) execution.getVariable("process_id");
-        log.info("ℹ️ [pipeline] Шаг: Назначение НФТ на продукт | cmdb={}, docId={}, process_id={}",
-                cmdb, docId, processId);
+        String branch = DatapipeBranchProcess.branch(execution);
+        log.info("ℹ️ [pipeline] Шаг: Назначение НФТ на продукт | cmdb={}, docId={}, process_id={}, branch={}",
+                cmdb, docId, processId, branch);
 
         if (cmdb == null || cmdb.isBlank()) {
             log.warn("ℹ️ [pipeline/nfr] STOP: переменная cmdb не задана — назначение НФТ пропущено");
@@ -131,9 +132,10 @@ public class AssignProductNfrDelegate extends StatusLogic implements JavaDelegat
             return;
         }
 
-        log.info("ℹ️ [pipeline/nfr] POST /api/v1/nfr/product alias={} ids={}", cmdb, idsToAssign);
-        productClient.postProductNfr(cmdb, idsToAssign);
-        log.info("ℹ️ [pipeline] Шаг завершён: Назначение НФТ | cmdb={}, назначено={}", cmdb, idsToAssign.size());
+        log.info("ℹ️ [pipeline/nfr] POST /api/v1/nfr/product alias={} branch={} ids={}", cmdb, branch, idsToAssign);
+        productClient.postProductNfr(cmdb, idsToAssign, branch);
+        log.info("ℹ️ [pipeline] Шаг завершён: Назначение НФТ | cmdb={}, branch={}, назначено={}",
+                cmdb, branch, idsToAssign.size());
     }
 
     private void saveDatapipeStatus(DelegateExecution execution, String alias) {

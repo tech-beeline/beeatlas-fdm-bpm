@@ -30,8 +30,8 @@ class ProductClientPostProductNfrTest {
     }
 
     @Test
-    void postsAlias() {
-        server.expect(requestTo(BASE_URL + "/api/v1/nfr/product?alias=BC-1"))
+    void postsAliasWithDefaultMainBranch() {
+        server.expect(requestTo(BASE_URL + "/api/v1/nfr/product?alias=BC-1&branch=main"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(jsonPath("$[0]").value(11))
                 .andRespond(withStatus(HttpStatus.OK));
@@ -42,8 +42,19 @@ class ProductClientPostProductNfrTest {
     }
 
     @Test
+    void postsAliasWithExplicitBranch() {
+        server.expect(requestTo(BASE_URL + "/api/v1/nfr/product?alias=BC-1&branch=develop"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.OK));
+
+        productClient.postProductNfr("BC-1", List.of(11), "develop");
+
+        server.verify();
+    }
+
+    @Test
     void aliasWithSpace_isEncodedOnce() {
-        server.expect(requestTo(BASE_URL + "/api/v1/nfr/product?alias=td%20pm"))
+        server.expect(requestTo(BASE_URL + "/api/v1/nfr/product?alias=td%20pm&branch=main"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.OK));
 

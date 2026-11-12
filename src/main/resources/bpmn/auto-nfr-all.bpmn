@@ -13,6 +13,7 @@
       <bpmn:extensionElements>
         <camunda:in source="product" target="product" />
         <camunda:in source="nfrId" target="nfrId" />
+        <camunda:in source="branch" target="branch" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0sbwg9e</bpmn:incoming>
       <bpmn:outgoing>Flow_0cj8upv</bpmn:outgoing>

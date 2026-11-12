@@ -81,7 +81,7 @@ class CheckPatternsDelegateTest {
     }
 
     @Test
-    void postsV2WithPipelineSourceIdAndMainBranch() {
+    void postsV2WithPipelineSourceIdAndNullBranchDefaultsToMainInClient() {
         when(productClient.getPatternIdsByProductAlias("BC-1")).thenReturn(List.of(10));
         when(techradarClient.getPatterns()).thenReturn(List.of(PatternDTO.builder()
                 .id(10)
@@ -92,8 +92,25 @@ class CheckPatternsDelegateTest {
 
         delegate.execute(execution);
 
-        verify(productClient).postPatternCheckResults(eq("BC-1"), eq("pipeline"), eq(77), eq("main"), anyList());
+        verify(productClient).postPatternCheckResults(eq("BC-1"), eq("pipeline"), eq(77), eq(null), anyList());
         verify(productClient, never()).getPatternIdsByProductAlias(anyString(), anyString());
+        assertThat(savedStatusId()).isEqualTo(401);
+    }
+
+    @Test
+    void datapipeProcessReadsBranchVariableWhenPresent() {
+        when(execution.getVariable("branch")).thenReturn("design");
+        when(productClient.getPatternIdsByProductAlias("BC-1")).thenReturn(List.of(10));
+        when(techradarClient.getPatterns()).thenReturn(List.of(PatternDTO.builder()
+                .id(10)
+                .code("P-OK")
+                .rule("g.V().has('cmdb','{cmdb}')")
+                .build()));
+        when(graphClient.executePatternQuery("g.V().has('cmdb','BC-1')")).thenReturn(List.of(new Object()));
+
+        delegate.execute(execution);
+
+        verify(productClient).postPatternCheckResults(eq("BC-1"), eq("pipeline"), eq(77), eq("design"), anyList());
         assertThat(savedStatusId()).isEqualTo(401);
     }
 
