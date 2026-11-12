@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_ff_recalc" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
+  <bpmn:process id="Process_recalc_ff" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_register</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_register" name="Регистрация процесса" camunda:delegateExpression="${RegisterFfRecalcProcessDelegate}">
+      <bpmn:incoming>Flow_register</bpmn:incoming>
+      <bpmn:outgoing>Flow_products</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_products" name="Список продуктов" camunda:delegateExpression="${GetProductsForFfRecalcDelegate}">
+      <bpmn:incoming>Flow_products</bpmn:incoming>
+      <bpmn:outgoing>Flow_mark</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_mark" name="Статус перед сабпроцессами" camunda:delegateExpression="${MarkFfRecalcSubProcessesDelegate}">
+      <bpmn:incoming>Flow_mark</bpmn:incoming>
+      <bpmn:outgoing>Flow_call</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:callActivity id="Activity_call" name="Расчёт fitness function для продукта" calledElement="Process_recalc_ff_product">
+      <bpmn:extensionElements>
+        <camunda:in source="product" target="product" />
+        <camunda:in source="ffCode" target="ffCode" />
+        <camunda:in source="process_id" target="process_id" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_call</bpmn:incoming>
+      <bpmn:outgoing>Flow_complete</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${products}" camunda:elementVariable="product" />
+    </bpmn:callActivity>
+    <bpmn:serviceTask id="Activity_complete" name="Статус завершения" camunda:delegateExpression="${CompleteFfRecalcProcessDelegate}">
+      <bpmn:incoming>Flow_complete</bpmn:incoming>
+      <bpmn:outgoing>Flow_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_register" sourceRef="StartEvent_1" targetRef="Activity_register" />
+    <bpmn:sequenceFlow id="Flow_products" sourceRef="Activity_register" targetRef="Activity_products" />
+    <bpmn:sequenceFlow id="Flow_mark" sourceRef="Activity_products" targetRef="Activity_mark" />
+    <bpmn:sequenceFlow id="Flow_call" sourceRef="Activity_mark" targetRef="Activity_call" />
+    <bpmn:sequenceFlow id="Flow_complete" sourceRef="Activity_call" targetRef="Activity_complete" />
+    <bpmn:sequenceFlow id="Flow_end" sourceRef="Activity_complete" targetRef="EndEvent_1" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_recalc_ff">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_register_di" bpmnElement="Activity_register">
+        <dc:Bounds x="230" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_products_di" bpmnElement="Activity_products">
+        <dc:Bounds x="370" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_mark_di" bpmnElement="Activity_mark">
+        <dc:Bounds x="510" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_call_di" bpmnElement="Activity_call">
+        <dc:Bounds x="650" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_complete_di" bpmnElement="Activity_complete">
+        <dc:Bounds x="790" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="932" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_register_di" bpmnElement="Flow_register">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="230" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_products_di" bpmnElement="Flow_products">
+        <di:waypoint x="330" y="120" />
+        <di:waypoint x="370" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_mark_di" bpmnElement="Flow_mark">
+        <di:waypoint x="470" y="120" />
+        <di:waypoint x="510" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_call_di" bpmnElement="Flow_call">
+        <di:waypoint x="610" y="120" />
+        <di:waypoint x="650" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_complete_di" bpmnElement="Flow_complete">
+        <di:waypoint x="750" y="120" />
+        <di:waypoint x="790" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_end_di" bpmnElement="Flow_end">
+        <di:waypoint x="890" y="120" />
+        <di:waypoint x="932" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

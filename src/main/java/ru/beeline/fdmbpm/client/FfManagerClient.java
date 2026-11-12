@@ -6,13 +6,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 import ru.beeline.fdmbpm.dto.ffmanager.PassedFfRequestDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.PostFfManagerDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.ProductActualResultsDTO;
 import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 
 @Slf4j
@@ -53,6 +57,29 @@ public class FfManagerClient {
         } catch (Exception e) {
             log.error("ℹ️ [ff-manager] run-all FAILED (исключение глотается) | docId={}, app={}, source_id={}: {}",
                     docId, body.getApp(), processId, e.getMessage(), e);
+        }
+    }
+
+    public void runFitnessFunction(String code, String alias, Integer docId, Integer sourceId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            String encodedCode = UriUtils.encodePathSegment(code, StandardCharsets.UTF_8);
+            String url = UriComponentsBuilder.fromHttpUrl(ffManagerUrl + "/api/v1/run/" + encodedCode)
+                    .queryParam("docId", docId)
+                    .queryParam("source_type", "recalc")
+                    .queryParam("source_id", sourceId)
+                    .toUriString();
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(Map.of("app", alias), headers);
+            log.info("POST FF Manager run: url={}, app={}", url, alias);
+            ResponseEntity<Object> response = longTimeoutRestTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.warn("FF Manager run non-2xx | status={}, code={}, app={}, docId={}",
+                        response.getStatusCode(), code, alias, docId);
+            }
+        } catch (Exception e) {
+            log.error("FF Manager run FAILED | code={}, app={}, docId={}, source_id={}: {}",
+                    code, alias, docId, sourceId, e.getMessage(), e);
         }
     }
 

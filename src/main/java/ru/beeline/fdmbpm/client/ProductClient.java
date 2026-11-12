@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.dto.mapic.MethodDTO;
 import ru.beeline.fdmbpm.dto.product.NfrCatalogItemDTO;
 import ru.beeline.fdmbpm.dto.product.NfrDetailsV2BpmDTO;
 import ru.beeline.fdmbpm.dto.product.ProductDTO;
+import ru.beeline.fdmbpm.dto.product.ProductInfoShortDTO;
 import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.dto.product.DiscoveredInterfaceDTO;
@@ -48,6 +49,18 @@ public class ProductClient {
         this.restTemplate = restTemplate;
         this.longTimeoutRestTemplate = longTimeoutRestTemplate;
         this.objectMapper = objectMapper;
+    }
+
+    public List<ProductInfoShortDTO> getProductInfo() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<List<ProductInfoShortDTO>> response = restTemplate.exchange(
+                productServerUrl + "/api/v1/product/info",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<List<ProductInfoShortDTO>>() {
+                });
+        return response.getBody() != null ? response.getBody() : List.of();
     }
 
     public void deleteRelation(Integer techId, Integer productId) {

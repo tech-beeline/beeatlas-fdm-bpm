@@ -2,13 +2,20 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0pqvq8q" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
   <bpmn:process id="Process_1t2rjem" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>Flow_1n820xq</bpmn:outgoing>
+      <bpmn:outgoing>Flow_register</bpmn:outgoing>
     </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_register" name="Регистрация процесса" camunda:delegateExpression="${RegisterAutoNfrProcessDelegate}">
+      <bpmn:incoming>Flow_register</bpmn:incoming>
+      <bpmn:outgoing>Flow_1n820xq</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_1qu1xr8" name="Получение списка продуктов, попадающих под условие требования" camunda:delegateExpression="${GetProductsForNfrDelegate}">
       <bpmn:incoming>Flow_1n820xq</bpmn:incoming>
+      <bpmn:outgoing>Flow_mark</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_mark" name="Статус перед саб-процессами" camunda:delegateExpression="${MarkAutoNfrSubProcessesDelegate}">
+      <bpmn:incoming>Flow_mark</bpmn:incoming>
       <bpmn:outgoing>Flow_0sbwg9e</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1n820xq" sourceRef="StartEvent_1" targetRef="Activity_1qu1xr8" />
     <bpmn:callActivity id="Activity_0hz3w34" name="Назначение требования для каждого продукта" calledElement="Process_053fkyf">
       <bpmn:extensionElements>
         <camunda:in source="product" target="product" />
@@ -16,42 +23,69 @@
         <camunda:in source="branch" target="branch" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0sbwg9e</bpmn:incoming>
-      <bpmn:outgoing>Flow_0cj8upv</bpmn:outgoing>
+      <bpmn:outgoing>Flow_complete</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${products}" camunda:elementVariable="product" />
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_0sbwg9e" sourceRef="Activity_1qu1xr8" targetRef="Activity_0hz3w34" />
+    <bpmn:serviceTask id="Activity_complete" name="Статус завершения" camunda:delegateExpression="${CompleteAutoNfrProcessDelegate}">
+      <bpmn:incoming>Flow_complete</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cj8upv</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:endEvent id="Event_1w3n4rp">
       <bpmn:incoming>Flow_0cj8upv</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0cj8upv" sourceRef="Activity_0hz3w34" targetRef="Event_1w3n4rp" />
+    <bpmn:sequenceFlow id="Flow_register" sourceRef="StartEvent_1" targetRef="Activity_register" />
+    <bpmn:sequenceFlow id="Flow_1n820xq" sourceRef="Activity_register" targetRef="Activity_1qu1xr8" />
+    <bpmn:sequenceFlow id="Flow_mark" sourceRef="Activity_1qu1xr8" targetRef="Activity_mark" />
+    <bpmn:sequenceFlow id="Flow_0sbwg9e" sourceRef="Activity_mark" targetRef="Activity_0hz3w34" />
+    <bpmn:sequenceFlow id="Flow_complete" sourceRef="Activity_0hz3w34" targetRef="Activity_complete" />
+    <bpmn:sequenceFlow id="Flow_0cj8upv" sourceRef="Activity_complete" targetRef="Event_1w3n4rp" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1t2rjem">
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
-        <dc:Bounds x="182" y="102" width="36" height="36" />
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_register_di" bpmnElement="Activity_register">
+        <dc:Bounds x="230" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0jiv8od_di" bpmnElement="Activity_1qu1xr8">
-        <dc:Bounds x="270" y="80" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+        <dc:Bounds x="370" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_mark_di" bpmnElement="Activity_mark">
+        <dc:Bounds x="510" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ge1vh9_di" bpmnElement="Activity_0hz3w34">
-        <dc:Bounds x="450" y="80" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+        <dc:Bounds x="650" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_complete_di" bpmnElement="Activity_complete">
+        <dc:Bounds x="790" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1w3n4rp_di" bpmnElement="Event_1w3n4rp">
-        <dc:Bounds x="632" y="102" width="36" height="36" />
+        <dc:Bounds x="932" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_register_di" bpmnElement="Flow_register">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="230" y="120" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1n820xq_di" bpmnElement="Flow_1n820xq">
-        <di:waypoint x="218" y="120" />
-        <di:waypoint x="270" y="120" />
+        <di:waypoint x="330" y="120" />
+        <di:waypoint x="370" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_mark_di" bpmnElement="Flow_mark">
+        <di:waypoint x="470" y="120" />
+        <di:waypoint x="510" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0sbwg9e_di" bpmnElement="Flow_0sbwg9e">
-        <di:waypoint x="370" y="120" />
-        <di:waypoint x="450" y="120" />
+        <di:waypoint x="610" y="120" />
+        <di:waypoint x="650" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_complete_di" bpmnElement="Flow_complete">
+        <di:waypoint x="750" y="120" />
+        <di:waypoint x="790" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0cj8upv_di" bpmnElement="Flow_0cj8upv">
-        <di:waypoint x="550" y="120" />
-        <di:waypoint x="632" y="120" />
+        <di:waypoint x="890" y="120" />
+        <di:waypoint x="932" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
