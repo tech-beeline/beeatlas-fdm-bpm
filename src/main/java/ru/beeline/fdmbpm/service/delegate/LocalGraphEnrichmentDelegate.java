@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 import ru.beeline.fdmbpm.service.RabbitService;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("LocalGraphEnrichmentDelegate")
@@ -63,14 +64,15 @@ public class LocalGraphEnrichmentDelegate extends StatusLogic implements JavaDel
         } catch (Exception e) {
             log.error("ℹ️ [pipeline] Ошибка на шаге Обогащение локального графа | process_id={}, docId={}",
                     processId, docId, e);
+            String message = StepErrorMessage.of("Обогащение локального графа", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;
             tt.execute(status -> {
-                saveAlias(processId, "errlclgrph", finalTypeProcess);
+                saveAlias(processId, "errlclgrph", finalTypeProcess, message);
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Обагащение локального графа");
+            throw new ProcessException("Ошибка процесса на шаге: Обогащение локального графа", e);
         }
     }
 }

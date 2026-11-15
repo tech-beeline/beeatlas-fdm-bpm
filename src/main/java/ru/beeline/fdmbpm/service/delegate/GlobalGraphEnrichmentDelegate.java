@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 import ru.beeline.fdmbpm.service.RabbitService;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("GlobalGraphEnrichmentDelegate")
@@ -63,14 +64,15 @@ public class GlobalGraphEnrichmentDelegate extends StatusLogic implements JavaDe
         } catch (Exception e) {
             log.error("ℹ️ [pipeline] Ошибка на шаге Обогащение глобального графа | process_id={}, docId={}",
                     processId, docId, e);
+            String message = StepErrorMessage.of("Обогащение глобального графа", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;
             tt.execute(status -> {
-                saveAlias(processId, "errglblgrph", finalTypeProcess);
+                saveAlias(processId, "errglblgrph", finalTypeProcess, message);
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Обагащение глобального графа");
+            throw new ProcessException("Ошибка процесса на шаге: Обогащение глобального графа", e);
         }
     }
 }

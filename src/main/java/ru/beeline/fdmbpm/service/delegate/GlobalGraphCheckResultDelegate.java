@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("GlobalGraphCheckResultDelegate")
@@ -33,10 +35,11 @@ public class GlobalGraphCheckResultDelegate extends StatusLogic implements JavaD
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         if (!Boolean.parseBoolean(String.valueOf(doneGlobalGraph))) {
-            saveAlias(processId, "errglblgrph", typeProcess);
+            String message = StepErrorMessage.of("Проверка результата глобального графа", null);
+            saveAlias(processId, "errglblgrph", typeProcess, message);
             log.error("ℹ️ [pipeline] Глобальный граф НЕ готов | process_id={}, doneGlobalGraph={}",
                     processId, doneGlobalGraph);
-            throw new Exception("doneGlobalGraph is" + doneGlobalGraph);
+            throw new ProcessException("Ошибка процесса на шаге: Проверка результата глобального графа");
         }
         log.info("ℹ️ [pipeline] Шаг завершён: Проверка результата глобального графа | process_id={}", processId);
     }

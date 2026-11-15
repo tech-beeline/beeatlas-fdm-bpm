@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.fdmbpm.domain.CamundaProcess;
 import ru.beeline.fdmbpm.domain.TypeProcess;
+import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("LocalGraphCheckResultDelegate")
@@ -33,10 +35,11 @@ public class LocalGraphCheckResultDelegate extends StatusLogic implements JavaDe
         CamundaProcess camundaProcess = camundaProcessRepository.findById(processId).get();
         TypeProcess typeProcess = typeProcessRepository.findById(camundaProcess.getTypeProcessId()).get();
         if (!Boolean.parseBoolean(String.valueOf(doneLocalGraph))) {
-            saveAlias(processId, "errlclgrph", typeProcess);
+            String message = StepErrorMessage.of("Проверка результата локального графа", null);
+            saveAlias(processId, "errlclgrph", typeProcess, message);
             log.error("ℹ️ [pipeline] Локальный граф НЕ готов | process_id={}, doneLocalGraph={}",
                     processId, doneLocalGraph);
-            throw new Exception("doneLocalGraph is" + doneLocalGraph);
+            throw new ProcessException("Ошибка процесса на шаге: Проверка результата локального графа");
         }
         log.info("ℹ️ [pipeline] Шаг завершён: Проверка результата локального графа | process_id={}", processId);
     }

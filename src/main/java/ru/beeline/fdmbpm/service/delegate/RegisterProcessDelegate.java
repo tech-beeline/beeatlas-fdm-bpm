@@ -28,6 +28,7 @@ import ru.beeline.fdmbpm.exception.VldterrException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.ContextRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("RegisterProcessDelegate")
@@ -119,25 +120,26 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
                 throw new ProcessException(productDTOResponseEntity.getStatusCode().toString());
             }
         } catch (VldterrException e) {
-            saveErrStatus("vldterr", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch);
+            saveErrStatus("vldterr", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch, e);
         } catch (CmdberrException e) {
-            saveErrStatus("cmdberr", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch);
+            saveErrStatus("cmdberr", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch, e);
         } catch (Exception e) {
-            saveErrStatus("errcrt", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch);
+            saveErrStatus("errcrt", processId, businessKey, typeProcess, cmdb, docId, branchProcess, branch, e);
         }
         log.info("ℹ️ [pipeline] Шаг завершён: Регистрация процесса | cmdb={}, process_id={}, docId={}",
                 cmdb, delegateExecution.getVariable("process_id"), delegateExecution.getVariable("docId"));
     }
 
     private void saveErrStatus(String statusAlias, String processId, String businessKey, TypeProcess typeProcess
-            , String cmdb, Integer docId, boolean branchProcess, String branch) {
+            , String cmdb, Integer docId, boolean branchProcess, String branch, Throwable error) {
         log.error("❌ Ошибка при регистрации процесса. Создание записи с ошибкой");
+        String message = StepErrorMessage.of("Получение информации и регистрации процесса", error);
         TransactionTemplate tt = new TransactionTemplate(transactionManager);
         tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         tt.execute(status -> {
             if (camundaProcessRepository.findByProcIdAndBusinessKey(processId, businessKey).isEmpty()) {
                 CamundaProcess failedProcess = saveProcess(typeProcess.getId(), processId, businessKey);
-                saveAlias(failedProcess.getId(), statusAlias, typeProcess);
+                saveAlias(failedProcess.getId(), statusAlias, typeProcess, message);
                 saveToContextRepository("cmdb", cmdb, failedProcess);
                 if (docId != null) {
                     saveToContextRepository("docId", docId.toString(), failedProcess);
@@ -148,7 +150,7 @@ public class RegisterProcessDelegate extends StatusLogic implements JavaDelegate
             }
             return null;
         });
-        throw new ProcessException("❌ Ошибка процесса на шаге: Получение информации и регистрации процесса");
+        throw new ProcessException("Ошибка процесса на шаге: Получение информации и регистрации процесса", error);
     }
 
     private static void validateBranch(String branch) {

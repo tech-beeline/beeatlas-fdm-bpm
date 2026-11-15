@@ -20,6 +20,7 @@ import ru.beeline.fdmbpm.dto.ffmanager.PostFfManagerDTO;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("CalculateLocalFFDelegate")
@@ -55,14 +56,15 @@ public class CalculateLocalFFDelegate extends StatusLogic implements JavaDelegat
         } catch (Exception e) {
             log.error("ℹ️ [pipeline] Ошибка на шаге Расчёт локальных FF | cmdb={}, process_id={}",
                     cmdb, processId, e);
+            String message = StepErrorMessage.of("Расчет Фитнес функции", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;
             tt.execute(status -> {
-                saveAlias(processId, "fferrcd", finalTypeProcess);
+                saveAlias(processId, "fferrcd", finalTypeProcess, message);
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Расчет Фитнес функции");
+            throw new ProcessException("Ошибка процесса на шаге: Расчет Фитнес функции", e);
         }
     }
 }
