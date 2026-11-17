@@ -66,11 +66,18 @@ public class GraphClient {
         }
     }
 
+    public static String singleLine(String cypherQuery) {
+        if (cypherQuery == null) {
+            return null;
+        }
+        return cypherQuery.replaceAll("\\R", " ");
+    }
+
     public List<Object> executePatternQuery(String cypherQuery) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("CYPHER-QUERY", cypherQuery);
+            headers.add("CYPHER-QUERY", singleLine(cypherQuery));
             HttpEntity<String> requestEntity = new HttpEntity<>(headers);
             ResponseEntity<List> response =
                     restTemplate.exchange(graphServerUrl + "/api/v1/elements",

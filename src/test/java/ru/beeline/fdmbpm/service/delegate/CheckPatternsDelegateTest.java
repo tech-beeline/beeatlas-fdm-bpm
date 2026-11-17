@@ -181,6 +181,21 @@ class CheckPatternsDelegateTest {
         assertThat(savedStatusId()).isEqualTo(402);
     }
 
+    @Test
+    void collapsesLineBreaksAfterCmdbReplacement() {
+        when(productClient.getPatternIdsByProductAlias("BC-1")).thenReturn(List.of(10));
+        when(techradarClient.getPatterns()).thenReturn(List.of(PatternDTO.builder()
+                .id(10)
+                .code("P-OK")
+                .rule("g.V()\n.has('a','{cmdb}')\r\n.has('b','{cmdb}')")
+                .build()));
+        when(graphClient.executePatternQuery("g.V() .has('a','BC-1') .has('b','BC-1')")).thenReturn(List.of());
+
+        delegate.execute(execution);
+
+        verify(graphClient).executePatternQuery("g.V() .has('a','BC-1') .has('b','BC-1')");
+    }
+
     private Integer savedStatusId() {
         ArgumentCaptor<CamundaProcessStatus> status = ArgumentCaptor.forClass(CamundaProcessStatus.class);
         verify(camundaProcessStatusRepository).saveAndFlush(status.capture());

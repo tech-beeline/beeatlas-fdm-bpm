@@ -73,7 +73,7 @@ public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
                 continue;
             }
 
-            String rule = pattern.getRule().replace("{cmdb}", effectiveCmdb);
+            String rule = GraphClient.singleLine(pattern.getRule().replace("{cmdb}", effectiveCmdb));
             log.info("ℹ️ [auto-nfr] graph query code={} rule={}", pattern.getCode(), rule);
 
             List<Object> elements = graphClient.executePatternQuery(rule);
