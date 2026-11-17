@@ -80,4 +80,20 @@ class AssignNfrAndCalcPatternDelegateTest {
         verify(productClient).postPatternCheckResults(
                 eq("BC-1"), eq("nfr"), isNull(), eq("develop"), any());
     }
+
+    @Test
+    void collapsesLineBreaksAfterCmdbReplacement() {
+        when(productClient.getNfrDetailsById(5)).thenReturn(NfrDetailsV2BpmDTO.builder()
+                .id(5)
+                .patterns(List.of(NfrPatternBpmDTO.builder()
+                        .code("P-NFR")
+                        .rule("g.V()\n.has('a','{cmdb}')\r\n.has('b','{cmdb}')")
+                        .build()))
+                .build());
+        when(graphClient.executePatternQuery("g.V() .has('a','BC-1') .has('b','BC-1')")).thenReturn(List.of());
+
+        delegate.execute(execution);
+
+        verify(graphClient).executePatternQuery("g.V() .has('a','BC-1') .has('b','BC-1')");
+    }
 }

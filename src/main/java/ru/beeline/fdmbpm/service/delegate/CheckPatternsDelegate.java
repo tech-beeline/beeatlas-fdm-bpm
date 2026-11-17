@@ -188,7 +188,7 @@ public class CheckPatternsDelegate extends StatusLogic implements JavaDelegate {
 
             log.info("pattern is {}", pattern);
 
-            String rule = pattern.getRule().replace("{cmdb}", cmdb);
+            String rule = GraphClient.singleLine(pattern.getRule().replace("{cmdb}", cmdb));
 
             List<Object> elements = graphClient.executePatternQuery(rule);
             if (elements == null) {
