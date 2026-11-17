@@ -151,7 +151,7 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_global_ff" sourceRef="Gateway_10n5vqm" targetRef="Activity_0boo1ka" />
     <bpmn:serviceTask id="Activity_0boo1ka" name="Расчет FF" camunda:asyncBefore="true" camunda:delegateExpression="${CalculateLocalFFDelegate}">
-      <bpmn:documentation>POST /api/v1/run-all, docId, source_type=pipeline, source_id=process_id. Шаг стоит после подтверждения глобального графа. Дальше назначение НФТ и проверка паттернов.</bpmn:documentation>
+      <bpmn:documentation>POST /api/v1/run-all?docId&amp;source_type=pipeline&amp;source_id=process_id&amp;branch={branch}. Без branch ff-manager пишет в main. Шаг после подтверждения глобального графа; дальше НФТ и паттерны.</bpmn:documentation>
       <bpmn:incoming>Flow_global_ff</bpmn:incoming>
       <bpmn:outgoing>Flow_09aeu24</bpmn:outgoing>
     </bpmn:serviceTask>
