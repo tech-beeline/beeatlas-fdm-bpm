@@ -47,6 +47,7 @@ public class CalculateProductFfDelegate implements JavaDelegate {
         }
         log.info("CalculateProductFfDelegate: alias={}, ffCode={}, docId={}, process_id={}",
                 alias, ffCode, docId, parentProcessId);
+        execution.setVariable("docId", docId);
         ffManagerClient.runFitnessFunction(ffCode, alias, docId, parentProcessId);
     }
 

@@ -6,13 +6,23 @@
     </bpmn:startEvent>
     <bpmn:serviceTask id="Activity_calc" name="docId и расчёт fitness function" camunda:delegateExpression="${CalculateProductFfDelegate}">
       <bpmn:incoming>Flow_calc</bpmn:incoming>
+      <bpmn:outgoing>Flow_dependent</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_dependent" name="Пересчёт зависимых fitness function" camunda:delegateExpression="${RecalculateDependentFfDelegate}">
+      <bpmn:incoming>Flow_dependent</bpmn:incoming>
+      <bpmn:outgoing>Flow_nfr</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_nfr" name="Пересчёт НФТ и паттернов" camunda:delegateExpression="${RecalculateTriggeredNfrDelegate}">
+      <bpmn:incoming>Flow_nfr</bpmn:incoming>
       <bpmn:outgoing>Flow_end</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_1">
       <bpmn:incoming>Flow_end</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_calc" sourceRef="StartEvent_1" targetRef="Activity_calc" />
-    <bpmn:sequenceFlow id="Flow_end" sourceRef="Activity_calc" targetRef="EndEvent_1" />
+    <bpmn:sequenceFlow id="Flow_dependent" sourceRef="Activity_calc" targetRef="Activity_dependent" />
+    <bpmn:sequenceFlow id="Flow_nfr" sourceRef="Activity_dependent" targetRef="Activity_nfr" />
+    <bpmn:sequenceFlow id="Flow_end" sourceRef="Activity_nfr" targetRef="EndEvent_1" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_recalc_ff_product">
@@ -22,16 +32,30 @@
       <bpmndi:BPMNShape id="Activity_calc_di" bpmnElement="Activity_calc">
         <dc:Bounds x="270" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_dependent_di" bpmnElement="Activity_dependent">
+        <dc:Bounds x="420" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_nfr_di" bpmnElement="Activity_nfr">
+        <dc:Bounds x="570" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
-        <dc:Bounds x="422" y="102" width="36" height="36" />
+        <dc:Bounds x="722" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_calc_di" bpmnElement="Flow_calc">
         <di:waypoint x="218" y="120" />
         <di:waypoint x="270" y="120" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_end_di" bpmnElement="Flow_end">
+      <bpmndi:BPMNEdge id="Flow_dependent_di" bpmnElement="Flow_dependent">
         <di:waypoint x="370" y="120" />
-        <di:waypoint x="422" y="120" />
+        <di:waypoint x="420" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nfr_di" bpmnElement="Flow_nfr">
+        <di:waypoint x="520" y="120" />
+        <di:waypoint x="570" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_end_di" bpmnElement="Flow_end">
+        <di:waypoint x="670" y="120" />
+        <di:waypoint x="722" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+import ru.beeline.fdmbpm.dto.ffmanager.FitnessFunctionCatalogDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.PassedFfRequestDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.PostFfManagerDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.ProductActualResultsDTO;
@@ -76,7 +77,7 @@ public class FfManagerClient {
         }
     }
 
-    public void runFitnessFunction(String code, String alias, Integer docId, Integer sourceId) {
+    public boolean runFitnessFunction(String code, String alias, Integer docId, Integer sourceId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -92,10 +93,34 @@ public class FfManagerClient {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 log.warn("FF Manager run non-2xx | status={}, code={}, app={}, docId={}",
                         response.getStatusCode(), code, alias, docId);
+                return false;
             }
+            return true;
         } catch (Exception e) {
             log.error("FF Manager run FAILED | code={}, app={}, docId={}, source_id={}: {}",
                     code, alias, docId, sourceId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public List<FitnessFunctionCatalogDTO> getFitnessFunctions() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = ffManagerUrl + "/api/v1/fitness-functions";
+            log.info("GET FF Manager fitness-functions: {}", url);
+            List<FitnessFunctionCatalogDTO> body = longTimeoutRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<FitnessFunctionCatalogDTO>>() {
+                    }
+            ).getBody();
+            return body != null ? body : List.of();
+        } catch (Exception e) {
+            log.error("GET FF Manager fitness-functions FAILED: {}", e.getMessage(), e);
+            return List.of();
         }
     }
 
