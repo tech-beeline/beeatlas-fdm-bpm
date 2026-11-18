@@ -16,6 +16,8 @@ import ru.beeline.fdmbpm.dto.camundaProcess.GetContextDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessByIdDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.GetProcessDTO;
 import ru.beeline.fdmbpm.dto.camundaProcess.ProcessDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.ProcessHistoryResponseDTO;
+import ru.beeline.fdmbpm.dto.camundaProcess.ProcessTypeDTO;
 import ru.beeline.fdmbpm.service.ProcessService;
 
 import java.util.List;
@@ -44,6 +46,20 @@ public class CamundaProcessController {
     public ResponseEntity<List<GetContextDTO>> getAllProcessByContext(@PathVariable String name,
                                                                       @PathVariable String value) {
         return ResponseEntity.status(HttpStatus.OK).body(processService.getAllProcessByContext(name, value));
+    }
+
+    @GetMapping("/process-types")
+    public ResponseEntity<List<ProcessTypeDTO>> getProcessTypes() {
+        return ResponseEntity.status(HttpStatus.OK).body(processService.getProcessTypes());
+    }
+
+    @GetMapping("/processes")
+    public ResponseEntity<ProcessHistoryResponseDTO> getProcessHistory(
+            @RequestParam(value = "limit", required = false) String limit,
+            @RequestParam(value = "offset", required = false) String offset,
+            @RequestParam(value = "typeProcessId", required = false) List<String> typeProcessId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(processService.getProcessHistory(limit, offset, typeProcessId));
     }
 
     @GetMapping("/processes/{id}")

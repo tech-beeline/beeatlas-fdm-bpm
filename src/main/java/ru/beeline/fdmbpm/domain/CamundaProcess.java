@@ -7,6 +7,8 @@ package ru.beeline.fdmbpm.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -31,4 +33,10 @@ public class CamundaProcess {
 
     @Column(name = "business_key")
     private String businessKey;
+
+    /**
+     * Время регистрации. Колонку заполняет база ({@code DEFAULT now()}), в INSERT и UPDATE поле не входит.
+     */
+    @Column(name = "create_date", insertable = false, updatable = false)
+    private LocalDateTime createDate;
 }
