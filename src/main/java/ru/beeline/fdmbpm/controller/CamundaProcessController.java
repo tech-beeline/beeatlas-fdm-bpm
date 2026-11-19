@@ -57,9 +57,13 @@ public class CamundaProcessController {
     public ResponseEntity<ProcessHistoryResponseDTO> getProcessHistory(
             @RequestParam(value = "limit", required = false) String limit,
             @RequestParam(value = "offset", required = false) String offset,
-            @RequestParam(value = "typeProcessId", required = false) List<String> typeProcessId) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(processService.getProcessHistory(limit, offset, typeProcessId));
+            @RequestParam(value = "typeProcessId", required = false) List<String> typeProcessId,
+            @RequestParam(value = "createDateFrom", required = false) String createDateFrom,
+            @RequestParam(value = "createDateTo", required = false) String createDateTo,
+            @RequestParam(value = "contextName", required = false) List<String> contextName,
+            @RequestParam(value = "contextValue", required = false) List<String> contextValue) {
+        return ResponseEntity.status(HttpStatus.OK).body(processService.getProcessHistory(
+                limit, offset, typeProcessId, createDateFrom, createDateTo, contextName, contextValue));
     }
 
     @GetMapping("/processes/{id}")
