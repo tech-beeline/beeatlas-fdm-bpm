@@ -3,17 +3,26 @@ package ru.beeline.fdmbpm.client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
+import ru.beeline.fdmbpm.dto.ffmanager.FitnessFunctionCatalogDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.PassedFfRequestDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.PostFfManagerDTO;
 import ru.beeline.fdmbpm.dto.ffmanager.ProductActualResultsDTO;
 import ru.beeline.fdmbpm.dto.product.AssessmentFitnessForNfrDTO;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.core.ParameterizedTypeReference;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,14 +38,26 @@ public class FfManagerClient {
     }
 
     public void postFfManager(PostFfManagerDTO body, Integer docId, Integer processId) {
+        postFfManager(body, docId, processId, null);
+    }
+
+    public void postFfManager(PostFfManagerDTO body, Integer docId, Integer processId, String branch) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<PostFfManagerDTO> entity = new HttpEntity<>(body, headers);
-            String url = ffManagerUrl + "/api/v1/run-all?docId=" + docId + "&source_type=pipeline&" +
-                    "source_id=" + processId;
-            log.info("Отправка POST запроса в FF Manager: {}, app: {}", url, body.getApp());
+            UriComponentsBuilder urlBuilder = UriComponentsBuilder
+                    .fromHttpUrl(ffManagerUrl + "/api/v1/run-all")
+                    .queryParam("docId", docId)
+                    .queryParam("source_type", "pipeline")
+                    .queryParam("source_id", processId);
+            if (branch != null && !branch.isBlank()) {
+                urlBuilder.queryParam("branch", branch.trim());
+            }
+            String url = urlBuilder.toUriString();
+            log.info("Отправка POST запроса в FF Manager: {}, app: {}, branch: {}",
+                    url, body.getApp(), blankToNull(branch));
             ResponseEntity<Object> response = longTimeoutRestTemplate.exchange(
                     url,
                     HttpMethod.POST,
@@ -44,15 +65,62 @@ public class FfManagerClient {
                     Object.class
             );
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("ℹ️ [ff-manager] run-all OK | status={}, docId={}, app={}, source_id={}",
-                        response.getStatusCode(), docId, body.getApp(), processId);
+                log.info("ℹ️ [ff-manager] run-all OK | status={}, docId={}, app={}, source_id={}, branch={}",
+                        response.getStatusCode(), docId, body.getApp(), processId, blankToNull(branch));
             } else {
-                log.warn("ℹ️ [ff-manager] run-all non-2xx (не пробрасывается в Camunda) | status={}, docId={}, app={}",
-                        response.getStatusCode(), docId, body.getApp());
+                log.warn("ℹ️ [ff-manager] run-all non-2xx (не пробрасывается в Camunda) | status={}, docId={}, app={}, branch={}",
+                        response.getStatusCode(), docId, body.getApp(), blankToNull(branch));
             }
         } catch (Exception e) {
-            log.error("ℹ️ [ff-manager] run-all FAILED (исключение глотается) | docId={}, app={}, source_id={}: {}",
-                    docId, body.getApp(), processId, e.getMessage(), e);
+            log.error("ℹ️ [ff-manager] run-all FAILED (исключение глотается) | docId={}, app={}, source_id={}, branch={}: {}",
+                    docId, body.getApp(), processId, blankToNull(branch), e.getMessage(), e);
+        }
+    }
+
+    public boolean runFitnessFunction(String code, String alias, Integer docId, Integer sourceId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            String encodedCode = UriUtils.encodePathSegment(code, StandardCharsets.UTF_8);
+            String url = UriComponentsBuilder.fromHttpUrl(ffManagerUrl + "/api/v1/run/" + encodedCode)
+                    .queryParam("docId", docId)
+                    .queryParam("source_type", "recalc")
+                    .queryParam("source_id", sourceId)
+                    .toUriString();
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(Map.of("app", alias), headers);
+            log.info("POST FF Manager run: url={}, app={}", url, alias);
+            ResponseEntity<Object> response = longTimeoutRestTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.warn("FF Manager run non-2xx | status={}, code={}, app={}, docId={}",
+                        response.getStatusCode(), code, alias, docId);
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("FF Manager run FAILED | code={}, app={}, docId={}, source_id={}: {}",
+                    code, alias, docId, sourceId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public List<FitnessFunctionCatalogDTO> getFitnessFunctions() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            String url = ffManagerUrl + "/api/v1/fitness-functions";
+            log.info("GET FF Manager fitness-functions: {}", url);
+            List<FitnessFunctionCatalogDTO> body = longTimeoutRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<FitnessFunctionCatalogDTO>>() {
+                    }
+            ).getBody();
+            return body != null ? body : List.of();
+        } catch (Exception e) {
+            log.error("GET FF Manager fitness-functions FAILED: {}", e.getMessage(), e);
+            return List.of();
         }
     }
 
@@ -124,5 +192,9 @@ public class FfManagerClient {
                         .isCheck(item.getIsCheck())
                         .build())
                 .toList();
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

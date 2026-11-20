@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @Component("AssignNfrAndCalcPatternDelegate")
 public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
 
-    private static final String BRANCH = "main";
-
     @Autowired
     private ProductClient productClient;
 
@@ -36,11 +34,12 @@ public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
         Integer nfrId = (Integer) execution.getVariable("nfrId");
         String product = (String) execution.getVariable("product");
         String cmdb = (String) execution.getVariable("cmdb");
-        log.info("ℹ️ [auto-nfr] Шаг: Назначение НФТ + расчёт паттернов | nfrId={}, product={}, cmdb={}",
-                nfrId, product, cmdb);
+        String branch = DatapipeBranchProcess.branch(execution);
+        log.info("ℹ️ [auto-nfr] Шаг: Назначение НФТ + расчёт паттернов | nfrId={}, product={}, cmdb={}, branch={}",
+                nfrId, product, cmdb, branch);
 
-        productClient.postProductNfr(product, List.of(nfrId));
-        log.info("ℹ️ [auto-nfr] НФТ {} назначен на продукт {}", nfrId, product);
+        productClient.postProductNfr(product, List.of(nfrId), branch);
+        log.info("ℹ️ [auto-nfr] НФТ {} назначен на продукт {} branch={}", nfrId, product, branch);
 
         NfrDetailsV2BpmDTO nfrDetails = productClient.getNfrDetailsById(nfrId);
         if (nfrDetails == null || nfrDetails.getPatterns() == null || nfrDetails.getPatterns().isEmpty()) {
@@ -74,7 +73,7 @@ public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
                 continue;
             }
 
-            String rule = pattern.getRule().replace("{cmdb}", effectiveCmdb);
+            String rule = GraphClient.singleLine(pattern.getRule().replace("{cmdb}", effectiveCmdb));
             log.info("ℹ️ [auto-nfr] graph query code={} rule={}", pattern.getCode(), rule);
 
             List<Object> elements = graphClient.executePatternQuery(rule);
@@ -102,11 +101,12 @@ public class AssignNfrAndCalcPatternDelegate implements JavaDelegate {
         }
 
         log.info("ℹ️ [auto-nfr] POST /api/v2/product/{}/patterns/nfr?branch={} source-id=null body={}",
-                product, BRANCH,
+                product, branch,
                 results.stream()
                         .map(r -> r.getCode() + "=" + r.getIsCheck())
                         .collect(Collectors.joining(", ")));
-        productClient.postPatternCheckResults(product, "nfr", null, BRANCH, results);
-        log.info("ℹ️ [auto-nfr] Шаг завершён | product={}, nfrId={}, записано={}", product, nfrId, results.size());
+        productClient.postPatternCheckResults(product, "nfr", null, branch, results);
+        log.info("ℹ️ [auto-nfr] Шаг завершён | product={}, nfrId={}, branch={}, записано={}",
+                product, nfrId, branch, results.size());
     }
 }

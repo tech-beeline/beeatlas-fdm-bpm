@@ -35,8 +35,6 @@ public class CheckPatternsDelegate extends StatusLogic implements JavaDelegate {
     static final String STATUS_DONE = "ptrncrt";
     static final String STATUS_ERROR = "ptrnerr";
 
-    private static final String BRANCH = "main";
-
     @Autowired
     private ProductClient productClient;
 
@@ -73,8 +71,10 @@ public class CheckPatternsDelegate extends StatusLogic implements JavaDelegate {
     private void checkPatternsForDatapipe(DelegateExecution execution) {
         String cmdb = (String) execution.getVariable("cmdb");
         Integer docId = (Integer) execution.getVariable("docId");
+        String branch = DatapipeBranchProcess.branch(execution);
         log.info("cmdb is" + cmdb);
         log.info("docId is" + docId);
+        log.info("branch is" + branch);
 
         if (cmdb == null) {
             log.error("cmdb is null in process context");
@@ -96,7 +96,7 @@ public class CheckPatternsDelegate extends StatusLogic implements JavaDelegate {
             return;
         }
 
-        productClient.postPatternCheckResults(cmdb, "pipeline", docId, BRANCH, results);
+        productClient.postPatternCheckResults(cmdb, "pipeline", docId, branch, results);
     }
 
     private void saveDatapipeStatus(DelegateExecution execution, String alias) {
@@ -188,7 +188,7 @@ public class CheckPatternsDelegate extends StatusLogic implements JavaDelegate {
 
             log.info("pattern is {}", pattern);
 
-            String rule = pattern.getRule().replace("{cmdb}", cmdb);
+            String rule = GraphClient.singleLine(pattern.getRule().replace("{cmdb}", cmdb));
 
             List<Object> elements = graphClient.executePatternQuery(rule);
             if (elements == null) {

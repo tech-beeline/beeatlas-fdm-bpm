@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
 import ru.beeline.fdmbpm.service.RabbitService;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("GlobalGraphEnrichmentDelegate")
@@ -49,27 +50,29 @@ public class GlobalGraphEnrichmentDelegate extends StatusLogic implements JavaDe
             ObjectNode item = objectMapper.createObjectNode();
             item.put("taskKey", processId);
             item.put("docId", docId);
+            String branch = null;
             if (DatapipeBranchProcess.isBranchProcess(delegateExecution)) {
-                String branch = DatapipeBranchProcess.branch(delegateExecution);
+                branch = DatapipeBranchProcess.branch(delegateExecution);
                 if (branch != null && !branch.isEmpty()) {
                     item.put(DatapipeBranchProcess.BRANCH_VARIABLE, branch);
                 }
             }
             rabbitService.sendMessage("create_global_graph", objectMapper.writeValueAsString(item));
             saveAlias(processId, "glbltskcrt", typeProcess);
-            log.info("ℹ️ [pipeline] Шаг завершён: Обогащение глобального графа | process_id={}, queue=create_global_graph",
-                    processId);
+            log.info("ℹ️ [pipeline] Шаг завершён: Обогащение глобального графа | process_id={}, branch={}, queue=create_global_graph",
+                    processId, branch);
         } catch (Exception e) {
             log.error("ℹ️ [pipeline] Ошибка на шаге Обогащение глобального графа | process_id={}, docId={}",
                     processId, docId, e);
+            String message = StepErrorMessage.of("Обогащение глобального графа", e);
             TransactionTemplate tt = new TransactionTemplate(transactionManager);
             tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             TypeProcess finalTypeProcess = typeProcess;
             tt.execute(status -> {
-                saveAlias(processId, "errglblgrph", finalTypeProcess);
+                saveAlias(processId, "errglblgrph", finalTypeProcess, message);
                 return null;
             });
-            throw new ProcessException("Ошибка процесса на шаге: Обагащение глобального графа");
+            throw new ProcessException("Ошибка процесса на шаге: Обогащение глобального графа", e);
         }
     }
 }

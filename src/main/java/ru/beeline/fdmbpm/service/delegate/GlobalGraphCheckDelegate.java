@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.dto.graph.GraphDTO;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("GlobalGraphCheckDelegate")
@@ -65,6 +66,7 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                 }
             } catch (Exception e) {
                 log.error("ℹ️ [pipeline] Ошибка проверки глобального графа | process_id={}", processId, e);
+                String message = StepErrorMessage.of("Проверка готовности глобального графа", e);
                 TransactionTemplate tt = new TransactionTemplate(transactionManager);
                 tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
                 tt.execute(status -> {
@@ -72,11 +74,11 @@ public class GlobalGraphCheckDelegate extends StatusLogic implements JavaDelegat
                             statusProcessRepository.findByAliasAndTypeProcessId("errglblgrph", typeProcess.getId());
                     if (camundaProcessStatusRepository.findByCamundaProcessIdAndStatusProcessId(processId,
                             statusProcess.getId()).isEmpty()) {
-                        saveAlias(processId, "errglblgrph", typeProcess);
+                        saveAlias(processId, "errglblgrph", typeProcess, message);
                     }
                     return null;
                 });
-                throw new ProcessException("❌ Ошибка процесса на шаге: Проверка готовности глобального графа");
+                throw new ProcessException("Ошибка процесса на шаге: Проверка готовности глобального графа", e);
             }
         } else {
             log.info("ℹ️ [pipeline/graph] globalGraphCount=null → ставим 1 (первый опрос)");

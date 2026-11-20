@@ -45,6 +45,7 @@ public class ProcessDataSourceConfig {
     public LocalContainerEntityManagerFactoryBean processesEntityManagerFactory() {
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
         factory.setDataSource(processesDataSource());
+        factory.setPersistenceUnitName("processes");
         factory.setPackagesToScan("ru.beeline.fdmbpm.domain");
         factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return factory;

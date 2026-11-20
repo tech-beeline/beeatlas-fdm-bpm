@@ -10,11 +10,19 @@ import org.springframework.stereotype.Service;
 import ru.beeline.fdmbpm.domain.*;
 import ru.beeline.fdmbpm.dto.camundaProcess.*;
 import ru.beeline.fdmbpm.exception.NotFoundException;
+import ru.beeline.fdmbpm.exception.ValidationException;
 import ru.beeline.fdmbpm.mapper.ContextDtoMapper;
 import ru.beeline.fdmbpm.repository.camunda.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +30,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ProcessService {
+
+    private static final DateTimeFormatter CREATE_DATE_FORMAT = DateTimeFormatter
+            .ofPattern("uuuu-MM-dd HH:mm:ss.SSS")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     @Autowired
     ContextDtoMapper contextDtoMapper;
@@ -138,6 +150,221 @@ public class ProcessService {
             }
         }
         return result;
+    }
+
+    public List<ProcessTypeDTO> getProcessTypes() {
+        return typeProcessRepository.findAllByOrderByIdAsc().stream()
+                .map(typeProcess -> ProcessTypeDTO.builder()
+                        .id(typeProcess.getId())
+                        .name(typeProcess.getName())
+                        .description(typeProcess.getDescription())
+                        .alias(typeProcess.getAlias())
+                        .build())
+                .toList();
+    }
+
+    public ProcessHistoryResponseDTO getProcessHistory(String limitRaw, String offsetRaw, List<String> typeProcessIds,
+                                                       String createDateFromRaw, String createDateToRaw,
+                                                       List<String> contextNames, List<String> contextValues) {
+        int limit = parsePageParam(limitRaw, 1, "limit должен быть целым числом от 1");
+        int offset = parsePageParam(offsetRaw, 0, "offset должен быть целым числом от 0");
+        List<Integer> typeIds = parseTypeIds(typeProcessIds);
+        Map<Integer, TypeProcess> knownTypes = Map.of();
+        if (!typeIds.isEmpty()) {
+            knownTypes = typeProcessRepository.findAllById(typeIds).stream()
+                    .collect(Collectors.toMap(TypeProcess::getId, typeProcess -> typeProcess));
+            for (Integer typeId : typeIds) {
+                if (!knownTypes.containsKey(typeId)) {
+                    throw new ValidationException("Тип процесса с id " + typeId + " не найден");
+                }
+            }
+        }
+        LocalDateTime createDateFrom = parseCreateDate(createDateFromRaw,
+                "createDateFrom должен быть датой yyyy-MM-dd HH:mm:ss.SSS");
+        LocalDateTime createDateTo = parseCreateDate(createDateToRaw,
+                "createDateTo должен быть датой yyyy-MM-dd HH:mm:ss.SSS");
+        if (createDateFrom != null && createDateTo != null && createDateFrom.isAfter(createDateTo)) {
+            throw new ValidationException("createDateFrom не может быть позже createDateTo");
+        }
+        String contextName = singleOptional(contextNames, "contextName передаётся один раз");
+        String contextValue = singleOptional(contextValues, "contextValue передаётся один раз");
+        if (contextName == null && contextValue != null) {
+            throw new ValidationException("contextValue нельзя передать без contextName");
+        }
+
+        ProcessHistoryFilter filter = new ProcessHistoryFilter(
+                typeIds, createDateFrom, createDateTo, contextName, contextValue);
+        long total = camundaProcessRepository.countHistory(filter);
+        if (offset >= total) {
+            return ProcessHistoryResponseDTO.builder().total(total).processes(List.of()).build();
+        }
+        List<CamundaProcess> page = camundaProcessRepository.findHistory(filter, limit, offset);
+        return ProcessHistoryResponseDTO.builder()
+                .total(total)
+                .processes(toHistoryItems(page, knownTypes))
+                .build();
+    }
+
+    private List<ProcessHistoryItemDTO> toHistoryItems(List<CamundaProcess> page, Map<Integer, TypeProcess> knownTypes) {
+        if (page.isEmpty()) {
+            return List.of();
+        }
+        List<Integer> processIds = page.stream().map(CamundaProcess::getId).toList();
+        Map<Integer, TypeProcess> types = knownTypes.isEmpty()
+                ? typeProcessRepository.findAllById(page.stream().map(CamundaProcess::getTypeProcessId).distinct().toList())
+                .stream()
+                .collect(Collectors.toMap(TypeProcess::getId, typeProcess -> typeProcess))
+                : knownTypes;
+        Map<Integer, List<ShortContextDTO>> contextByProcess = contextRepository.findByCamundaProcessIdIn(processIds)
+                .stream()
+                .sorted(Comparator.comparing(Context::getId, Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.groupingBy(
+                        Context::getCamundaProcessId,
+                        LinkedHashMap::new,
+                        Collectors.mapping(contextDtoMapper::shortContextConvert, Collectors.toList())));
+        Map<Integer, CamundaProcessStatus> latestStatusByProcess = latestStatusByProcess(processIds);
+        Map<Integer, StatusProcess> statusDefinitions = statusDefinitions(latestStatusByProcess.values());
+
+        List<ProcessHistoryItemDTO> items = new ArrayList<>();
+        for (CamundaProcess process : page) {
+            TypeProcess typeProcess = types.get(process.getTypeProcessId());
+            if (typeProcess == null) {
+                throw new NotFoundException(String.format("Type process с id: %s не найден", process.getTypeProcessId()));
+            }
+            CamundaProcessStatus latestStatus = latestStatusByProcess.get(process.getId());
+            items.add(ProcessHistoryItemDTO.builder()
+                    .id(process.getId())
+                    .procId(process.getProcId())
+                    .createDate(process.getCreateDate())
+                    .type(TypeDTO.builder()
+                            .id(typeProcess.getId())
+                            .name(typeProcess.getName())
+                            .description(typeProcess.getDescription())
+                            .build())
+                    .context(contextByProcess.getOrDefault(process.getId(), List.of()))
+                    .status(toStatusDto(latestStatus, statusDefinitions))
+                    .build());
+        }
+        return items;
+    }
+
+    private Map<Integer, CamundaProcessStatus> latestStatusByProcess(Collection<Integer> processIds) {
+        Map<Integer, CamundaProcessStatus> latest = new LinkedHashMap<>();
+        for (CamundaProcessStatus status : camundaProcessStatusRepository.findByCamundaProcessIdIn(processIds)) {
+            CamundaProcessStatus current = latest.get(status.getCamundaProcessId());
+            if (current == null || statusComesAfter(status, current)) {
+                latest.put(status.getCamundaProcessId(), status);
+            }
+        }
+        return latest;
+    }
+
+    private boolean statusComesAfter(CamundaProcessStatus candidate, CamundaProcessStatus current) {
+        Comparator<CamundaProcessStatus> byDateThenId = Comparator
+                .comparing(CamundaProcessStatus::getCreatedDate, Comparator.nullsFirst(Comparator.naturalOrder()))
+                .thenComparing(CamundaProcessStatus::getId, Comparator.nullsFirst(Comparator.naturalOrder()));
+        return byDateThenId.compare(candidate, current) > 0;
+    }
+
+    private Map<Integer, StatusProcess> statusDefinitions(Collection<CamundaProcessStatus> statuses) {
+        List<Integer> statusIds = statuses.stream()
+                .map(CamundaProcessStatus::getStatusProcessId)
+                .distinct()
+                .toList();
+        if (statusIds.isEmpty()) {
+            return Map.of();
+        }
+        return statusProcessRepository.findAllById(statusIds).stream()
+                .collect(Collectors.toMap(StatusProcess::getId, statusProcess -> statusProcess));
+    }
+
+    private StatusDTO toStatusDto(CamundaProcessStatus status, Map<Integer, StatusProcess> statusDefinitions) {
+        if (status == null) {
+            return null;
+        }
+        StatusProcess statusProcess = statusDefinitions.get(status.getStatusProcessId());
+        if (statusProcess == null) {
+            throw new NotFoundException("Информация о статусе процесса не найдена");
+        }
+        return StatusDTO.builder()
+                .id(status.getId())
+                .name(statusProcess.getName())
+                .alias(statusProcess.getAlias())
+                .createdDate(status.getCreatedDate())
+                .isDone(statusProcess.getIsDone())
+                .isError(statusProcess.getIsError())
+                .message(status.getMessage())
+                .build();
+    }
+
+    private List<Integer> parseTypeIds(List<String> typeProcessIds) {
+        if (typeProcessIds == null || typeProcessIds.isEmpty()) {
+            return List.of();
+        }
+        LinkedHashSet<Integer> unique = new LinkedHashSet<>();
+        for (String raw : typeProcessIds) {
+            unique.add(parseTypeId(raw));
+        }
+        return List.copyOf(unique);
+    }
+
+    private Integer parseTypeId(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw new ValidationException("typeProcessId должен быть целым числом");
+        }
+        try {
+            long value = Long.parseLong(raw.trim());
+            if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                throw new ValidationException("typeProcessId должен быть целым числом");
+            }
+            return (int) value;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("typeProcessId должен быть целым числом");
+        }
+    }
+
+    private LocalDateTime parseCreateDate(String raw, String errorMessage) {
+        if (raw == null) {
+            return null;
+        }
+        String text = raw.trim();
+        if (text.isEmpty()) {
+            throw new ValidationException(errorMessage);
+        }
+        try {
+            return LocalDateTime.parse(text, CREATE_DATE_FORMAT);
+        } catch (DateTimeParseException e) {
+            throw new ValidationException(errorMessage);
+        }
+    }
+
+    private String singleOptional(List<String> raw, String repeatMessage) {
+        if (raw == null || raw.isEmpty()) {
+            return null;
+        }
+        if (raw.size() > 1) {
+            throw new ValidationException(repeatMessage);
+        }
+        String value = raw.get(0);
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value;
+    }
+
+    private int parsePageParam(String raw, int min, String errorMessage) {
+        if (raw == null || raw.isBlank()) {
+            throw new ValidationException(errorMessage);
+        }
+        try {
+            long value = Long.parseLong(raw.trim());
+            if (value < min || value > Integer.MAX_VALUE) {
+                throw new ValidationException(errorMessage);
+            }
+            return (int) value;
+        } catch (NumberFormatException e) {
+            throw new ValidationException(errorMessage);
+        }
     }
 
     public GetProcessByIdDTO getProcessById(Integer id) {

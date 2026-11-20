@@ -30,7 +30,8 @@ class StagingDelegatesTestSupport {
     static final int PROCESS_ID = 42;
     static final int TYPE_ID = 2;
     static final List<String> ALIASES = List.of("crt", "vldterr", "cmdberr", "errcrt",
-            "stgarchcrt", "stgarchdn", "stgarcherr", "stgseqcrt", "stgseqdn", "stgseqwop", "stgseqerr");
+            "stgarchcrt", "stgarchdn", "stgarcherr", "stgseqcrt", "stgseqdn", "stgseqwop", "stgseqerr",
+            "glbltskcrt", "errglblgrph");
 
     final CamundaProcessRepository camundaProcessRepository = mock(CamundaProcessRepository.class);
     final TypeProcessRepository typeProcessRepository = mock(TypeProcessRepository.class);

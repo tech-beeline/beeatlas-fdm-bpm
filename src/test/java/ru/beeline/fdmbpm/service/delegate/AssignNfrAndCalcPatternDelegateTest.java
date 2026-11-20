@@ -14,6 +14,7 @@ import ru.beeline.fdmbpm.dto.product.PatternCheckResultDTO;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -42,7 +43,7 @@ class AssignNfrAndCalcPatternDelegateTest {
     }
 
     @Test
-    void postsV2WithNfrWithoutSourceIdAndMainBranch() {
+    void postsV2WithNfrWithoutSourceIdAndMainBranchWhenBranchMissing() {
         when(productClient.getNfrDetailsById(5)).thenReturn(NfrDetailsV2BpmDTO.builder()
                 .id(5)
                 .patterns(List.of(NfrPatternBpmDTO.builder()
@@ -55,8 +56,44 @@ class AssignNfrAndCalcPatternDelegateTest {
         delegate.execute(execution);
 
         ArgumentCaptor<List<PatternCheckResultDTO>> resultsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(productClient).postProductNfr(eq("BC-1"), eq(List.of(5)), isNull());
         verify(productClient).postPatternCheckResults(
-                eq("BC-1"), eq("nfr"), isNull(), eq("main"), resultsCaptor.capture());
+                eq("BC-1"), eq("nfr"), isNull(), isNull(), resultsCaptor.capture());
         assertThat(resultsCaptor.getValue()).extracting(PatternCheckResultDTO::getCode).containsExactly("P-NFR");
+    }
+
+    @Test
+    void readsBranchFromProcessAndPostsDevelop() {
+        when(execution.getVariable("branch")).thenReturn(" develop ");
+        when(productClient.getNfrDetailsById(5)).thenReturn(NfrDetailsV2BpmDTO.builder()
+                .id(5)
+                .patterns(List.of(NfrPatternBpmDTO.builder()
+                        .code("P-NFR")
+                        .rule("g.V()")
+                        .build()))
+                .build());
+        when(graphClient.executePatternQuery("g.V()")).thenReturn(List.of(new Object()));
+
+        delegate.execute(execution);
+
+        verify(productClient).postProductNfr(eq("BC-1"), eq(List.of(5)), eq("develop"));
+        verify(productClient).postPatternCheckResults(
+                eq("BC-1"), eq("nfr"), isNull(), eq("develop"), any());
+    }
+
+    @Test
+    void collapsesLineBreaksAfterCmdbReplacement() {
+        when(productClient.getNfrDetailsById(5)).thenReturn(NfrDetailsV2BpmDTO.builder()
+                .id(5)
+                .patterns(List.of(NfrPatternBpmDTO.builder()
+                        .code("P-NFR")
+                        .rule("g.V()\n.has('a','{cmdb}')\r\n.has('b','{cmdb}')")
+                        .build()))
+                .build());
+        when(graphClient.executePatternQuery("g.V() .has('a','BC-1') .has('b','BC-1')")).thenReturn(List.of());
+
+        delegate.execute(execution);
+
+        verify(graphClient).executePatternQuery("g.V() .has('a','BC-1') .has('b','BC-1')");
     }
 }

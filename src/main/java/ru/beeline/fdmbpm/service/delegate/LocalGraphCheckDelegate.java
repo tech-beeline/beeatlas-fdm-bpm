@@ -21,6 +21,7 @@ import ru.beeline.fdmbpm.dto.graph.GraphDTO;
 import ru.beeline.fdmbpm.exception.ProcessException;
 import ru.beeline.fdmbpm.repository.camunda.CamundaProcessRepository;
 import ru.beeline.fdmbpm.repository.camunda.TypeProcessRepository;
+import ru.beeline.fdmbpm.utils.StepErrorMessage;
 
 @Slf4j
 @Component("LocalGraphCheckDelegate")
@@ -65,6 +66,7 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
                 }
             } catch (Exception e) {
                 log.error("ℹ️ [pipeline] Ошибка проверки локального графа | process_id={}", processId, e);
+                String message = StepErrorMessage.of("Проверка готовности локального графа", e);
                 TransactionTemplate tt = new TransactionTemplate(transactionManager);
                 tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
                 tt.execute(status -> {
@@ -72,11 +74,11 @@ public class LocalGraphCheckDelegate extends StatusLogic implements JavaDelegate
                             statusProcessRepository.findByAliasAndTypeProcessId("errlclgrph", typeProcess.getId());
                     if (camundaProcessStatusRepository.findByCamundaProcessIdAndStatusProcessId(processId,
                             statusProcess.getId()).isEmpty()) {
-                        saveAlias(processId, "errlclgrph", typeProcess);
+                        saveAlias(processId, "errlclgrph", typeProcess, message);
                     }
                     return null;
                 });
-                throw new ProcessException("❌ Ошибка процесса на шаге: Проверка готовности локального графа");
+                throw new ProcessException("Ошибка процесса на шаге: Проверка готовности локального графа", e);
             }
         } else {
             log.info("ℹ️ [pipeline/graph] localGraphCount=null → ставим 1 (первый опрос)");
