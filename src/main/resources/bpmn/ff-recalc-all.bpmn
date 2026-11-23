@@ -4,19 +4,19 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_register</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_register" name="Регистрация процесса" camunda:delegateExpression="${RegisterFfRecalcProcessDelegate}">
+    <bpmn:serviceTask id="Activity_register" name="Регистрация процесса" camunda:asyncBefore="true" camunda:delegateExpression="${RegisterFfRecalcProcessDelegate}">
       <bpmn:incoming>Flow_register</bpmn:incoming>
       <bpmn:outgoing>Flow_products</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_products" name="Список продуктов" camunda:delegateExpression="${GetProductsForFfRecalcDelegate}">
+    <bpmn:serviceTask id="Activity_products" name="Список продуктов" camunda:asyncBefore="true" camunda:delegateExpression="${GetProductsForFfRecalcDelegate}">
       <bpmn:incoming>Flow_products</bpmn:incoming>
       <bpmn:outgoing>Flow_mark</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_mark" name="Статус перед сабпроцессами" camunda:delegateExpression="${MarkFfRecalcSubProcessesDelegate}">
+    <bpmn:serviceTask id="Activity_mark" name="Статус перед сабпроцессами" camunda:asyncBefore="true" camunda:delegateExpression="${MarkFfRecalcSubProcessesDelegate}">
       <bpmn:incoming>Flow_mark</bpmn:incoming>
       <bpmn:outgoing>Flow_call</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:callActivity id="Activity_call" name="Расчёт fitness function для продукта" calledElement="Process_recalc_ff_product">
+    <bpmn:callActivity id="Activity_call" name="Расчёт fitness function для продукта" camunda:asyncBefore="true" calledElement="Process_recalc_ff_product">
       <bpmn:extensionElements>
         <camunda:in source="product" target="product" />
         <camunda:in source="ffCode" target="ffCode" />
@@ -26,7 +26,7 @@
       <bpmn:outgoing>Flow_complete</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${products}" camunda:elementVariable="product" />
     </bpmn:callActivity>
-    <bpmn:serviceTask id="Activity_complete" name="Статус завершения" camunda:delegateExpression="${CompleteFfRecalcProcessDelegate}">
+    <bpmn:serviceTask id="Activity_complete" name="Статус завершения" camunda:asyncBefore="true" camunda:delegateExpression="${CompleteFfRecalcProcessDelegate}">
       <bpmn:incoming>Flow_complete</bpmn:incoming>
       <bpmn:outgoing>Flow_end</bpmn:outgoing>
     </bpmn:serviceTask>

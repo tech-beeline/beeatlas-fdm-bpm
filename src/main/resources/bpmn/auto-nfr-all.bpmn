@@ -4,19 +4,19 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_register</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_register" name="Регистрация процесса" camunda:delegateExpression="${RegisterAutoNfrProcessDelegate}">
+    <bpmn:serviceTask id="Activity_register" name="Регистрация процесса" camunda:asyncBefore="true" camunda:delegateExpression="${RegisterAutoNfrProcessDelegate}">
       <bpmn:incoming>Flow_register</bpmn:incoming>
       <bpmn:outgoing>Flow_1n820xq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_1qu1xr8" name="Получение списка продуктов, попадающих под условие требования" camunda:delegateExpression="${GetProductsForNfrDelegate}">
+    <bpmn:serviceTask id="Activity_1qu1xr8" name="Получение списка продуктов, попадающих под условие требования" camunda:asyncBefore="true" camunda:delegateExpression="${GetProductsForNfrDelegate}">
       <bpmn:incoming>Flow_1n820xq</bpmn:incoming>
       <bpmn:outgoing>Flow_mark</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_mark" name="Статус перед саб-процессами" camunda:delegateExpression="${MarkAutoNfrSubProcessesDelegate}">
+    <bpmn:serviceTask id="Activity_mark" name="Статус перед саб-процессами" camunda:asyncBefore="true" camunda:delegateExpression="${MarkAutoNfrSubProcessesDelegate}">
       <bpmn:incoming>Flow_mark</bpmn:incoming>
       <bpmn:outgoing>Flow_0sbwg9e</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:callActivity id="Activity_0hz3w34" name="Назначение требования для каждого продукта" calledElement="Process_053fkyf">
+    <bpmn:callActivity id="Activity_0hz3w34" name="Назначение требования для каждого продукта" camunda:asyncBefore="true" calledElement="Process_053fkyf">
       <bpmn:extensionElements>
         <camunda:in source="product" target="product" />
         <camunda:in source="nfrId" target="nfrId" />
@@ -26,7 +26,7 @@
       <bpmn:outgoing>Flow_complete</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${products}" camunda:elementVariable="product" />
     </bpmn:callActivity>
-    <bpmn:serviceTask id="Activity_complete" name="Статус завершения" camunda:delegateExpression="${CompleteAutoNfrProcessDelegate}">
+    <bpmn:serviceTask id="Activity_complete" name="Статус завершения" camunda:asyncBefore="true" camunda:delegateExpression="${CompleteAutoNfrProcessDelegate}">
       <bpmn:incoming>Flow_complete</bpmn:incoming>
       <bpmn:outgoing>Flow_0cj8upv</bpmn:outgoing>
     </bpmn:serviceTask>

@@ -4,15 +4,15 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_calc</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_calc" name="docId и расчёт fitness function" camunda:delegateExpression="${CalculateProductFfDelegate}">
+    <bpmn:serviceTask id="Activity_calc" name="docId и расчёт fitness function" camunda:asyncBefore="true" camunda:delegateExpression="${CalculateProductFfDelegate}">
       <bpmn:incoming>Flow_calc</bpmn:incoming>
       <bpmn:outgoing>Flow_dependent</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_dependent" name="Пересчёт зависимых fitness function" camunda:delegateExpression="${RecalculateDependentFfDelegate}">
+    <bpmn:serviceTask id="Activity_dependent" name="Пересчёт зависимых fitness function" camunda:asyncBefore="true" camunda:delegateExpression="${RecalculateDependentFfDelegate}">
       <bpmn:incoming>Flow_dependent</bpmn:incoming>
       <bpmn:outgoing>Flow_nfr</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_nfr" name="Пересчёт НФТ и паттернов" camunda:delegateExpression="${RecalculateTriggeredNfrDelegate}">
+    <bpmn:serviceTask id="Activity_nfr" name="Пересчёт НФТ и паттернов" camunda:asyncBefore="true" camunda:delegateExpression="${RecalculateTriggeredNfrDelegate}">
       <bpmn:incoming>Flow_nfr</bpmn:incoming>
       <bpmn:outgoing>Flow_end</bpmn:outgoing>
     </bpmn:serviceTask>
